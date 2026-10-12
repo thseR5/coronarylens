@@ -470,17 +470,19 @@ def _sprint_lines(m: dict) -> list[str]:
           f"rule) went into nested CV ({sp['outer']}; {sp['inner']}); selection happens inside every outer fold, so the "
           "outer score accounts for the search."), "",
          f"Served on the full training split: **{sp['served_on_full_training_split']['chosen']}**.", "",
-         "| metric | served procedure (mean ± SD) | previous served model | paired diff (mean ± SD) | folds improved |",
-         "|---|---|---|---|---|"]
+         "| metric | served procedure (mean ± SD) | previous served model | paired diff (mean ± SD) | p (Nadeau–Bengio) | folds improved |",
+         "|---|---|---|---|---|---|"]
     prev = sp["previous_served"]
     for t in ["CAD", "LAD", "LCX", "RCA"]:
         k = f"auc_{t}"
         L.append(f"| {t} ROC-AUC | {hv[t]['roc_auc']['mean']:.3f} ± {hv[t]['roc_auc']['sd']:.3f} | "
                  f"{prev[t]['roc_auc']['mean']:.3f} ± {prev[t]['roc_auc']['sd']:.3f} | "
-                 f"{d[k]['mean']:+.4f} ± {d[k]['sd']:.4f} | {d[k]['folds_improved']}/{d[k]['n_folds']} |")
+                 f"{d[k]['mean']:+.4f} ± {d[k]['sd']:.4f} | {d[k]['p']:.3f} ({d[k]['verdict']}) | "
+                 f"{d[k]['folds_improved']}/{d[k]['n_folds']} |")
     for k, label in (("pattern_log_loss", "pattern log-loss"), ("brier_mean", "mean Brier")):
         L.append(f"| {label} | {hv[k]['mean']:.4f} ± {hv[k]['sd']:.4f} | {prev[k]['mean']:.4f} ± {prev[k]['sd']:.4f} | "
-                 f"{d[k]['mean']:+.4f} ± {d[k]['sd']:.4f} | {d[k]['folds_improved']}/{d[k]['n_folds']} |")
+                 f"{d[k]['mean']:+.4f} ± {d[k]['sd']:.4f} | {d[k]['p']:.3f} ({d[k]['verdict']}) | "
+                 f"{d[k]['folds_improved']}/{d[k]['n_folds']} |")
     return [*L, ""]
 
 

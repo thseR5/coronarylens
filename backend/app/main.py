@@ -98,6 +98,9 @@ def metrics():
     ablation = artifacts_dir() / "ablation.json"
     if ablation.exists():  # analysis-only leakage ablation, shown in the Model performance tab
         out["ablation"] = json.loads(ablation.read_text(encoding="utf-8"))
+    whatif = config.REPORTS / "whatif" / "whatif.json"  # what-if plausibility check of the served model
+    if whatif.exists():
+        out["whatif"] = json.loads(whatif.read_text(encoding="utf-8"))
     bench = config.REPORTS / "benchmarks"  # extra benchmarks scored on the same outer folds (ml/benchmark_extra.py)
     if bench.is_dir():
         out["benchmarks"] = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted(bench.glob("*.json"))}

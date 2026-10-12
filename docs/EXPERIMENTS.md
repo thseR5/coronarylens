@@ -178,8 +178,59 @@ Candidates: 10 (9 finalists + previous served recipe). Wall time 1824 s on 3 sin
 
 Inner choice per outer fold: ebm+bayes_lr+sel_joint|avg|dirichlet ×28, catboost+bayes_lr+sel_joint|avg|dirichlet ×10, catboost_d3+bayes_lr+sel_joint|avg|dirichlet ×4, catboost+catboost_d3+svm|avg|vector ×3, catboost_d3+sel_joint+svm|avg|vector ×2, catboost+svm|avg|vector ×2, catboost+sel_joint+svm|avg|vector ×1.
 
-**Decision (pre-registered table):** real gain in calibration/risk estimation (pattern log-loss −0.067, 12 SE, 46/50 folds; mean Brier −0.0039, 40/50) and in CAD and LAD discrimination (+0.007 and +0.015 AUC, both > 1 SE, 39/50 and 35/50 folds) → **adopt**. LCX and RCA: differences within noise (23/50 folds each) → **the LCX/RCA ceiling held after 748 screened procedures**. No implausible jump (CAD 0.934, LCX 0.708, RCA 0.737 ≪ alarm thresholds).
+**Decision (pre-registered table; plain-SE wording, superseded by the corrected statistics below, where only log-loss is significant):** real gain in calibration/risk estimation (pattern log-loss −0.067, 12 SE, 46/50 folds; mean Brier −0.0039, 40/50) and in CAD and LAD discrimination (+0.007 and +0.015 AUC, both > 1 SE, 39/50 and 35/50 folds) → **adopt**. LCX and RCA: differences within noise (23/50 folds each) → **the LCX/RCA ceiling held after 748 screened procedures**. No implausible jump (CAD 0.934, LCX 0.708, RCA 0.737 ≪ alarm thresholds).
 
 **Stopping rule:** every candidate (a)–(k) has been tried; the last three candidate families screened (stacking (f+g), SVM alone (k), vessel-count blend (h)) brought no gain > 1 SE on their own → stop.
 
 **Total configurations:** 12 (Phase 1 benchmarks) + 748 screened procedures + 10 finalists in nested CV. Selection happened inside nested CV, so the reported performance accounts for that search.
+
+### Corrected statistics (2026-10-13, user request): Nadeau–Bengio corrected resampled t-test
+
+Repeated-CV folds share training data, so the plain SE of a mean over folds is too small. Corrected variance = (1/J + n_test/n_train)·s² with J = 50 outer folds, n_train ≈ 193.6, n_test ≈ 48.4 (factor 0.270 instead of 0.020, i.e. SE × 3.7); t with 49 df; two-sided p. **These replace the plain-SE statements above; only the corrected figures are used in the dashboard, report and Q&A.**
+
+**Served procedure vs previous served model (same 10×5 folds):**
+
+| Metric | Paired diff (mean ± SD) | Corrected SE | t (df 49) | p | Folds improved | Verdict |
+|---|---|---|---|---|---|---|
+| Pattern log-loss | -0.0670 ± 0.0392 | 0.0204 | -3.29 | 0.002 | 46/50 | significant improvement |
+| Mean Brier | -0.0039 ± 0.0059 | 0.0031 | -1.25 | 0.217 | 40/50 | small, not statistically significant |
+| CAD AUC | +0.0073 ± 0.0109 | 0.0057 | +1.28 | 0.207 | 39/50 | small, not statistically significant |
+| LAD AUC | +0.0149 ± 0.0193 | 0.0100 | +1.49 | 0.142 | 35/50 | small, not statistically significant |
+| LCX AUC | -0.0058 ± 0.0460 | 0.0239 | -0.24 | 0.809 | 23/50 | no improvement (not significant) |
+| RCA AUC | -0.0068 ± 0.0416 | 0.0216 | -0.31 | 0.755 | 23/50 | no improvement (not significant) |
+| ≥2 vessels AUC | +0.0161 ± 0.0444 | 0.0231 | +0.70 | 0.489 | 34/50 | small, not statistically significant |
+| 3-vessel AUC | +0.0136 ± 0.0562 | 0.0292 | +0.47 | 0.642 | 34/50 | small, not statistically significant |
+
+Reading: only the risk estimate (pattern log-loss) improves significantly. Brier, CAD/LAD and ≥2/3-vessel AUC gains are small and not statistically significant; LCX/RCA show no improvement. Adoption still holds under the pre-registered rule (log-loss **or** AUC improvement): log-loss t = −3.29, p = 0.002.
+
+**Served procedure vs independent binary ensemble (identical 10×5 folds, `reports/sprint/indep_B1.json`):**
+
+| Metric | Paired diff (mean ± SD) | Corrected SE | t (df 49) | p | Folds improved | Verdict |
+|---|---|---|---|---|---|---|
+| Pattern log-loss | -0.1533 ± 0.0751 | 0.0390 | -3.93 | <0.001 | 49/50 | significant improvement |
+| Mean Brier | -0.0084 ± 0.0080 | 0.0042 | -2.02 | 0.049 | 43/50 | significant improvement |
+| CAD AUC | +0.0083 ± 0.0131 | 0.0068 | +1.23 | 0.224 | 34/50 | small, not statistically significant |
+| LAD AUC | +0.0109 ± 0.0237 | 0.0123 | +0.88 | 0.381 | 31/50 | small, not statistically significant |
+| LCX AUC | +0.0022 ± 0.0510 | 0.0265 | +0.08 | 0.934 | 27/50 | small, not statistically significant |
+| RCA AUC | -0.0045 ± 0.0515 | 0.0268 | -0.17 | 0.869 | 24/50 | no improvement (not significant) |
+
+Coherence on these folds: independent ensemble 5.4% of patients with P(CAD) < max vessel; served procedure 0.0% (measured on all 50 outer folds; 0 by construction). "Equal AUC, better log-loss" therefore remains accurate for the served model.
+
+**Headline (absolute, served procedure, 10×5 nested CV, mean [95% corrected CI]):**
+
+| Target | ROC-AUC | PR-AUC | Brier | Accuracy | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|---|
+| CAD | 0.934 [0.896, 0.973] | 0.972 [0.954, 0.991] | 0.089 [0.062, 0.116] | 0.880 [0.840, 0.920] | 0.909 [0.865, 0.953] | 0.926 [0.883, 0.968] | 0.916 [0.889, 0.944] |
+| LAD | 0.866 [0.820, 0.911] | 0.894 [0.850, 0.938] | 0.144 [0.121, 0.167] | 0.805 [0.761, 0.848] | 0.789 [0.741, 0.837] | 0.913 [0.865, 0.961] | 0.845 [0.811, 0.879] |
+| LCX | 0.708 [0.647, 0.769] | 0.578 [0.507, 0.649] | 0.204 [0.186, 0.223] | 0.630 [0.583, 0.676] | 0.515 [0.477, 0.554] | 0.848 [0.733, 0.963] | 0.638 [0.587, 0.690] |
+| RCA | 0.737 [0.679, 0.796] | 0.583 [0.494, 0.673] | 0.194 [0.179, 0.209] | 0.654 [0.603, 0.705] | 0.527 [0.474, 0.580] | 0.848 [0.740, 0.956] | 0.647 [0.591, 0.703] |
+| ≥2 vessels | 0.766 [0.711, 0.820] | | | | | | |
+| 3 vessels | 0.755 [0.689, 0.821] | | | | | | |
+
+Pattern log-loss 1.5084 [1.4126, 1.6043]; mean Brier 0.1579.
+
+### What-if plausibility check (`ml/whatif_check.py`)
+
+11 key features × 5 presets swept across the observed training range with the served model. Flags: 6; none for P(CAD) (overall risk always moves in the clinically expected direction); no single-step jump > 0.15. Flags are small vessel-level reversals (0.025–0.048): Region RWMA → LCX/RCA (regional finding; the expected sign in features.yaml is for overall CAD), LDL → LAD (−0.031; LDL has a weak, nearly flat effect in this cohort), EF → LCX (+0.028). Visible but sub-threshold: a step of ~0.07 in P(LAD) as EF crosses ~55% (tree split at the reference-range boundary). Curves: `reports/whatif/whatif_<preset>.png` and the performance tab.
+
+Monotone-constrained variant: not triggered (no material problem) and not available as specified: CatBoost does not support monotone constraints with the MultiClass loss used for the 8-pattern model; logged rather than substituted.

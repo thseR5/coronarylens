@@ -23,7 +23,15 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest", "ruff", "mypy", "httpx", "types-PyYAML"]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+    "httpx",
+    "types-PyYAML",
+    "markdown>=3.11",
+    "pypdf>=6.20.1",
+]
 anatomy = ["trimesh", "fast-simplification", "requests"]
 sprint = [
     "catboost>=1.2.10",

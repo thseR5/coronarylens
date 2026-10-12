@@ -35,7 +35,7 @@ No deadline (user, 2026-10-12): optimize for the best result.
 ### Part 2 result (2026-10-13)
 
 - 748 procedures screened (training split only), 10 finalists (pre-registered rule) in 10×5 nested CV with selection inside every fold.
-- Adopted (pre-registered table): pattern log-loss −0.067 ± 0.039 (46/50 folds), mean Brier −0.0039 (40/50), CAD AUC +0.007 (39/50), LAD AUC +0.015 (35/50); LCX/RCA within noise (23/50) → ceiling held.
+- Adopted (pre-registered table). Corrected (Nadeau–Bengio) paired test: pattern log-loss −0.067, p 0.002 (46/50 folds) significant; Brier, CAD and LAD gains small, not statistically significant; LCX/RCA no improvement → ceiling held. Vs independent ensemble on identical folds: equal AUC (all p > 0.2), log-loss p 0.0003, Brier p 0.049; contradictions 0% vs 5.4%.
 - Served on the full training split: catboost + catboost_d3 + svm | avg | vector.
 - Locked test set, second look (n = 61): CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (first look 0.920 / 0.842 / 0.692 / 0.685); all differences inside the wide 95% CIs; nested CV remains the primary estimate.
 - Latency (production build, load ≈ 3.5): colours p95 175 ms, SHAP p95 240–241 ms. Explain in-process p50 47 ms.

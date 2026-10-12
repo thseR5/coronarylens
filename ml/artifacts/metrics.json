@@ -4249,229 +4249,409 @@
      "roc_auc": {
       "mean": 0.934326,
       "sd": 0.036641,
-      "se": 0.005182,
-      "n": 50
+      "se": 0.019039,
+      "ci95": [
+       0.896066,
+       0.972587
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "pr_auc": {
       "mean": 0.972364,
       "sd": 0.018048,
-      "se": 0.002552,
-      "n": 50
+      "se": 0.009378,
+      "ci95": [
+       0.953519,
+       0.99121
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "brier": {
       "mean": 0.089072,
       "sd": 0.026036,
-      "se": 0.003682,
-      "n": 50
+      "se": 0.013529,
+      "ci95": [
+       0.061885,
+       0.116259
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "accuracy": {
       "mean": 0.879787,
       "sd": 0.038501,
-      "se": 0.005445,
-      "n": 50
+      "se": 0.020006,
+      "ci95": [
+       0.839584,
+       0.919991
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "precision": {
       "mean": 0.90923,
       "sd": 0.042092,
-      "se": 0.005953,
-      "n": 50
+      "se": 0.021872,
+      "ci95": [
+       0.865277,
+       0.953182
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "recall": {
       "mean": 0.925741,
       "sd": 0.040658,
-      "se": 0.00575,
-      "n": 50
+      "se": 0.021127,
+      "ci95": [
+       0.883285,
+       0.968196
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "f1": {
       "mean": 0.916318,
       "sd": 0.026515,
-      "se": 0.00375,
-      "n": 50
+      "se": 0.013778,
+      "ci95": [
+       0.888631,
+       0.944005
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "specificity": {
       "mean": 0.767707,
       "sd": 0.116476,
-      "se": 0.016472,
-      "n": 50
+      "se": 0.060523,
+      "ci95": [
+       0.646082,
+       0.889332
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      }
     },
     "LAD": {
      "roc_auc": {
       "mean": 0.865749,
       "sd": 0.043379,
-      "se": 0.006135,
-      "n": 50
+      "se": 0.022541,
+      "ci95": [
+       0.820452,
+       0.911046
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "pr_auc": {
       "mean": 0.894083,
       "sd": 0.042245,
-      "se": 0.005974,
-      "n": 50
+      "se": 0.021951,
+      "ci95": [
+       0.84997,
+       0.938195
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "brier": {
       "mean": 0.144054,
       "sd": 0.022257,
-      "se": 0.003148,
-      "n": 50
+      "se": 0.011565,
+      "ci95": [
+       0.120813,
+       0.167295
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "accuracy": {
       "mean": 0.804719,
       "sd": 0.041642,
-      "se": 0.005889,
-      "n": 50
+      "se": 0.021638,
+      "ci95": [
+       0.761236,
+       0.848203
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "precision": {
       "mean": 0.788664,
       "sd": 0.046088,
-      "se": 0.006518,
-      "n": 50
+      "se": 0.023948,
+      "ci95": [
+       0.740538,
+       0.83679
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "recall": {
       "mean": 0.912796,
       "sd": 0.046209,
-      "se": 0.006535,
-      "n": 50
+      "se": 0.024011,
+      "ci95": [
+       0.864544,
+       0.961048
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "f1": {
       "mean": 0.844828,
       "sd": 0.0325,
-      "se": 0.004596,
-      "n": 50
+      "se": 0.016887,
+      "ci95": [
+       0.810891,
+       0.878764
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "specificity": {
       "mean": 0.654637,
       "sd": 0.090748,
-      "se": 0.012834,
-      "n": 50
+      "se": 0.047154,
+      "ci95": [
+       0.559877,
+       0.749397
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      }
     },
     "LCX": {
      "roc_auc": {
       "mean": 0.708127,
       "sd": 0.058584,
-      "se": 0.008285,
-      "n": 50
+      "se": 0.030441,
+      "ci95": [
+       0.646954,
+       0.769301
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "pr_auc": {
       "mean": 0.578042,
       "sd": 0.068165,
-      "se": 0.00964,
-      "n": 50
+      "se": 0.03542,
+      "ci95": [
+       0.506864,
+       0.649221
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "brier": {
       "mean": 0.204347,
       "sd": 0.01752,
-      "se": 0.002478,
-      "n": 50
+      "se": 0.009103,
+      "ci95": [
+       0.186052,
+       0.222641
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "accuracy": {
       "mean": 0.629685,
       "sd": 0.044289,
-      "se": 0.006263,
-      "n": 50
+      "se": 0.023013,
+      "ci95": [
+       0.583439,
+       0.675932
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "precision": {
       "mean": 0.515229,
       "sd": 0.036795,
-      "se": 0.005204,
-      "n": 50
+      "se": 0.019119,
+      "ci95": [
+       0.476808,
+       0.553651
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "recall": {
       "mean": 0.84807,
       "sd": 0.109978,
-      "se": 0.015553,
-      "n": 50
+      "se": 0.057146,
+      "ci95": [
+       0.733231,
+       0.96291
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "f1": {
       "mean": 0.638369,
       "sd": 0.0491,
-      "se": 0.006944,
-      "n": 50
+      "se": 0.025513,
+      "ci95": [
+       0.587099,
+       0.68964
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "specificity": {
       "mean": 0.491126,
       "sd": 0.082259,
-      "se": 0.011633,
-      "n": 50
+      "se": 0.042743,
+      "ci95": [
+       0.405231,
+       0.577021
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      }
     },
     "RCA": {
      "roc_auc": {
       "mean": 0.737296,
       "sd": 0.056192,
-      "se": 0.007947,
-      "n": 50
+      "se": 0.029198,
+      "ci95": [
+       0.67862,
+       0.795972
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "pr_auc": {
       "mean": 0.583352,
       "sd": 0.08576,
-      "se": 0.012128,
-      "n": 50
+      "se": 0.044562,
+      "ci95": [
+       0.493802,
+       0.672903
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "brier": {
       "mean": 0.193959,
       "sd": 0.014483,
-      "se": 0.002048,
-      "n": 50
+      "se": 0.007526,
+      "ci95": [
+       0.178836,
+       0.209083
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "accuracy": {
       "mean": 0.654005,
       "sd": 0.048649,
-      "se": 0.00688,
-      "n": 50
+      "se": 0.025279,
+      "ci95": [
+       0.603205,
+       0.704805
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "precision": {
       "mean": 0.527281,
       "sd": 0.050631,
-      "se": 0.00716,
-      "n": 50
+      "se": 0.026308,
+      "ci95": [
+       0.474412,
+       0.580149
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "recall": {
       "mean": 0.848032,
       "sd": 0.103854,
-      "se": 0.014687,
-      "n": 50
+      "se": 0.053964,
+      "ci95": [
+       0.739587,
+       0.956478
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "f1": {
       "mean": 0.646996,
       "sd": 0.053856,
-      "se": 0.007616,
-      "n": 50
+      "se": 0.027985,
+      "ci95": [
+       0.590759,
+       0.703233
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      },
      "specificity": {
       "mean": 0.537183,
       "sd": 0.092159,
-      "se": 0.013033,
-      "n": 50
+      "se": 0.047887,
+      "ci95": [
+       0.44095,
+       0.633416
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      }
     },
     "P_GE2": {
      "roc_auc": {
       "mean": 0.765661,
       "sd": 0.05198,
-      "se": 0.007351,
-      "n": 50
+      "se": 0.02701,
+      "ci95": [
+       0.711383,
+       0.819939
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      }
     },
     "P_3VD": {
      "roc_auc": {
       "mean": 0.755308,
       "sd": 0.06309,
-      "se": 0.008922,
-      "n": 50
+      "se": 0.032782,
+      "ci95": [
+       0.689429,
+       0.821186
+      ],
+      "n": 50,
+      "se_note": "Nadeau-Bengio corrected"
      }
     },
     "pattern_log_loss": {
      "mean": 1.508408,
      "sd": 0.091794,
-     "se": 0.012982,
-     "n": 50
+     "se": 0.047698,
+     "ci95": [
+      1.412556,
+      1.60426
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "brier_mean": {
      "mean": 0.157858,
      "sd": 0.013839,
-     "se": 0.001957,
-     "n": 50
+     "se": 0.007191,
+     "ci95": [
+      0.143407,
+      0.172309
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "coherence_violation_rate": {
      "mean": 0.0,
@@ -4777,559 +4957,576 @@
    "catboost+sel_joint+svm|avg|vector": 1
   },
   "paired_diff_vs_previous_served": {
-   "auc_CAD": {
-    "mean": 0.007272,
-    "sd": 0.010939,
-    "se": 0.001547,
-    "folds_improved": 39,
-    "folds_equal": 3,
+   "pattern_log_loss": {
+    "mean": -0.06698,
+    "sd": 0.039172,
+    "se_naive": 0.00554,
+    "se_corrected": 0.020354,
+    "t": -3.29074,
+    "df": 49,
+    "p": 0.001857,
+    "ci95": [
+     -0.107884,
+     -0.026077
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 46,
     "n_folds": 50,
-    "better_is": "higher"
-   },
-   "auc_LAD": {
-    "mean": 0.014938,
-    "sd": 0.019279,
-    "se": 0.002726,
-    "folds_improved": 35,
-    "folds_equal": 2,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "auc_LCX": {
-    "mean": -0.005814,
-    "sd": 0.045978,
-    "se": 0.006502,
-    "folds_improved": 23,
-    "folds_equal": 0,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "auc_RCA": {
-    "mean": -0.006792,
-    "sd": 0.041588,
-    "se": 0.005881,
-    "folds_improved": 23,
-    "folds_equal": 0,
-    "n_folds": 50,
-    "better_is": "higher"
+    "better_is": "lower",
+    "verdict": "significant improvement"
    },
    "brier_mean": {
     "mean": -0.003856,
     "sd": 0.005933,
-    "se": 0.000839,
+    "se_naive": 0.000839,
+    "se_corrected": 0.003083,
+    "t": -1.250793,
+    "df": 49,
+    "p": 0.21695,
+    "ci95": [
+     -0.010052,
+     0.002339
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
     "folds_improved": 40,
-    "folds_equal": 0,
     "n_folds": 50,
-    "better_is": "lower"
+    "better_is": "lower",
+    "verdict": "small, not statistically significant"
    },
-   "pattern_log_loss": {
-    "mean": -0.06698,
-    "sd": 0.039172,
-    "se": 0.00554,
-    "folds_improved": 46,
-    "folds_equal": 0,
+   "auc_CAD": {
+    "mean": 0.007272,
+    "sd": 0.010939,
+    "se_naive": 0.001547,
+    "se_corrected": 0.005684,
+    "t": 1.279467,
+    "df": 49,
+    "p": 0.206758,
+    "ci95": [
+     -0.00415,
+     0.018695
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 39,
     "n_folds": 50,
-    "better_is": "lower"
+    "better_is": "higher",
+    "verdict": "small, not statistically significant"
    },
-   "brier_CAD": {
-    "mean": -0.005837,
-    "sd": 0.008287,
-    "se": 0.001172,
-    "folds_improved": 38,
-    "folds_equal": 0,
-    "n_folds": 50,
-    "better_is": "lower"
-   },
-   "pr_auc_CAD": {
-    "mean": 0.003805,
-    "sd": 0.007202,
-    "se": 0.001019,
-    "folds_improved": 36,
-    "folds_equal": 0,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "brier_LAD": {
-    "mean": -0.007869,
-    "sd": 0.007748,
-    "se": 0.001096,
-    "folds_improved": 44,
-    "folds_equal": 0,
-    "n_folds": 50,
-    "better_is": "lower"
-   },
-   "pr_auc_LAD": {
-    "mean": 0.010106,
-    "sd": 0.021389,
-    "se": 0.003025,
+   "auc_LAD": {
+    "mean": 0.014938,
+    "sd": 0.019279,
+    "se_naive": 0.002726,
+    "se_corrected": 0.010018,
+    "t": 1.491192,
+    "df": 49,
+    "p": 0.142321,
+    "ci95": [
+     -0.005193,
+     0.03507
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
     "folds_improved": 35,
-    "folds_equal": 0,
     "n_folds": 50,
-    "better_is": "higher"
+    "better_is": "higher",
+    "verdict": "small, not statistically significant"
    },
-   "brier_LCX": {
-    "mean": -0.000408,
-    "sd": 0.010766,
-    "se": 0.001523,
+   "auc_LCX": {
+    "mean": -0.005814,
+    "sd": 0.045978,
+    "se_naive": 0.006502,
+    "se_corrected": 0.023891,
+    "t": -0.24337,
+    "df": 49,
+    "p": 0.808735,
+    "ci95": [
+     -0.053825,
+     0.042196
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
     "folds_improved": 23,
-    "folds_equal": 0,
     "n_folds": 50,
-    "better_is": "lower"
+    "better_is": "higher",
+    "verdict": "no improvement (not significant)"
    },
-   "pr_auc_LCX": {
-    "mean": -0.01533,
-    "sd": 0.069118,
-    "se": 0.009775,
-    "folds_improved": 18,
-    "folds_equal": 0,
+   "auc_RCA": {
+    "mean": -0.006792,
+    "sd": 0.041588,
+    "se_naive": 0.005881,
+    "se_corrected": 0.02161,
+    "t": -0.314283,
+    "df": 49,
+    "p": 0.75464,
+    "ci95": [
+     -0.050218,
+     0.036635
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 23,
     "n_folds": 50,
-    "better_is": "higher"
-   },
-   "brier_RCA": {
-    "mean": -0.001311,
-    "sd": 0.008595,
-    "se": 0.001216,
-    "folds_improved": 33,
-    "folds_equal": 0,
-    "n_folds": 50,
-    "better_is": "lower"
-   },
-   "pr_auc_RCA": {
-    "mean": -0.020272,
-    "sd": 0.067911,
-    "se": 0.009604,
-    "folds_improved": 21,
-    "folds_equal": 0,
-    "n_folds": 50,
-    "better_is": "higher"
+    "better_is": "higher",
+    "verdict": "no improvement (not significant)"
    },
    "auc_P_GE2": {
     "mean": 0.016092,
     "sd": 0.044431,
-    "se": 0.006283,
+    "se_naive": 0.006283,
+    "se_corrected": 0.023087,
+    "t": 0.697011,
+    "df": 49,
+    "p": 0.489089,
+    "ci95": [
+     -0.030303,
+     0.062487
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
     "folds_improved": 34,
-    "folds_equal": 2,
     "n_folds": 50,
-    "better_is": "higher"
+    "better_is": "higher",
+    "verdict": "small, not statistically significant"
    },
    "auc_P_3VD": {
     "mean": 0.01364,
     "sd": 0.056152,
-    "se": 0.007941,
+    "se_naive": 0.007941,
+    "se_corrected": 0.029177,
+    "t": 0.467474,
+    "df": 49,
+    "p": 0.642233,
+    "ci95": [
+     -0.044994,
+     0.072274
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
     "folds_improved": 34,
-    "folds_equal": 2,
     "n_folds": 50,
-    "better_is": "higher"
-   },
-   "accuracy_CAD": {
-    "mean": -0.008614,
-    "sd": 0.026732,
-    "se": 0.00378,
-    "folds_improved": 13,
-    "folds_equal": 10,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "precision_CAD": {
-    "mean": -0.006868,
-    "sd": 0.02872,
-    "se": 0.004062,
-    "folds_improved": 13,
-    "folds_equal": 10,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "recall_CAD": {
-    "mean": -0.004483,
-    "sd": 0.030075,
-    "se": 0.004253,
-    "folds_improved": 9,
-    "folds_equal": 24,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "f1_CAD": {
-    "mean": -0.005711,
-    "sd": 0.018533,
-    "se": 0.002621,
-    "folds_improved": 14,
-    "folds_equal": 8,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "specificity_CAD": {
-    "mean": -0.017971,
-    "sd": 0.08213,
-    "se": 0.011615,
-    "folds_improved": 9,
-    "folds_equal": 23,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "accuracy_LAD": {
-    "mean": 0.00835,
-    "sd": 0.033916,
-    "se": 0.004796,
-    "folds_improved": 23,
-    "folds_equal": 14,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "precision_LAD": {
-    "mean": 0.012189,
-    "sd": 0.033371,
-    "se": 0.004719,
-    "folds_improved": 29,
-    "folds_equal": 5,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "recall_LAD": {
-    "mean": -0.005741,
-    "sd": 0.043545,
-    "se": 0.006158,
-    "folds_improved": 10,
-    "folds_equal": 22,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "f1_LAD": {
-    "mean": 0.004531,
-    "sd": 0.026583,
-    "se": 0.003759,
-    "folds_improved": 25,
-    "folds_equal": 5,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "specificity_LAD": {
-    "mean": 0.02817,
-    "sd": 0.07107,
-    "se": 0.010051,
-    "folds_improved": 26,
-    "folds_equal": 12,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "accuracy_LCX": {
-    "mean": 0.009005,
-    "sd": 0.048017,
-    "se": 0.006791,
-    "folds_improved": 18,
-    "folds_equal": 17,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "precision_LCX": {
-    "mean": 0.007176,
-    "sd": 0.037226,
-    "se": 0.005265,
-    "folds_improved": 23,
-    "folds_equal": 7,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "recall_LCX": {
-    "mean": -0.043743,
-    "sd": 0.107526,
-    "se": 0.015207,
-    "folds_improved": 12,
-    "folds_equal": 13,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "f1_LCX": {
-    "mean": -0.007335,
-    "sd": 0.04351,
-    "se": 0.006153,
-    "folds_improved": 19,
-    "folds_equal": 5,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "specificity_LCX": {
-    "mean": 0.042115,
-    "sd": 0.103435,
-    "se": 0.014628,
-    "folds_improved": 30,
-    "folds_equal": 6,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "accuracy_RCA": {
-    "mean": 0.005833,
-    "sd": 0.048529,
-    "se": 0.006863,
-    "folds_improved": 23,
-    "folds_equal": 10,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "precision_RCA": {
-    "mean": 0.004252,
-    "sd": 0.043876,
-    "se": 0.006205,
-    "folds_improved": 27,
-    "folds_equal": 4,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "recall_RCA": {
-    "mean": 0.000382,
-    "sd": 0.126081,
-    "se": 0.017831,
-    "folds_improved": 16,
-    "folds_equal": 14,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "f1_RCA": {
-    "mean": 0.003691,
-    "sd": 0.055686,
-    "se": 0.007875,
-    "folds_improved": 25,
-    "folds_equal": 2,
-    "n_folds": 50,
-    "better_is": "higher"
-   },
-   "specificity_RCA": {
-    "mean": 0.008946,
-    "sd": 0.099928,
-    "se": 0.014132,
-    "folds_improved": 26,
-    "folds_equal": 5,
-    "n_folds": 50,
-    "better_is": "higher"
+    "better_is": "higher",
+    "verdict": "small, not statistically significant"
    }
   },
+  "stats": "paired differences over 50 outer folds; Nadeau-Bengio corrected SE, t (df 49) and two-sided p",
   "previous_served": {
    "CAD": {
     "roc_auc": {
      "mean": 0.927054,
      "sd": 0.04097,
-     "se": 0.005794,
-     "n": 50
+     "se": 0.021289,
+     "ci95": [
+      0.884272,
+      0.969836
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "pr_auc": {
      "mean": 0.968559,
      "sd": 0.021337,
-     "se": 0.003017,
-     "n": 50
+     "se": 0.011087,
+     "ci95": [
+      0.946279,
+      0.990839
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "brier": {
      "mean": 0.094909,
      "sd": 0.022839,
-     "se": 0.00323,
-     "n": 50
+     "se": 0.011868,
+     "ci95": [
+      0.07106,
+      0.118757
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "accuracy": {
      "mean": 0.888401,
      "sd": 0.040656,
-     "se": 0.00575,
-     "n": 50
+     "se": 0.021125,
+     "ci95": [
+      0.845948,
+      0.930854
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "precision": {
      "mean": 0.916098,
      "sd": 0.040514,
-     "se": 0.00573,
-     "n": 50
+     "se": 0.021052,
+     "ci95": [
+      0.873792,
+      0.958403
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "recall": {
      "mean": 0.930224,
      "sd": 0.0443,
-     "se": 0.006265,
-     "n": 50
+     "se": 0.023019,
+     "ci95": [
+      0.883966,
+      0.976482
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "f1": {
      "mean": 0.92203,
      "sd": 0.028902,
-     "se": 0.004087,
-     "n": 50
+     "se": 0.015018,
+     "ci95": [
+      0.89185,
+      0.95221
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "specificity": {
      "mean": 0.785678,
      "sd": 0.108891,
-     "se": 0.0154,
-     "n": 50
+     "se": 0.056582,
+     "ci95": [
+      0.671973,
+      0.899383
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     }
    },
    "LAD": {
     "roc_auc": {
      "mean": 0.850811,
      "sd": 0.047993,
-     "se": 0.006787,
-     "n": 50
+     "se": 0.024938,
+     "ci95": [
+      0.800696,
+      0.900925
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "pr_auc": {
      "mean": 0.883976,
      "sd": 0.042856,
-     "se": 0.006061,
-     "n": 50
+     "se": 0.022269,
+     "ci95": [
+      0.839226,
+      0.928727
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "brier": {
      "mean": 0.151923,
      "sd": 0.02059,
-     "se": 0.002912,
-     "n": 50
+     "se": 0.010699,
+     "ci95": [
+      0.130423,
+      0.173423
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "accuracy": {
      "mean": 0.796369,
      "sd": 0.046418,
-     "se": 0.006564,
-     "n": 50
+     "se": 0.024119,
+     "ci95": [
+      0.747899,
+      0.844839
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "precision": {
      "mean": 0.776475,
      "sd": 0.048262,
-     "se": 0.006825,
-     "n": 50
+     "se": 0.025078,
+     "ci95": [
+      0.72608,
+      0.82687
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "recall": {
      "mean": 0.918537,
      "sd": 0.045663,
-     "se": 0.006458,
-     "n": 50
+     "se": 0.023727,
+     "ci95": [
+      0.870855,
+      0.966219
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "f1": {
      "mean": 0.840297,
      "sd": 0.035094,
-     "se": 0.004963,
-     "n": 50
+     "se": 0.018236,
+     "ci95": [
+      0.803651,
+      0.876942
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "specificity": {
      "mean": 0.626466,
      "sd": 0.095171,
-     "se": 0.013459,
-     "n": 50
+     "se": 0.049452,
+     "ci95": [
+      0.527088,
+      0.725844
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     }
    },
    "LCX": {
     "roc_auc": {
      "mean": 0.713942,
      "sd": 0.052051,
-     "se": 0.007361,
-     "n": 50
+     "se": 0.027047,
+     "ci95": [
+      0.65959,
+      0.768294
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "pr_auc": {
      "mean": 0.593372,
      "sd": 0.068358,
-     "se": 0.009667,
-     "n": 50
+     "se": 0.03552,
+     "ci95": [
+      0.521992,
+      0.664752
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "brier": {
      "mean": 0.204755,
      "sd": 0.013603,
-     "se": 0.001924,
-     "n": 50
+     "se": 0.007069,
+     "ci95": [
+      0.19055,
+      0.21896
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "accuracy": {
      "mean": 0.62068,
      "sd": 0.045514,
-     "se": 0.006437,
-     "n": 50
+     "se": 0.02365,
+     "ci95": [
+      0.573154,
+      0.668206
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "precision": {
      "mean": 0.508053,
      "sd": 0.034018,
-     "se": 0.004811,
-     "n": 50
+     "se": 0.017676,
+     "ci95": [
+      0.472532,
+      0.543575
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "recall": {
      "mean": 0.891813,
      "sd": 0.085195,
-     "se": 0.012048,
-     "n": 50
+     "se": 0.044268,
+     "ci95": [
+      0.802852,
+      0.980774
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "f1": {
      "mean": 0.645704,
      "sd": 0.039974,
-     "se": 0.005653,
-     "n": 50
+     "se": 0.020771,
+     "ci95": [
+      0.603963,
+      0.687446
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "specificity": {
      "mean": 0.449011,
      "sd": 0.079021,
-     "se": 0.011175,
-     "n": 50
+     "se": 0.04106,
+     "ci95": [
+      0.366497,
+      0.531526
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     }
    },
    "RCA": {
     "roc_auc": {
      "mean": 0.744088,
      "sd": 0.055151,
-     "se": 0.007799,
-     "n": 50
+     "se": 0.028657,
+     "ci95": [
+      0.686499,
+      0.801676
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "pr_auc": {
      "mean": 0.603624,
      "sd": 0.086719,
-     "se": 0.012264,
-     "n": 50
+     "se": 0.04506,
+     "ci95": [
+      0.513072,
+      0.694176
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "brier": {
      "mean": 0.19527,
      "sd": 0.014409,
-     "se": 0.002038,
-     "n": 50
+     "se": 0.007487,
+     "ci95": [
+      0.180224,
+      0.210316
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "accuracy": {
      "mean": 0.648172,
      "sd": 0.052199,
-     "se": 0.007382,
-     "n": 50
+     "se": 0.027123,
+     "ci95": [
+      0.593665,
+      0.702678
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "precision": {
      "mean": 0.523029,
      "sd": 0.05024,
-     "se": 0.007105,
-     "n": 50
+     "se": 0.026106,
+     "ci95": [
+      0.470568,
+      0.57549
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "recall": {
      "mean": 0.84765,
      "sd": 0.104608,
-     "se": 0.014794,
-     "n": 50
+     "se": 0.054356,
+     "ci95": [
+      0.738418,
+      0.956883
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "f1": {
      "mean": 0.643304,
      "sd": 0.051209,
-     "se": 0.007242,
-     "n": 50
+     "se": 0.026609,
+     "ci95": [
+      0.589831,
+      0.696777
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     },
     "specificity": {
      "mean": 0.528237,
      "sd": 0.098847,
-     "se": 0.013979,
-     "n": 50
+     "se": 0.051363,
+     "ci95": [
+      0.42502,
+      0.631454
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     }
    },
    "P_GE2": {
     "roc_auc": {
      "mean": 0.749569,
      "sd": 0.054564,
-     "se": 0.007716,
-     "n": 50
+     "se": 0.028352,
+     "ci95": [
+      0.692594,
+      0.806545
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     }
    },
    "P_3VD": {
     "roc_auc": {
      "mean": 0.741668,
      "sd": 0.073747,
-     "se": 0.010429,
-     "n": 50
+     "se": 0.03832,
+     "ci95": [
+      0.664661,
+      0.818675
+     ],
+     "n": 50,
+     "se_note": "Nadeau-Bengio corrected"
     }
    },
    "pattern_log_loss": {
     "mean": 1.575388,
     "sd": 0.078672,
-    "se": 0.011126,
-    "n": 50
+    "se": 0.040879,
+    "ci95": [
+     1.493238,
+     1.657538
+    ],
+    "n": 50,
+    "se_note": "Nadeau-Bengio corrected"
    },
    "brier_mean": {
     "mean": 0.161714,
     "sd": 0.012196,
-    "se": 0.001725,
-    "n": 50
+    "se": 0.006337,
+    "ci95": [
+     0.148979,
+     0.174449
+    ],
+    "n": 50,
+    "se_note": "Nadeau-Bengio corrected"
    },
    "coherence_violation_rate": {
     "mean": 0.0,
@@ -5337,6 +5534,149 @@
     "se": 0.0,
     "n": 50
    }
+  },
+  "vs_independent_same_folds": {
+   "pattern_log_loss": {
+    "mean": -0.153324,
+    "sd": 0.075075,
+    "se_naive": 0.010617,
+    "se_corrected": 0.03901,
+    "t": -3.930363,
+    "df": 49,
+    "p": 0.000266,
+    "ci95": [
+     -0.231718,
+     -0.07493
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 49,
+    "n_folds": 50,
+    "better_is": "lower",
+    "verdict": "significant improvement"
+   },
+   "brier_mean": {
+    "mean": -0.008386,
+    "sd": 0.007989,
+    "se_naive": 0.00113,
+    "se_corrected": 0.004151,
+    "t": -2.020256,
+    "df": 49,
+    "p": 0.048841,
+    "ci95": [
+     -0.016729,
+     -4.4e-05
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 43,
+    "n_folds": 50,
+    "better_is": "lower",
+    "verdict": "significant improvement"
+   },
+   "auc_CAD": {
+    "mean": 0.008345,
+    "sd": 0.013054,
+    "se_naive": 0.001846,
+    "se_corrected": 0.006783,
+    "t": 1.230224,
+    "df": 49,
+    "p": 0.224487,
+    "ci95": [
+     -0.005286,
+     0.021975
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 34,
+    "n_folds": 50,
+    "better_is": "higher",
+    "verdict": "small, not statistically significant"
+   },
+   "auc_LAD": {
+    "mean": 0.010918,
+    "sd": 0.023744,
+    "se_naive": 0.003358,
+    "se_corrected": 0.012338,
+    "t": 0.884957,
+    "df": 49,
+    "p": 0.380502,
+    "ci95": [
+     -0.013875,
+     0.035712
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 31,
+    "n_folds": 50,
+    "better_is": "higher",
+    "verdict": "small, not statistically significant"
+   },
+   "auc_LCX": {
+    "mean": 0.002208,
+    "sd": 0.050954,
+    "se_naive": 0.007206,
+    "se_corrected": 0.026476,
+    "t": 0.083412,
+    "df": 49,
+    "p": 0.933864,
+    "ci95": [
+     -0.050998,
+     0.055414
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 27,
+    "n_folds": 50,
+    "better_is": "higher",
+    "verdict": "small, not statistically significant"
+   },
+   "auc_RCA": {
+    "mean": -0.004457,
+    "sd": 0.051547,
+    "se_naive": 0.00729,
+    "se_corrected": 0.026784,
+    "t": -0.166391,
+    "df": 49,
+    "p": 0.868534,
+    "ci95": [
+     -0.058282,
+     0.049369
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4,
+    "folds_improved": 24,
+    "n_folds": 50,
+    "better_is": "higher",
+    "verdict": "no improvement (not significant)"
+   },
+   "coherence_independent": {
+    "mean": 0.054116,
+    "sd": 0.030654,
+    "se_naive": 0.004335,
+    "se_corrected": 0.015928,
+    "t": 3.397505,
+    "df": 49,
+    "p": 0.001358,
+    "ci95": [
+     0.022107,
+     0.086124
+    ],
+    "J": 50,
+    "n_train": 193.6,
+    "n_test": 48.4
+   }
+  },
+  "served_coherence_measured": {
+   "mean": 0.0,
+   "max": 0.0,
+   "n_folds": 50
   },
   "rule": "finalists by the pre-registered rule; inner selection by cross-fitted inner-OOF pattern log-loss",
   "served_on_full_training_split": {

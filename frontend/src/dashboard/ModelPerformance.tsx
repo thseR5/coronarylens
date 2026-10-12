@@ -17,9 +17,19 @@ import {
 import { api } from '../api/client'
 
 // Loose view of ml/artifacts/metrics.json (+ ablation) — only the fields this tab reads.
-type Stat = { mean: number; sd: number }
+type Stat = { mean: number; sd: number; ci95?: [number, number] }
 type CI = { value: number; ci95: [number, number] }
-type Diff = { mean: number; sd: number; se: number; folds_improved: number; n_folds: number; better_is: string }
+type Diff = {
+  mean: number
+  sd: number
+  se_corrected: number
+  t: number
+  p: number
+  folds_improved: number
+  n_folds: number
+  better_is: string
+  verdict: string
+}
 interface Sprint {
   n_screened: number
   n_finalists: number
@@ -29,8 +39,18 @@ interface Sprint {
   paired_diff_vs_previous_served: Record<string, Diff>
   previous_served: Record<string, Record<string, Stat>> & { pattern_log_loss: Stat; brier_mean: Stat }
   served_on_full_training_split: { chosen: string }
+  vs_independent_same_folds?: Record<string, Diff> & { coherence_independent: { mean: number } }
+  served_coherence_measured?: { mean: number; max: number; n_folds: number }
+}
+interface WhatIf {
+  jump_threshold: number
+  presets: string[]
+  features: string[]
+  curves: Record<string, Record<string, { x: number[]; CAD: number[]; LAD: number[]; LCX: number[]; RCA: number[] }>>
+  flags: { preset: string; feature: string; output: string; kind: string; delta?: number; max_step?: number }[]
 }
 interface Metrics {
+  whatif?: WhatIf
   sprint?: Sprint
   test_first_look?: { test: { served: { metrics: Record<string, Record<string, CI>> } } }
   data: { n: number; n_train: number; n_test: number }
@@ -87,6 +107,8 @@ export default function ModelPerformance() {
   const [m, setM] = useState<Metrics | null>(null)
   const [err, setErr] = useState(false)
   const [dcaTarget, setDcaTarget] = useState<(typeof TARGETS)[number]>('CAD')
+  const [wiPreset, setWiPreset] = useState('three-vessel')
+  const [wiFeature, setWiFeature] = useState('age')
   const reg = m?.benchmarks?.regularized_lr
 
   useEffect(() => {
@@ -100,6 +122,8 @@ export default function ModelPerformance() {
   const coherence = Object.keys(VARIANT_LABEL)
     .filter((v) => m.coherence[v])
     .map((v) => ({ name: VARIANT_LABEL[v], rate: m.coherence[v].mean * 100 }))
+  if (m.sprint?.served_coherence_measured)
+    coherence.push({ name: 'Served procedure', rate: m.sprint.served_coherence_measured.mean * 100 })
   const dca = m.dca.test[dcaTarget]
   const dcaRows = dca.thresholds.map((t, i) => ({ t, model: dca.model[i], all: dca.treat_all[i], none: 0 }))
   const COLORS = ['#4fd1c5', '#f6c35b', '#a78bfa', '#f472b6']
@@ -126,10 +150,10 @@ export default function ModelPerformance() {
       <Section
         title={
           m.sprint
-            ? `Headline · nested CV of the served procedure (mean ± SD, ${m.sprint.outer})`
+            ? `Headline · nested CV of the served procedure (mean [95% CI], ${m.sprint.outer})`
             : `Headline · nested CV, served model (mean ± SD over ${m.cv.settings.outer_repeats}×${m.cv.settings.outer_folds} outer folds)`
         }
-        note="Every number here comes from patients the model (and every choice about it) never saw while training. Threshold metrics use the max-F1 threshold chosen inside each training fold."
+        note="Every number here comes from patients the model (and every choice about it) never saw while training. Brackets: 95% CI with the Nadeau–Bengio correction for overlapping CV folds. Threshold metrics use the max-F1 threshold chosen inside each training fold."
       >
         <table className="w-full">
           <thead className="text-[10px] uppercase text-muted">
@@ -153,7 +177,9 @@ export default function ModelPerformance() {
                   <Td strong>{t === 'P_GE2' ? '≥2 vessels' : t === 'P_3VD' ? '3 vessels' : t}</Td>
                   <Td strong>
                     {f3(r.roc_auc?.mean)}
-                    <span className="block text-[9px] text-muted">±{f2(r.roc_auc?.sd)}</span>
+                    <span className="block text-[9px] text-muted">
+                      {r.roc_auc?.ci95 ? `[${f2(r.roc_auc.ci95[0])}–${f2(r.roc_auc.ci95[1])}]` : `±${f2(r.roc_auc?.sd)}`}
+                    </span>
                   </Td>
                   <Td>{f2(r.pr_auc?.mean)}</Td>
                   <Td>{f3(r.brier?.mean)}</Td>
@@ -175,9 +201,11 @@ export default function ModelPerformance() {
             <>
               Screening used the training split only. Finalists were chosen by a rule written before the results were read; inside
               every outer fold the procedure with the best inner cross-fitted log-loss was selected and then scored on unseen
-              patients, so these numbers already account for the search. Served (selected on the full training split):{' '}
-              <span className="font-mono">{m.sprint.served_on_full_training_split.chosen}</span>. LCX/RCA did not improve: the
-              ceiling held.
+              patients, so these numbers already account for the search. Gains are paired over 50 outer folds, tested with the
+              Nadeau–Bengio corrected resampled t-test (overlapping folds make the plain SE too small). Served (selected on the full
+              training split):{' '}
+              <span className="font-mono">{m.sprint.served_on_full_training_split.chosen}</span>. Only the risk estimate (log-loss)
+              improved significantly; AUC changes are small and not significant, and LCX/RCA did not improve: the ceiling held.
             </>
           }
         >
@@ -187,6 +215,7 @@ export default function ModelPerformance() {
                 <Th>Metric</Th>
                 <Th>Previous model</Th>
                 <Th>Paired gain</Th>
+                <Th>p (corrected)</Th>
                 <Th>Folds better</Th>
               </tr>
             </thead>
@@ -205,7 +234,7 @@ export default function ModelPerformance() {
                 const prev = k.startsWith('auc_')
                   ? m.sprint!.previous_served[k.slice(4)]?.roc_auc?.mean
                   : (m.sprint!.previous_served[k as 'pattern_log_loss' | 'brier_mean'] as Stat).mean
-                const good = d.better_is === 'lower' ? d.mean < -d.se : d.mean > d.se
+                const good = d.verdict === 'significant improvement'
                 return (
                   <tr key={k} className="border-t border-line/60">
                     <Td strong>{label}</Td>
@@ -215,7 +244,13 @@ export default function ModelPerformance() {
                         {d.mean >= 0 ? '+' : '−'}
                         {Math.abs(d.mean).toFixed(4)}
                       </span>
-                      <span className="block text-[9px] text-muted">± {d.sd.toFixed(4)} (SE {d.se.toFixed(4)})</span>
+                      <span className="block text-[9px] text-muted">
+                        SE {d.se_corrected.toFixed(4)}, t {d.t.toFixed(2)}
+                      </span>
+                    </Td>
+                    <Td>
+                      {d.p < 0.001 ? '<0.001' : d.p.toFixed(3)}
+                      <span className="block text-[9px] text-muted">{d.verdict}</span>
                     </Td>
                     <Td>
                       {d.folds_improved}/{d.n_folds}
@@ -225,6 +260,107 @@ export default function ModelPerformance() {
               })}
             </tbody>
           </table>
+        </Section>
+      )}
+
+      {m.sprint?.vs_independent_same_folds && (
+        <Section
+          title="Served procedure vs independent ensemble · identical 10×5 folds"
+          note={`The independent ensemble (one LR+RF+ET model per target) contradicts itself in ${pc(m.sprint.vs_independent_same_folds.coherence_independent.mean)} of patients on these folds; the served procedure in ${pc(m.sprint.served_coherence_measured?.mean ?? 0)} (by construction). Equal discrimination, significantly better risk estimates.`}
+        >
+          <table className="w-full">
+            <thead className="text-[10px] uppercase text-muted">
+              <tr>
+                <Th>Metric</Th>
+                <Th>Paired diff</Th>
+                <Th>p (corrected)</Th>
+                <Th>Folds better</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {(
+                [
+                  ['pattern_log_loss', 'Pattern log-loss'],
+                  ['brier_mean', 'Mean Brier'],
+                  ['auc_CAD', 'CAD AUC'],
+                  ['auc_LAD', 'LAD AUC'],
+                  ['auc_LCX', 'LCX AUC'],
+                  ['auc_RCA', 'RCA AUC'],
+                ] as const
+              ).map(([k, label]) => {
+                const d = m.sprint!.vs_independent_same_folds![k] as Diff
+                return (
+                  <tr key={k} className="border-t border-line/60">
+                    <Td strong>{label}</Td>
+                    <Td>
+                      {d.mean >= 0 ? '+' : '−'}
+                      {Math.abs(d.mean).toFixed(4)}
+                    </Td>
+                    <Td>
+                      {d.p < 0.001 ? '<0.001' : d.p.toFixed(3)}
+                      <span className="block text-[9px] text-muted">{d.verdict}</span>
+                    </Td>
+                    <Td>
+                      {d.folds_improved}/{d.n_folds}
+                    </Td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </Section>
+      )}
+
+      {m.whatif && (
+        <Section
+          title="What-if plausibility · how the served model responds to one feature at a time"
+          note={`Each feature swept across its training range with the other inputs fixed at a preset patient. Flags: ${m.whatif.flags.length} (direction reversals vs clinical expectation larger than 0.02, or a single step larger than ${m.whatif.jump_threshold}). ${m.whatif.flags.filter((f) => f.output === 'CAD').length === 0 ? 'P(CAD) never moves against the expected direction.' : ''} Model behaviour, not causation.`}
+        >
+          <div className="mb-1 flex flex-wrap gap-1">
+            <select aria-label="What-if preset" value={wiPreset} onChange={(e) => setWiPreset(e.target.value)} className="rounded bg-panel-2 px-1.5 py-0.5 text-[11px] ring-1 ring-line">
+              {m.whatif.presets.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+            <select aria-label="What-if feature" value={wiFeature} onChange={(e) => setWiFeature(e.target.value)} className="rounded bg-panel-2 px-1.5 py-0.5 text-[11px] ring-1 ring-line">
+              {m.whatif.features.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="h-44">
+            <ResponsiveContainer>
+              <LineChart
+                data={m.whatif.curves[wiPreset]?.[wiFeature]?.x.map((x, i) => {
+                  const c = m.whatif!.curves[wiPreset][wiFeature]
+                  return { x, CAD: c.CAD[i], LAD: c.LAD[i], LCX: c.LCX[i], RCA: c.RCA[i] }
+                })}
+                margin={{ left: -10, right: 10, top: 5 }}
+              >
+                <CartesianGrid stroke="#243445" />
+                <XAxis dataKey="x" type="number" domain={['dataMin', 'dataMax']} {...AX} />
+                <YAxis domain={[0, 1]} {...AX} />
+                <Tooltip {...TIP} formatter={(v) => `${(Number(v) * 100).toFixed(1)}%`} />
+                <Legend wrapperStyle={{ fontSize: 10 }} />
+                {(['CAD', 'LAD', 'LCX', 'RCA'] as const).map((t, i) => (
+                  <Line key={t} dataKey={t} stroke={COLORS[i]} dot={false} isAnimationActive={false} />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          {m.whatif.flags.length > 0 && (
+            <ul className="mt-1 list-disc pl-4 text-[10px] text-muted">
+              {m.whatif.flags.map((f, i) => (
+                <li key={i}>
+                  {f.preset}: {f.feature} → {f.output} {f.kind === 'direction' ? `moves ${f.delta! > 0 ? 'up' : 'down'} by ${Math.abs(f.delta! * 100).toFixed(1)} pts against the expected direction` : `jumps ${(f.max_step! * 100).toFixed(1)} pts in one step`}
+                </li>
+              ))}
+            </ul>
+          )}
         </Section>
       )}
 
@@ -277,8 +413,9 @@ export default function ModelPerformance() {
         title="Coherence · patients where P(CAD) < some vessel's P(stenosis)"
         note={
           <>
-            Logically impossible, since CAD means at least one stenotic vessel. Measured on nested-CV out-of-fold predictions. The
-            joint model is 0% by construction: P(CAD) = 1 − P(no vessel stenotic). Naive logistic regression = four separate
+            Logically impossible, since CAD means at least one stenotic vessel. Measured on nested-CV outer-test predictions (5×5
+            benchmark folds; the served procedure on the sprint's 10×5 folds). Joint models are 0% by construction: P(CAD) = 1 −
+            P(no vessel stenotic). Naive logistic regression = four separate
             scikit-learn LogisticRegression models (L2, C = 1, lbfgs, standardized inputs).
             {reg && (
               <>

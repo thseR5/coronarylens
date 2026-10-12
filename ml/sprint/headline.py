@@ -11,6 +11,7 @@ import numpy as np
 from ml import config
 from ml import evaluate as E
 from ml.joint import TARGETS, marginals
+from ml.sprint.stats import corrected, paired
 
 NESTED = config.REPORTS / "sprint"
 
@@ -19,15 +20,27 @@ def load(tag: str = "B1") -> dict:
     return json.loads((NESTED / f"nested_{tag}.json").read_text("utf-8"))
 
 
+def fold_sizes(rec: dict, n_train_total: int = 242) -> tuple[float, float]:
+    """Mean outer-train and outer-test sizes (for the Nadeau-Bengio correction)."""
+    n_test = float(np.mean([len(f["selected_pred"]["test_index"]) for f in rec["folds"]]))
+    return n_train_total - n_test, n_test
+
+
+_SIZES = (193.6, 48.4)  # set per record in variant_summary / sprint_section
+
+
 def _stat(vals) -> dict:
     a = np.asarray(vals, float)
     a = a[~np.isnan(a)]
-    return {"mean": float(a.mean()), "sd": float(a.std(ddof=1)), "se": float(a.std(ddof=1) / np.sqrt(a.size)),
-            "n": int(a.size)}
+    c = corrected(a, *_SIZES)
+    return {"mean": float(a.mean()), "sd": float(a.std(ddof=1)), "se": c["se_corrected"], "ci95": c["ci95"],
+            "n": int(a.size), "se_note": "Nadeau-Bengio corrected"}
 
 
 def variant_summary(rec: dict, label: str = "selected") -> dict:
     """Per-target dict in the cv.variants schema (roc_auc, pr_auc, brier, accuracy, ... as mean/sd/se/n)."""
+    global _SIZES
+    _SIZES = fold_sizes(rec)
     rows = [f[label] for f in rec["folds"]]
     out: dict = {}
     for t in TARGETS:
@@ -74,11 +87,49 @@ def subgroups(rec: dict, Xtr, Ytr, cols, n_folds: int) -> dict:
     return out
 
 
+METRICS = ["pattern_log_loss", "brier_mean", "auc_CAD", "auc_LAD", "auc_LCX", "auc_RCA", "auc_P_GE2", "auc_P_3VD"]
+
+
+def corrected_paired(rec: dict) -> dict:
+    n_train, n_test = fold_sizes(rec)
+    return {k: paired(rec["folds"], "selected", "baseline", k, k.startswith(("pattern", "brier")), n_train, n_test)
+            for k in METRICS}
+
+
+def vs_independent(rec: dict) -> dict | None:
+    """Served procedure vs the independent binary ensemble on IDENTICAL outer folds (reports/sprint/indep_B1.json)."""
+    f = NESTED / "indep_B1.json"
+    if not f.exists():
+        return None
+    ind = json.loads(f.read_text("utf-8"))["folds"]
+    if not all(b["selected_pred"]["test_index"] == i["test_index"] for b, i in zip(rec["folds"], ind, strict=True)):
+        raise ValueError("independent-ensemble folds differ from the sprint folds")
+    rows = [{"served": b["selected"], "independent": i} for b, i in zip(rec["folds"], ind, strict=True)]
+    n_train, n_test = fold_sizes(rec)
+    out = {k: paired(rows, "served", "independent", k, k.startswith(("pattern", "brier")), n_train, n_test)
+           for k in ["pattern_log_loss", "brier_mean", "auc_CAD", "auc_LAD", "auc_LCX", "auc_RCA"]}
+    out["coherence_independent"] = corrected([i["coherence"] for i in ind], n_train, n_test)
+    return out
+
+
+def served_coherence(rec: dict) -> dict:
+    """Measured share of outer-test patients with P(CAD) < max vessel probability (0 by construction)."""
+    vals = []
+    for f in rec["folds"]:
+        m = marginals(np.asarray(f["selected_pred"]["P"]))
+        mx = np.max(np.column_stack([m["LAD"], m["LCX"], m["RCA"]]), axis=1)
+        vals.append(float(np.mean(m["CAD"] < mx - 1e-9)))
+    return {"mean": float(np.mean(vals)), "max": float(np.max(vals)), "n_folds": len(vals)}
+
+
 def sprint_section(rec: dict) -> dict:
     fin = json.loads((NESTED / "finalists.json").read_text("utf-8"))
     return {"n_screened": fin["n_screened"], "n_finalists": len(fin["finalists"]),
             "finalists": [f["name"] for f in fin["finalists"]], "outer": rec["outer"], "inner": rec["inner"],
             "chosen_counts": rec["chosen_counts"],
-            "paired_diff_vs_previous_served": rec["paired_diff_selected_minus_baseline"],
+            "paired_diff_vs_previous_served": corrected_paired(rec),
+            "stats": "paired differences over 50 outer folds; Nadeau-Bengio corrected SE, t (df 49) and two-sided p",
             "previous_served": variant_summary(rec, "baseline"),
+            "vs_independent_same_folds": vs_independent(rec),
+            "served_coherence_measured": served_coherence(rec),
             "rule": "finalists by the pre-registered rule; inner selection by cross-fitted inner-OOF pattern log-loss"}
