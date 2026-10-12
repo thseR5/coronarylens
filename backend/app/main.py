@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -125,3 +126,11 @@ def make_report(req: ExplainRequest):
 
 
 __all__ = ["RequestValidationError", "app"]
+
+
+# Production / Docker: serve the built frontend from the same origin (registered last so /api/* wins).
+_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if _DIST.is_dir():
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount("/", StaticFiles(directory=_DIST, html=True), name="web")

@@ -1,4 +1,4 @@
-.PHONY: setup audit train anatomy test dev dev-api dev-web build docker lint
+.PHONY: setup audit train anatomy test test-e2e dev dev-api dev-web build serve docker lint
 
 setup:            ## install Python + frontend dependencies
 	uv sync --all-groups
@@ -17,6 +17,9 @@ test:
 	uv run pytest -q
 	cd frontend && npx vitest run
 
+test-e2e:         ## Playwright: full stack + 3D scene (needs `npx playwright install chromium` once)
+	cd frontend && npx playwright test -c e2e/app.config.ts && npx playwright test -c e2e/playwright.config.ts --project gpu
+
 lint:
 	uv run ruff check ml backend tools
 	cd frontend && npx tsc -b --noEmit
@@ -32,6 +35,10 @@ dev:              ## API on :8000 and web on :5173
 
 build:
 	cd frontend && npx vite build
+
+serve:            ## production-style: build web app, serve web + API on :8000
+	cd frontend && npx vite build
+	uv run uvicorn backend.app.main:app --port 8000
 
 docker:
 	docker compose up --build

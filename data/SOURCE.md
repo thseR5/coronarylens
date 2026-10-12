@@ -9,4 +9,4 @@
 - **Rows / columns:** 303 / 59, no missing values (verified 2026-10-12)
 
 Cite: Alizadehsani R., Roshanzamir M., Sani Z. *Extension of Z-Alizadeh Sani dataset.* UCI Machine Learning
-Repository. https://doi.org/10.24432/C5W02J (verify DOI before final citation).
+Repository. https://doi.org/10.24432/C5461K (verified on the UCI page, 2026-10-12).
