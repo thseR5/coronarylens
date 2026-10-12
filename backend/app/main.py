@@ -19,6 +19,7 @@ from backend.app.presets import load_presets
 from backend.app.schemas import (
     AnalyzeRequest,
     AnalyzeResponse,
+    CohortMapResponse,
     CounterfactualRequest,
     CounterfactualResponse,
     ExplainRequest,
@@ -27,6 +28,7 @@ from backend.app.schemas import (
     Preset,
     SimilarRequest,
     SimilarResponse,
+    TrainingPatient,
 )
 from backend.app.service import Service, Superseded, artifacts_dir
 from ml import config
@@ -125,6 +127,19 @@ def counterfactual(req: CounterfactualRequest, x_client_id: str | None = Header(
 @app.post("/api/similar", response_model=SimilarResponse)
 def similar(req: SimilarRequest):
     return _guard(svc().similar, req.features, req.k)
+
+
+@app.post("/api/cohort-map", response_model=CohortMapResponse)
+def cohort_map(req: ExplainRequest):
+    return _guard(svc().cohort_map, req.features)
+
+
+@app.get("/api/training-patient/{index}", response_model=TrainingPatient)
+def training_patient(index: int):
+    try:
+        return svc().model.training_patient(index)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=f"row {index} is not in the training split") from e
 
 
 @app.post("/api/report", response_class=HTMLResponse)

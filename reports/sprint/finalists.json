@@ -1,0 +1,204 @@
+{
+ "n_screened": 278,
+ "tags": [
+  "A1"
+ ],
+ "rule": "see docs/EXPERIMENTS.md 'Finalist-selection rule'",
+ "finalists": [
+  {
+   "name": "lr_l2|avg|dirichlet",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "lr_l2"
+   ],
+   "combine": "avg",
+   "calib": "dirichlet",
+   "screen": {
+    "pattern_log_loss": 1.5275529982262626,
+    "auc_CAD": 0.923581872842377,
+    "auc_LAD": 0.8466123756755508,
+    "auc_LCX": 0.7052924648786718,
+    "auc_RCA": 0.732497323849366,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "lr_l2_strong|avg|dirichlet",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "lr_l2_strong"
+   ],
+   "combine": "avg",
+   "calib": "dirichlet",
+   "screen": {
+    "pattern_log_loss": 1.5286691048194958,
+    "auc_CAD": 0.9309925462026303,
+    "auc_LAD": 0.8550559897280147,
+    "auc_LCX": 0.7127188277206424,
+    "auc_RCA": 0.7437167386101771,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "catboost|avg|dirichlet",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "catboost"
+   ],
+   "combine": "avg",
+   "calib": "dirichlet",
+   "screen": {
+    "pattern_log_loss": 1.5291932576155023,
+    "auc_CAD": 0.9358474839819378,
+    "auc_LAD": 0.8752874752105587,
+    "auc_LCX": 0.735260200309202,
+    "auc_RCA": 0.7411485291343475,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "catboost_d3|avg|dirichlet",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "catboost_d3"
+   ],
+   "combine": "avg",
+   "calib": "dirichlet",
+   "screen": {
+    "pattern_log_loss": 1.5294314440957024,
+    "auc_CAD": 0.934714070243482,
+    "auc_LAD": 0.8733734125498017,
+    "auc_LCX": 0.7408322914566109,
+    "auc_RCA": 0.740344921971807,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "ebm|avg|dirichlet",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "ebm"
+   ],
+   "combine": "avg",
+   "calib": "dirichlet",
+   "screen": {
+    "pattern_log_loss": 1.5304001421586326,
+    "auc_CAD": 0.9333804570779362,
+    "auc_LAD": 0.8670641665283442,
+    "auc_LCX": 0.7078268468105129,
+    "auc_RCA": 0.7279109454006089,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "lr_en|avg|dirichlet",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "lr_en"
+   ],
+   "combine": "avg",
+   "calib": "dirichlet",
+   "screen": {
+    "pattern_log_loss": 1.5309459061034345,
+    "auc_CAD": 0.9217963735610795,
+    "auc_LAD": 0.8475934362452381,
+    "auc_LCX": 0.7207314646770182,
+    "auc_RCA": 0.7371670384056281,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "catboost+catboost_d3|avg|vector",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "catboost",
+    "catboost_d3"
+   ],
+   "combine": "avg",
+   "calib": "vector",
+   "screen": {
+    "pattern_log_loss": 1.532962500069398,
+    "auc_CAD": 0.9366945939214847,
+    "auc_LAD": 0.8772120869588678,
+    "auc_LCX": 0.7498968878134032,
+    "auc_RCA": 0.7480465542942325,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "lgbm+catboost_d3|learned|vector",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "lgbm",
+    "catboost_d3"
+   ],
+   "combine": "learned",
+   "calib": "vector",
+   "screen": {
+    "pattern_log_loss": 1.5334152232036684,
+    "auc_CAD": 0.936425501669199,
+    "auc_LAD": 0.8732822386197202,
+    "auc_LCX": 0.7481796061033811,
+    "auc_RCA": 0.7478607587913492,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "rf+lgbm+catboost|learned|vector",
+   "reason": "best LCX+RCA AUC",
+   "learners": [
+    "rf",
+    "lgbm",
+    "catboost"
+   ],
+   "combine": "learned",
+   "calib": "vector",
+   "screen": {
+    "pattern_log_loss": 1.5378975833287845,
+    "auc_CAD": 0.9383004912920879,
+    "auc_LAD": 0.8747867022052485,
+    "auc_LCX": 0.7503937621832358,
+    "auc_RCA": 0.7492211384459461,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "lgbm+catboost+ebm|learned|vector",
+   "reason": "best mean AUC",
+   "learners": [
+    "lgbm",
+    "catboost",
+    "ebm"
+   ],
+   "combine": "learned",
+   "calib": "vector",
+   "screen": {
+    "pattern_log_loss": 1.537842206752626,
+    "auc_CAD": 0.9391272723541632,
+    "auc_LAD": 0.8766928999199329,
+    "auc_LCX": 0.7477652752571083,
+    "auc_RCA": 0.7492731597071954,
+    "from": "A1"
+   }
+  },
+  {
+   "name": "lr_en+rf+et|avg|vector",
+   "reason": "baseline (served recipe)",
+   "learners": [
+    "lr_en",
+    "rf",
+    "et"
+   ],
+   "combine": "avg",
+   "calib": "vector",
+   "screen": {
+    "pattern_log_loss": 1.5723937341025496,
+    "auc_CAD": 0.9328328758076657,
+    "auc_LAD": 0.8547634411699747,
+    "auc_LCX": 0.716848692612758,
+    "auc_RCA": 0.7426295149638804,
+    "from": "A1"
+   }
+  }
+ ]
+}

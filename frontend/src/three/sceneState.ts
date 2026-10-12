@@ -10,6 +10,8 @@ export interface SceneLocalState {
   /** Software rasteriser detected: lower DPR, no MSAA, Lambert shading, ribs hidden initially. */
   lowPower: boolean
   labels: boolean
+  /** Frontal clipping plane through the heart: cuts myocardium/aorta (never vessels) to reveal the LV territories. */
+  clip: { enabled: boolean; depth: number } // depth in heart units along -Z (anterior -> posterior), -1..1
   activeRenderer: 'bodyparts3d' | 'procedural' | null
   fallbackReason: string | null
   screenshot: (() => string | null) | null
@@ -27,6 +29,7 @@ export const useSceneLocal = create<SceneLocalState>((set) => ({
   heartbeat: !prefersReducedMotion(),
   lowPower: false,
   labels: true,
+  clip: { enabled: false, depth: 0 },
   activeRenderer: null,
   fallbackReason: null,
   screenshot: null,

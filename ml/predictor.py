@@ -121,6 +121,38 @@ class ServedModel:
                         "pattern": nb["pattern"], "cad": nb["cad"]})
         return {"neighbors": out}
 
+    # ------------------------------------------------------------------ cohort map
+    def _cohort_pca(self):
+        """Deterministic 2-D PCA of the standardized TRAINING split (test patients never shown)."""
+        if getattr(self, "_pca", None) is None:
+            from sklearn.decomposition import PCA
+
+            Z = self.knn.sc_.transform(self.knn.X_)
+            self._pca = PCA(2, svd_solver="full").fit(Z)
+            xy = self._pca.transform(Z)
+            n_vessels = np.array([p.count("1") for p in self.knn.patterns_])
+            self._cohort_points = [
+                {"index": int(i), "x": float(a), "y": float(b), "pattern": str(p), "n_vessels": int(n), "cad": bool(c)}
+                for i, (a, b), p, n, c in zip(self.knn.row_index_, xy, self.knn.patterns_, n_vessels, self.knn.cad_,
+                                              strict=True)]
+        return self._pca
+
+    def cohort_map(self, features: dict[str, Any]) -> dict:
+        pca = self._cohort_pca()
+        x, _, _ = self.encode(features)
+        px, py = pca.transform(self.knn.sc_.transform(x))[0]
+        return {"method": "PCA (2 components) of standardized features, training split",
+                "explained_variance": [float(v) for v in pca.explained_variance_ratio_],
+                "points": self._cohort_points, "patient": {"x": float(px), "y": float(py)}}
+
+    def training_patient(self, index: int) -> dict:
+        pos = np.flatnonzero(self.knn.row_index_ == int(index))
+        if pos.size == 0:
+            raise KeyError(index)
+        row = pd.Series(self.knn.X_[pos[0]], index=self.columns)
+        return {"index": int(index), "features": decode_row(row, self.fcfg),
+                "pattern": str(self.knn.patterns_[pos[0]]), "cad": bool(self.knn.cad_[pos[0]])}
+
     # ------------------------------------------------------------------ counterfactual
     def _candidates(self, raw: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
         """Per modifiable unit: candidate value changes, within plausibility range, towards the ref range."""

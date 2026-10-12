@@ -152,15 +152,22 @@ class Dirichlet:
 
     def fit(self, P, y):
         L, y = np.log(_norm(P)), np.asarray(y, int)
-        k = L.shape[1]
+        n, k = L.shape
         off = ~np.eye(k, dtype=bool)
+        Y = np.zeros((n, k))
+        Y[np.arange(n), y] = 1
 
-        def obj(theta):
+        def obj(theta):  # regularised NLL and its analytic gradient
             W, b = theta[: k * k].reshape(k, k), theta[k * k:]
-            nll = -log_softmax(L @ W.T + b, axis=1)[np.arange(len(y)), y].mean()
-            return nll + (self.lam_off * np.sum(W[off] ** 2) + self.lam_b * np.sum(b**2)) / k
+            Z = L @ W.T + b
+            lp = log_softmax(Z, axis=1)
+            G = (np.exp(lp) - Y) / n
+            f = -(Y * lp).sum() / n + (self.lam_off * np.sum(W[off] ** 2) + self.lam_b * np.sum(b**2)) / k
+            gW = G.T @ L + 2 * self.lam_off * np.where(off, W, 0.0) / k
+            gb = G.sum(0) + 2 * self.lam_b * b / k
+            return f, np.r_[gW.ravel(), gb]
 
-        r = minimize(obj, np.r_[np.eye(k).ravel(), np.zeros(k)], method="L-BFGS-B")
+        r = minimize(obj, np.r_[np.eye(k).ravel(), np.zeros(k)], jac=True, method="L-BFGS-B")
         self.W_, self.b_ = r.x[: k * k].reshape(k, k), r.x[k * k:]
         return self
 

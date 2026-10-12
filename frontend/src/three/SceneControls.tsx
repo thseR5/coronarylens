@@ -71,6 +71,30 @@ export default function SceneControls() {
         <Btn active={view.autoRotate} onClick={() => toggle('autoRotate')} testId="toggle-rotate">Rotate</Btn>
         <Btn active={local.heartbeat} onClick={() => local.set({ heartbeat: !local.heartbeat })} testId="toggle-heartbeat">Heartbeat</Btn>
         <Btn active={local.labels} onClick={() => local.set({ labels: !local.labels })}>Labels</Btn>
+        <Btn
+          active={local.clip.enabled}
+          onClick={() => local.set({ clip: { ...local.clip, enabled: !local.clip.enabled } })}
+          testId="toggle-clip"
+          title="Frontal clipping plane: cuts away the anterior heart wall to show the LV territories (vessels stay visible)"
+        >
+          Clip
+        </Btn>
+        {local.clip.enabled && (
+          <label className="flex items-center gap-1 rounded bg-ink/70 px-1.5 text-[10px] text-muted">
+            depth
+            <input
+              type="range"
+              min={-0.9}
+              max={0.9}
+              step={0.05}
+              value={local.clip.depth}
+              onChange={(e) => local.set({ clip: { enabled: true, depth: Number(e.target.value) } })}
+              aria-label="Clipping plane depth"
+              data-testid="clip-depth"
+              className="w-20 accent-[var(--color-accent)]"
+            />
+          </label>
+        )}
         <Btn onClick={screenshot} title="Save the 3D view as PNG (labels not included)" testId="screenshot">PNG</Btn>
       </div>
     </div>

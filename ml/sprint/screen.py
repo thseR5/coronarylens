@@ -9,10 +9,13 @@ Usage: uv run python -m ml.sprint.screen --tag A1 --learners lr_en rf et catboos
 from __future__ import annotations
 
 import argparse
+import hashlib
 import itertools
 import json
 import time
+from pathlib import Path
 
+import joblib
 import numpy as np
 from joblib import Parallel, delayed, parallel_config
 from sklearn.model_selection import RepeatedStratifiedKFold
@@ -45,14 +48,43 @@ SPECS: dict[str, dict] = {
     "catboost_d3": {"learner": "catboost", "params": {"depth": 3, "l2_leaf_reg": 10.0}},
     "ebm": {"learner": "ebm", "params": {}},
     "tabpfn": {"learner": "tabpfn", "params": {}},
+    # batch 2 (ml/sprint/learners2.py)
+    "bayes_lr": {"learner": "bayes_lr", "params": {"sigma": 0.5, "tau": 0.15}},
+    "bayes_lr_flat": {"learner": "bayes_lr", "params": {"sigma": 0.5, "tau": 0.0}},  # same model, no clinical prior
+    "sel_joint": {"learner": "sel_joint", "params": {}},
+    "stack": {"learner": "stack", "params": {}},
+    "svm": {"learner": "svm", "params": {}},
 }
 
 
-def fold_cache(i, a, b, X, y, cols, names, features, inner, seed, with_count):
+CACHE = Path(".scratch/sprint_cache")  # gitignored; learner outputs are deterministic given spec/fold/seed
+
+
+def _cached_learner(name, i, Xa, ya, Xb, features, inner, seed):
+    key = hashlib.sha256(json.dumps([SPECS[name], features, i, seed, inner, SEED, ya.tolist()],
+                                    sort_keys=True).encode()).hexdigest()[:16]
+    f = CACHE / f"{name}_{key}.joblib"
+    if f.exists():
+        return joblib.load(f)
+    out = learner_outputs(SPECS[name], Xa, ya, Xb, seed + i, inner)
+    CACHE.mkdir(parents=True, exist_ok=True)
+    joblib.dump(out, f)
+    return out
+
+
+def fold_work(i, a, b, X, Y, cols, names, features, inner, seed, procedures):
+    """One outer fold: learner caches (from disk when available) + scores of every procedure."""
+    y = Y["pattern"]
     Xa, Xb = transform_features(features, X[a], X[b], cols)
-    out = {n: learner_outputs(SPECS[n], Xa, y[a], Xb, seed + i, inner) for n in names}
-    cnt = count_model_outputs(Xa, y[a], Xb, seed + i, inner) if with_count else None
-    return i, out, cnt
+    cache = {n: _cached_learner(n, i, Xa, y[a], Xb, features, inner, seed) for n in names}
+    cnt = count_model_outputs(Xa, y[a], Xb, seed + i, inner) if any(p.count_lambda for p in procedures) else None
+    Yb = {k: v[b] for k, v in Y.items()}
+    scores = {}
+    for p in procedures:
+        fit = fit_post(p, [cache[n].oof for n in p.learners], None if cnt is None else cnt.oof, y[a])
+        P = apply_post(fit, [cache[n].test for n in p.learners], None if cnt is None else cnt.test)
+        scores[p.name] = score(Yb, P)
+    return i, scores
 
 
 def run(tag: str, learners: list[str], procedures: list[Procedure], features: str = "base", folds: int = 5,
@@ -61,21 +93,17 @@ def run(tag: str, learners: list[str], procedures: list[Procedure], features: st
     Y = labels(T)
     y = Y["pattern"]
     splits = list(RepeatedStratifiedKFold(n_splits=folds, n_repeats=repeats, random_state=SEED).split(X, y))
-    with_count = any(p.count_lambda for p in procedures)
     t0 = time.time()
     # no nested parallelism: every learner/BLAS/OpenMP pool inside a worker is limited to one thread
     with parallel_config(backend="loky", inner_max_num_threads=1):
         res = Parallel(n_jobs=n_jobs)(
-            delayed(fold_cache)(i, a, b, X, y, cols, learners, features, inner, SEED, with_count)
+            delayed(fold_work)(i, a, b, X, Y, cols, learners, features, inner, SEED, procedures)
             for i, (a, b) in enumerate(splits))
     t_cache = time.time() - t0
     per_proc: dict[str, list[dict]] = {p.name: [] for p in procedures}
-    for (i, cache, cnt), (a, b) in zip(sorted(res, key=lambda r: r[0]), splits, strict=True):
-        Yb = {k: v[b] for k, v in Y.items()}
-        for p in procedures:
-            fit = fit_post(p, [cache[n].oof for n in p.learners], None if cnt is None else cnt.oof, y[a])
-            P = apply_post(fit, [cache[n].test for n in p.learners], None if cnt is None else cnt.test)
-            per_proc[p.name].append(score(Yb, P))
+    for _, scores in sorted(res, key=lambda r: r[0]):
+        for name, m in scores.items():
+            per_proc[name].append(m)
     summary = {}
     for name, rows in per_proc.items():
         summary[name] = {k: {"mean": float(np.mean([r[k] for r in rows])), "sd": float(np.std([r[k] for r in rows])),
@@ -83,7 +111,7 @@ def run(tag: str, learners: list[str], procedures: list[Procedure], features: st
         summary[name]["_folds"] = rows
     out = {"tag": tag, "stage": "screening (training split only, never headline)", "features": features,
            "cv": f"{repeats}x{folds} repeated stratified, inner {inner}-fold", "learners": {n: SPECS[n] for n in learners},
-           "seconds_learner_cache": round(t_cache, 1), "procedures": summary}
+           "seconds_total": round(t_cache, 1), "procedures": summary}
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"screen_{tag}.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
     return out
@@ -115,6 +143,7 @@ def main():
     ap.add_argument("--combos", action="store_true", help="also all 2-3 learner averages/learned weights")
     ap.add_argument("--calibs", nargs="+", default=["vector"])
     ap.add_argument("--count", nargs="*", type=float, default=[])
+    ap.add_argument("--combo-calibs", nargs="+", default=None, help="calibrations for combos (default: first of --calibs)")
     ap.add_argument("--n-jobs", type=int, default=3)
     a = ap.parse_args()
     procs = []
@@ -124,14 +153,15 @@ def main():
         for r in (2, 3):
             for combo in itertools.combinations(a.learners, r):
                 for comb in ("avg", "learned"):
-                    procs.append(Procedure(combo, comb, a.calibs[0]))
+                    for cc in (a.combo_calibs or a.calibs[:1]):
+                        procs.append(Procedure(combo, comb, cc))
     base = tuple(n for n in ("lr_en", "rf", "et") if n in a.learners)
     for lam in a.count:
         if base:
             procs.append(Procedure(base, "avg", a.calibs[0], count_lambda=lam))
     procs = list(dict.fromkeys(procs))
     out = run(a.tag, a.learners, procs, a.features, n_jobs=a.n_jobs)
-    print(f"cache {out['seconds_learner_cache']} s; {len(procs)} procedures")
+    print(f"{out['seconds_total']} s; {len(procs)} procedures")
     print(table(out))
 
 

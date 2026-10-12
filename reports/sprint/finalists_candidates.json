@@ -1,0 +1,87 @@
+[
+ {
+  "learners": [
+   "lr_l2"
+  ],
+  "combine": "avg",
+  "calib": "dirichlet"
+ },
+ {
+  "learners": [
+   "lr_l2_strong"
+  ],
+  "combine": "avg",
+  "calib": "dirichlet"
+ },
+ {
+  "learners": [
+   "catboost"
+  ],
+  "combine": "avg",
+  "calib": "dirichlet"
+ },
+ {
+  "learners": [
+   "catboost_d3"
+  ],
+  "combine": "avg",
+  "calib": "dirichlet"
+ },
+ {
+  "learners": [
+   "ebm"
+  ],
+  "combine": "avg",
+  "calib": "dirichlet"
+ },
+ {
+  "learners": [
+   "lr_en"
+  ],
+  "combine": "avg",
+  "calib": "dirichlet"
+ },
+ {
+  "learners": [
+   "catboost",
+   "catboost_d3"
+  ],
+  "combine": "avg",
+  "calib": "vector"
+ },
+ {
+  "learners": [
+   "lgbm",
+   "catboost_d3"
+  ],
+  "combine": "learned",
+  "calib": "vector"
+ },
+ {
+  "learners": [
+   "rf",
+   "lgbm",
+   "catboost"
+  ],
+  "combine": "learned",
+  "calib": "vector"
+ },
+ {
+  "learners": [
+   "lgbm",
+   "catboost",
+   "ebm"
+  ],
+  "combine": "learned",
+  "calib": "vector"
+ },
+ {
+  "learners": [
+   "lr_en",
+   "rf",
+   "et"
+  ],
+  "combine": "avg",
+  "calib": "vector"
+ }
+]

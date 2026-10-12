@@ -141,6 +141,30 @@ class SimilarResponse(_Model):
     neighbors: list[SimilarPatient]
 
 
+# ---------------------------------------------------------------- cohort map
+class CohortPoint(_Model):
+    index: int = Field(description="Row index in the source data (training split only)")
+    x: float
+    y: float
+    pattern: str = Field(description="True angiography vessel pattern")
+    n_vessels: int
+    cad: bool
+
+
+class CohortMapResponse(_Model):
+    method: str
+    explained_variance: list[float]
+    points: list[CohortPoint]
+    patient: dict[str, float] = Field(description='{"x": .., "y": ..} of the current patient, projected')
+
+
+class TrainingPatient(_Model):
+    index: int
+    features: dict[str, FeatureValue]
+    pattern: str
+    cad: bool
+
+
 # ---------------------------------------------------------------- misc
 class Preset(_Model):
     id: str

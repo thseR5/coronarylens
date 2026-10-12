@@ -229,7 +229,10 @@ export default function CoronaryScene() {
         shadows={false}
         gl={{ antialias: !lowPower, powerPreference: 'high-performance' }}
         camera={{ position: [0, 0.4, DEFAULT_DISTANCE], fov: 38, near: 0.05, far: 100 }}
-        onCreated={({ gl: r }) => r.setClearColor(new THREE.Color('#0b1118'), 1)}
+        onCreated={({ gl: r }) => {
+          r.setClearColor(new THREE.Color('#0b1118'), 1)
+          r.localClippingEnabled = true // per-material clipping plane (see AnatomyModel)
+        }}
         onPointerMissed={(e) => {
           const d = down.current
           if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 5) select(null)

@@ -67,6 +67,27 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   if (ms > 1000) console.warn(`WARNING: dev-mode update took ${ms} ms; check the production latency test`)
   expect(ms).toBeLessThan(5000)
 
+  // Cohort map: training patients only; clicking a dot loads that patient (true pattern shown).
+  const map = page.getByRole('img', { name: 'Cohort map of training patients' })
+  await map.scrollIntoViewIfNeeded()
+  await expect(map).toBeVisible()
+  const dot = map.locator('circle').first()
+  await dot.click()
+  await expect(page.getByText(/Loaded training patient #\d+; true angiography pattern/)).toBeVisible()
+  await page.getByRole('complementary', { name: 'Risk dashboard' }).screenshot({ path: '../docs/img/app-cohort-map.png' })
+
+  // Clipping plane reveals the LV territories; vessels stay visible.
+  await page.getByTestId('toggle-clip').click()
+  await page.getByTestId('clip-depth').fill('0.1')
+  await page.waitForTimeout(500)
+  await page.locator('section[aria-label="3D heart"]').screenshot({ path: '../docs/img/app-clip-plane.png' })
+  await page.getByTestId('toggle-clip').click()
+
+  // Printable report (Report / PDF button) carries the disclaimer.
+  const rep = await request.post('http://127.0.0.1:8000/api/report', { data: { features: p3.features } })
+  expect(await rep.text()).toContain('Not a substitute for formal diagnostic imaging')
+  await expect(page.getByRole('button', { name: 'Report / PDF' })).toBeEnabled()
+
   // Model performance tab renders real metrics.
   await page.getByRole('tab', { name: 'Model performance' }).click()
   await expect(page.getByText(/^Headline · nested CV/)).toBeVisible()

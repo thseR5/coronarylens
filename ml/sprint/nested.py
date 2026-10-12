@@ -104,8 +104,13 @@ def run(tag: str, procs: list[Procedure], folds: int = 5, repeats: int = 10, inn
 
     diff = {}
     for k in keys:
-        d = np.array([r["selected"][k] - r["baseline"][k] for r in rows])
-        diff[k] = {"mean": float(np.nanmean(d)), "se": float(np.nanstd(d) / np.sqrt(len(d)))}
+        d = np.array([r["selected"][k] - r["baseline"][k] for r in rows], dtype=float)
+        d = d[~np.isnan(d)]
+        lower_is_better = k.startswith(("pattern_log_loss", "brier"))
+        improved = int(np.sum(d < 0)) if lower_is_better else int(np.sum(d > 0))
+        diff[k] = {"mean": float(d.mean()), "sd": float(d.std(ddof=1)), "se": float(d.std(ddof=1) / np.sqrt(d.size)),
+                   "folds_improved": improved, "folds_equal": int(np.sum(d == 0)), "n_folds": int(d.size),
+                   "better_is": "lower" if lower_is_better else "higher"}
     out = {"tag": tag, "stage": "nested CV of the selection procedure (headline)",
            "outer": f"{repeats}x{folds} repeated stratified (seed {seed})", "inner": f"{inner}-fold OOF + 5-fold cross-fitted post-processing",
            "n_candidates": len(procs), "candidates": [p.name for p in procs], "seconds": round(time.time() - t0, 1),
@@ -135,7 +140,8 @@ def main():
     print(f"{out['n_candidates']} candidates, {out['seconds']} s; chosen: {out['chosen_counts']}")
     for k in ["auc_CAD", "auc_LAD", "auc_LCX", "auc_RCA", "pattern_log_loss", "brier_mean"]:
         print(f"{k:18s} selected {s[k]['mean']:.4f}±{s[k]['sd']:.3f}  baseline {bl[k]['mean']:.4f}±{bl[k]['sd']:.3f}  "
-              f"diff {d[k]['mean']:+.4f} (SE {d[k]['se']:.4f})")
+              f"paired diff {d[k]['mean']:+.4f} ± {d[k]['sd']:.4f} (SE {d[k]['se']:.4f}); "
+              f"improved in {d[k]['folds_improved']}/{d[k]['n_folds']} folds ({d[k]['better_is']} is better)")
 
 
 if __name__ == "__main__":

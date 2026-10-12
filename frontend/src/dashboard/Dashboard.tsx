@@ -5,6 +5,8 @@ import About from './About'
 import MeasurementsTable from './MeasurementsTable'
 import RiskSummary from './RiskSummary'
 import SimilarPatients from './SimilarPatients'
+import CohortMap from './CohortMap'
+import { api } from '../api/client'
 import VesselCards from './VesselCards'
 import WhatIf from './WhatIf'
 import WhyPanel from './WhyPanel'
@@ -40,7 +42,25 @@ export default function Dashboard({ latencyMs }: { latencyMs: number | null }) {
             {label}
           </button>
         ))}
-        {latencyMs != null && <span className="ml-auto self-center font-mono text-[10px] text-muted">{latencyMs} ms</span>}
+        <span className="ml-auto flex items-center gap-2 self-center">
+          {latencyMs != null && <span className="font-mono text-[10px] text-muted">{latencyMs} ms</span>}
+          <button
+            type="button"
+            className="btn !py-0.5"
+            disabled={!analysis || analysis.model_version === 'mock'}
+            title="Printable report with the disclaimer; use the browser's Print dialog to save it as PDF"
+            onClick={async () => {
+              const w = window.open('', '_blank')
+              if (!w) return
+              w.document.write(await api.reportHtml(useStore.getState().features))
+              w.document.close()
+              w.focus()
+              w.print()
+            }}
+          >
+            Report / PDF
+          </button>
+        </span>
       </div>
 
       {error && !analysis && (
@@ -75,6 +95,7 @@ export default function Dashboard({ latencyMs }: { latencyMs: number | null }) {
           <MeasurementsTable />
           <WhatIf />
           <SimilarPatients />
+          <CohortMap />
         </>
       )}
       {tab === 'model' && <ModelPerformance />}

@@ -172,5 +172,8 @@ class Service:
         if self.pool is not None:
             self.pool.shutdown()
 
+    def cohort_map(self, features):
+        return self._cached("cohort", features, lambda: self.model.cohort_map(features))
+
     def similar(self, features, k):
         return self._cached("similar", features, lambda: self.model.similar(features, k), k)

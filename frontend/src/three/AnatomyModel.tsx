@@ -114,6 +114,8 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
   const invalidate = useThree((s) => s.invalidate)
   const reduced = useMemo(prefersReducedMotion, [])
   const lite = useSceneLocal((s) => s.lowPower)
+  const clip = useSceneLocal((s) => s.clip)
+  const clipPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 0, -1), 0), [])
 
   // ---- one-time setup: find nodes by name, assign materials, cache transforms + anchors
   const nodes = useMemo(() => {
@@ -226,6 +228,23 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
     }
     invalidate()
   }, [nodes, view.showRibs, view.showLungs, view.showAorta, view.xray, view.territoryMode, hasSegments, hovered, hoveredSegment, selected, invalidate])
+
+  // ---- clipping plane: keeps the part of the heart behind the plane (z < depth), so the anterior myocardium is
+  // cut away; vessels, labels and the bullseye are never clipped
+  useEffect(() => {
+    clipPlane.constant = clip.depth
+    for (const r of nodes.values()) {
+      if (r.spec.role === 'vessel') continue
+      const clipped = clip.enabled && ['Myocardium', 'Aorta', 'LeftMain'].includes(r.spec.node)
+      for (const m of [r.solid, r.xray]) {
+        if (!m) continue
+        m.clippingPlanes = clipped ? [clipPlane] : null
+        m.clipShadows = false
+        m.needsUpdate = true
+      }
+    }
+    invalidate()
+  }, [nodes, clip, clipPlane, invalidate])
 
   // ---- uncertain-status stripes (target values; faded in useFrame)
   const stripeTarget = useRef(new Map<string, number>())

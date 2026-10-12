@@ -1,4 +1,4 @@
-# API v1 (frozen)
+# API v1 (additive changes only since freeze)
 
 Types: `backend/app/schemas.py` (source) ⇄ `frontend/src/types/api.ts` (mirror).
 
@@ -13,7 +13,9 @@ Types: `backend/app/schemas.py` (source) ⇄ `frontend/src/types/api.ts` (mirror
 | POST | `/api/explain` | `ExplainRequest` | `ExplainResponse` |
 | POST | `/api/counterfactual` | `CounterfactualRequest` | `CounterfactualResponse` |
 | POST | `/api/similar` | `SimilarRequest` | `SimilarResponse` |
-| POST | `/api/report` | `ExplainRequest` | printable HTML with disclaimer |
+| POST | `/api/cohort-map` | `ExplainRequest` | `CohortMapResponse` (2-D PCA of the training split + projected patient) |
+| GET | `/api/training-patient/{index}` | – | `TrainingPatient` (training split only; 404 for test rows) |
+| POST | `/api/report` | `ExplainRequest` | printable HTML with disclaimer (UI: Report / PDF → browser Print) |
 
 Invariants (tested): pattern probabilities sum to 1; `cad.p ≥ max(vessels[*].p)`; `cad.p = 1 − patterns["000"]`;
 no forbidden column (`LAD, LCX, RCA, Cath`) is accepted as a feature (422).

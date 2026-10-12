@@ -1,5 +1,5 @@
 import { load as loadYaml } from 'js-yaml'
-import type { AnalyzeResponse, ExplainResponse, Features, Preset, SimilarResponse, CounterfactualResponse, TargetId, ThresholdMode } from '../types/api'
+import type { AnalyzeResponse, CohortMapResponse, ExplainResponse, Features, Preset, SimilarResponse, CounterfactualResponse, TargetId, ThresholdMode, TrainingPatient } from '../types/api'
 import type { AnatomyConfig, AppConfig, FeaturesConfig, TargetsConfig } from '../types/config'
 import featuresRaw from '../../../config/features.yaml?raw'
 import targetsRaw from '../../../config/targets.yaml?raw'
@@ -51,4 +51,16 @@ export const api = {
   counterfactual: (features: Features, target: TargetId) =>
     post<CounterfactualResponse>('counterfactual', { features, target }),
   similar: (features: Features, k = 5) => post<SimilarResponse>('similar', { features, k }),
+  cohortMap: (features: Features) => post<CohortMapResponse>('cohort-map', { features }),
+  trainingPatient: (index: number) => get<TrainingPatient>(`training-patient/${index}`),
+  /** Printable HTML report (analysis + explanation + disclaimer); the browser's Print dialog saves it as PDF. */
+  reportHtml: async (features: Features) => {
+    const res = await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ features }),
+    })
+    if (!res.ok) throw new Error(`report: ${res.status}`)
+    return res.text()
+  },
 }

@@ -104,4 +104,8 @@ LEARNERS: dict[str, Callable] = {
 
 
 def make(name: str, seed: int, **params):
+    if name not in LEARNERS:
+        from ml.sprint.learners2 import LEARNERS2
+
+        return LEARNERS2[name](seed, **params)
     return LEARNERS[name](seed, **params)

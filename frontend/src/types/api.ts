@@ -98,3 +98,26 @@ export interface Preset {
   features: Features
   true_pattern: string | null
 }
+
+export interface CohortPoint {
+  index: number
+  x: number
+  y: number
+  pattern: string
+  n_vessels: number
+  cad: boolean
+}
+
+export interface CohortMapResponse {
+  method: string
+  explained_variance: number[]
+  points: CohortPoint[]
+  patient: { x: number; y: number }
+}
+
+export interface TrainingPatient {
+  index: number
+  features: Features
+  pattern: string
+  cad: boolean
+}
