@@ -29,6 +29,11 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   // AHA segments are the default territories; hovering a 3D segment highlights the same bullseye segment.
   const ahaBtn = page.getByTestId('toggle-territory-mode')
   await expect(ahaBtn).toHaveText('AHA 17-segment')
+  // pause the heartbeat so the mesh does not move between projecting a point and hovering it
+  const beat = page.getByTestId('toggle-heartbeat')
+  const beating = (await beat.getAttribute('aria-pressed')) === 'true'
+  if (beating) await beat.click()
+  await page.waitForTimeout(300)
   let hit: { seg: number; x: number; y: number } | null = null
   for (const seg of [7, 1, 13, 12, 6, 2, 8, 17]) {
     const p = await page.evaluate((n) => window.__coronaryLens?.project(n) ?? null, `AHA_${String(seg).padStart(2, '0')}`)
@@ -42,6 +47,7 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   await expect(page.locator(`[data-testid="bullseye"] [data-segment="${hit!.seg}"]`)).toHaveAttribute('data-hot', 'segment')
   await page.screenshot({ path: '../docs/img/app-aha-segments.png' })
   await page.mouse.move(5, 5)
+  if (beating) await beat.click()
   await ahaBtn.click()
   await expect(ahaBtn).toHaveText('nearest-artery estimate (14/17 agree with AHA)')
   await page.waitForTimeout(600)
