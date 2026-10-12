@@ -25,6 +25,10 @@ dependencies = [
 [dependency-groups]
 dev = ["pytest", "ruff", "mypy", "httpx", "types-PyYAML"]
 anatomy = ["trimesh", "fast-simplification", "requests"]
+sprint = [
+    "catboost>=1.2.10",
+    "interpret>=0.7.8",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["ml/tests", "backend/tests"]
@@ -32,3 +36,6 @@ pythonpath = ["."]
 
 [tool.ruff]
 line-length = 110
+
+[tool.uv]
+default-groups = ["dev", "anatomy", "sprint"]

@@ -29,3 +29,14 @@ Note: the "Pattern log-loss" column for rows 1–10 is the mean of per-target lo
 
 Engineered features: paired Δ log-loss −0.0005 ± 0.0046, Δ AUC +0.0024 ± 0.0058 → within noise, not adopted.
 Configurations so far: 12.
+
+## Part 2 sprint (2026-10-13)
+
+Candidate status before screening:
+- (a) TabPFN v2: **skipped**. `tabpfn` 9.2.0 installs, but downloading weights requires accepting the Prior Labs license and
+  an API token (`TabPFNLicenseError`, non-interactive). Accepting a license is the user's decision; it can be added later with
+  `TABPFN_TOKEN`. Package removed to keep the environment lean (torch ≈ 1 GB).
+- (b) Monotonic constraints: LightGBM accepts `monotone_constraints` for multiclass, but on the 8-pattern model a constraint
+  forces every pattern's raw score up together, which after the softmax does not mean "more diseased vessels". Not a meaningful
+  test, so not run as an 8-class learner; the clinically directed prior is tested via `bayes_lr` (d) instead. CatBoost does not
+  support monotone constraints for MultiClass.

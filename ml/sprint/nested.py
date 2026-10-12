@@ -19,7 +19,7 @@ import time
 from collections import Counter
 
 import numpy as np
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, parallel_config
 from sklearn.model_selection import RepeatedStratifiedKFold
 
 from ml import config
@@ -90,8 +90,10 @@ def run(tag: str, procs: list[Procedure], folds: int = 5, repeats: int = 10, inn
     seed = int(config.models_cfg()["seed"])
     splits = list(RepeatedStratifiedKFold(n_splits=folds, n_repeats=repeats, random_state=seed).split(X, Y["pattern"]))
     t0 = time.time()
-    rows = Parallel(n_jobs=n_jobs)(delayed(_outer_fold)(i, a, b, X, Y, cols, procs, inner, seed)
-                                   for i, (a, b) in enumerate(splits))
+    # no nested parallelism: every learner/BLAS/OpenMP pool inside a worker is limited to one thread
+    with parallel_config(backend="loky", inner_max_num_threads=1):
+        rows = Parallel(n_jobs=n_jobs)(delayed(_outer_fold)(i, a, b, X, Y, cols, procs, inner, seed)
+                                       for i, (a, b) in enumerate(splits))
     rows = sorted(rows, key=lambda r: r["fold"])
     keys = list(rows[0]["selected"])
 

@@ -14,7 +14,7 @@ import json
 import time
 
 import numpy as np
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, parallel_config
 from sklearn.model_selection import RepeatedStratifiedKFold
 
 from ml import config
@@ -63,9 +63,11 @@ def run(tag: str, learners: list[str], procedures: list[Procedure], features: st
     splits = list(RepeatedStratifiedKFold(n_splits=folds, n_repeats=repeats, random_state=SEED).split(X, y))
     with_count = any(p.count_lambda for p in procedures)
     t0 = time.time()
-    res = Parallel(n_jobs=n_jobs)(
-        delayed(fold_cache)(i, a, b, X, y, cols, learners, features, inner, SEED, with_count)
-        for i, (a, b) in enumerate(splits))
+    # no nested parallelism: every learner/BLAS/OpenMP pool inside a worker is limited to one thread
+    with parallel_config(backend="loky", inner_max_num_threads=1):
+        res = Parallel(n_jobs=n_jobs)(
+            delayed(fold_cache)(i, a, b, X, y, cols, learners, features, inner, SEED, with_count)
+            for i, (a, b) in enumerate(splits))
     t_cache = time.time() - t0
     per_proc: dict[str, list[dict]] = {p.name: [] for p in procedures}
     for (i, cache, cnt), (a, b) in zip(sorted(res, key=lambda r: r[0]), splits, strict=True):

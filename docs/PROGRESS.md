@@ -20,3 +20,14 @@ No deadline (user, 2026-10-12): optimize for the best result.
 | 2 Performance sprint | next | harness in ml/sprint/ |
 | 3 Tier 2/3 completion | pending | |
 | 4 Docs, packaging, review | pending | |
+
+### Live-update latency (Part 1 gate) — production build, idle machine, 2026-10-12
+
+40 unique edits per run, cold server cache, real FastAPI backend; times include the 100 ms debounce. Source: `docs/latency.json`.
+
+| Run | Load (1 min) before | Colours + probabilities p50 / p95 | SHAP panel p50 / p95 |
+|---|---|---|---|
+| 1 | 3.95 | 157 / 159 ms | 253 / 271 ms |
+| 2 | 21.91 (previous run winding down) | 157 / 159 ms | 240 / 242 ms |
+| 3 | 14.36 (previous run winding down) | 156 / 158 ms | 240 / 242 ms |
+| Target (p95) | | ≤ 300 ms | ≤ 700 ms |
