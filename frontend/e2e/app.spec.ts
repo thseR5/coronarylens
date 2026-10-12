@@ -42,5 +42,12 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   console.log(`slider→gauge update: ${ms} ms (includes 150 ms debounce)`)
   expect(ms).toBeLessThan(1000)
 
+  // Model performance tab renders real metrics.
+  await page.getByRole('tab', { name: 'Model performance' }).click()
+  await expect(page.getByText('Locked test set · served model')).toBeVisible()
+  await expect(page.getByText('Leakage ablation', { exact: false })).toBeVisible()
+  await page.screenshot({ path: '../docs/img/app-model-tab.png', fullPage: false })
+  await page.getByRole('complementary', { name: 'Risk dashboard' }).screenshot({ path: '../docs/img/app-model-tab-panel.png' })
+
   expect(errors).toEqual([])
 })

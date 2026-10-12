@@ -84,7 +84,11 @@ def presets():
 
 @app.get("/api/metrics")
 def metrics():
-    return json.loads((artifacts_dir() / "metrics.json").read_text(encoding="utf-8"))
+    out = json.loads((artifacts_dir() / "metrics.json").read_text(encoding="utf-8"))
+    ablation = artifacts_dir() / "ablation.json"
+    if ablation.exists():  # analysis-only leakage ablation, shown in the Model performance tab
+        out["ablation"] = json.loads(ablation.read_text(encoding="utf-8"))
+    return out
 
 
 @app.get("/api/global-explanations")
