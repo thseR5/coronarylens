@@ -1,0 +1,57 @@
+# Anatomy registry: structure -> FMA concepts (BodyParts3D, part-of tree) -> glTF node name -> target.
+# tools/build_anatomy.py builds frontend/public/models/anatomy.glb from this file; the frontend
+# finds meshes by `node`. A test asserts every target in targets.yaml maps to exactly one node here.
+
+source:
+  name: BodyParts3D
+  version: "4.0"
+  publisher: Database Center for Life Science (DBCLS)
+  license: CC BY 4.0
+  url: https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+  attribution: "BodyParts3D, © The Database Center for Life Science, licensed under CC Attribution 4.0 International"
+  obj_zip: https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/partof_BP3D_4.0_obj_99.zip
+  element_parts: https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/partof_element_parts.txt
+  parts_list: https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/partof_parts_list_e.txt
+
+# Which geometry to load: bodyparts3d (anatomy.glb) or procedural (TubeGeometry fallback in the frontend).
+renderer: bodyparts3d
+glb_path: /models/anatomy.glb
+
+# role: vessel = colored by its target probability; territory = tinted by its vessel; context = neutral
+structures:
+  - {node: LAD, role: vessel, target: LAD, label: "Left anterior descending (LAD)",
+     fma: [FMA74912, FMA3862, FMA3860, FMA3868, FMA3872, FMA3874, FMA3876]}
+  - {node: LCX, role: vessel, target: LCX, label: "Left circumflex (LCX)", fma: [FMA3895]}
+  - {node: RCA, role: vessel, target: RCA, label: "Right coronary artery (RCA)",
+     fma: [FMA3802, FMA3815, FMA3818, FMA3837, FMA3840]}
+  - {node: LeftMain, role: context, target: null, label: "Left main (not modelled)", fma: [FMA3855],
+     note: "Dataset has no left-main label; rendered neutral"}
+  - {node: LV_Anterior, role: territory, target: LAD, label: "LV anterior wall", fma: [FMA9560]}
+  - {node: LV_Lateral, role: territory, target: LCX, label: "LV lateral wall", fma: [FMA9563, FMA87178]}
+  - {node: LV_Inferior, role: territory, target: RCA, label: "LV inferior wall", fma: [FMA9561, FMA87179]}
+  - {node: Myocardium, role: context, target: null, label: "Heart", fma: [FMA7088],
+     note: "Whole-heart concept minus the LV territory walls and coronaries (subtracted in build)"}
+  - {node: Aorta, role: context, target: null, label: "Aorta", fma: [FMA3734]}
+  - {node: Lungs, role: context, target: null, label: "Lungs", fma: [FMA7309, FMA7310]}
+  - {node: RibCage, role: context, target: null, label: "Rib cage", fma: [FMA7480]}
+  - {node: Sternum, role: context, target: null, label: "Sternum", fma: [FMA7485]}
+
+territory_note: "Expected supply territory (illustrative); coronary dominance varies between people."
+
+# AHA 17-segment model (Cerqueira et al., Circulation 2002), typical coronary assignment.
+bullseye:
+  LAD: [1, 2, 7, 8, 13, 14, 17]
+  RCA: [3, 4, 9, 10, 15]
+  LCX: [5, 6, 11, 12, 16]
+
+# Angiographic camera presets (degrees). LAO/RAO = rotation about the body's long axis
+# (positive = toward patient's left); cranial/caudal = tilt toward head/feet.
+camera_presets:
+  - {id: ap, label: AP, rao_lao: 0, cran_caud: 0}
+  - {id: lao30, label: "LAO 30°", rao_lao: 30, cran_caud: 0}
+  - {id: rao30, label: "RAO 30°", rao_lao: -30, cran_caud: 0}
+  - {id: lao_cranial, label: "LAO 30° cranial 20°", rao_lao: 30, cran_caud: 20}
+  - {id: rao_caudal, label: "RAO 30° caudal 20°", rao_lao: -30, cran_caud: -20}
+
+# Probability -> color: perceptually uniform, colorblind-safe sequential scale (frontend implements).
+color_scale: {name: viridis-like-sequential, domain: [0, 1]}

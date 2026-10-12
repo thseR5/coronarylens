@@ -1,0 +1,46 @@
+# Targets and leakage rules. Single source of truth for label encoding, the vessel-pattern
+# space and the operating thresholds.
+
+# Columns that may NEVER reach a model as input (challenge rule 1d). Enforced by ml/leakage.py
+# in training, evaluation and inference.
+forbidden_columns: [LAD, LCX, RCA, Cath]
+
+# Overall CAD. There is no separate CAD column: `Cath` IS the CAD label.
+cad:
+  id: cad
+  column: Cath
+  label: Coronary artery disease
+  positive: CAD
+  negative: Normal
+
+# Vessel-level targets. Order defines the pattern bit order (first vessel = most significant bit).
+# Pattern code = sum(bit_i * 2^(k-1-i)), e.g. "101" = LAD + RCA stenotic = code 5.
+vessels:
+  - {id: LAD, column: LAD, label: Left anterior descending, positive: Stenotic, negative: Normal}
+  - {id: LCX, column: LCX, label: Left circumflex, positive: Stenotic, negative: Normal}
+  - {id: RCA, column: RCA, label: Right coronary artery, positive: Stenotic, negative: Normal}
+
+# Served outputs, all marginals of one joint distribution over the 2^k vessel patterns:
+#   P(vessel)  = sum of P(pattern) over patterns with that bit set
+#   P(CAD)     = 1 - P(all-zero pattern)       -> guarantees P(CAD) >= max vessel probability
+#   P(>=2)     = sum of P(pattern) with >= 2 bits set
+#   P(3VD)     = P(all-ones pattern)
+derived:
+  - {id: p_ge2, label: Multi-vessel disease (≥2 vessels)}
+  - {id: p_3vd, label: Three-vessel disease}
+
+# Known label inconsistency: one patient has Cath = Normal but LAD = Stenotic.
+# Cath remains the CAD ground truth for evaluation; the derived P(CAD) is evaluated against Cath.
+label_notes:
+  - "Row index 93 (0-based): Cath=Normal, LAD=Stenotic, LCX=Normal, RCA=Normal."
+
+# Operating thresholds. Values here are placeholders; ml/thresholds.py writes the fitted
+# values (chosen on out-of-fold predictions) to ml/artifacts/thresholds.json, which the API serves.
+threshold_modes:
+  - {id: f1, label: "Balanced (max F1)", rule: max_f1}
+  - {id: screening, label: "Screening (sensitivity ≥ 0.90)", rule: min_sensitivity, value: 0.90}
+
+conformal:
+  target_coverage: 0.90
+  method: mondrian_cross_conformal
+  statuses: {"1": likely, "0,1": uncertain, "0": unlikely}

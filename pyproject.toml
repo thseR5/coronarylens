@@ -1,0 +1,21 @@
+[project]
+name = "coronarylens"
+version = "0.1.0"
+description = "Coherent, uncertainty-aware coronary digital twin (decision support / education only)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "pandas", "numpy", "openpyxl", "scikit-learn", "shap", "joblib", "pyyaml",
+  "pydantic>=2", "fastapi", "uvicorn[standard]", "lightgbm", "dice-ml",
+  "matplotlib", "scipy", "pandera",
+]
+
+[dependency-groups]
+dev = ["pytest", "ruff", "mypy", "httpx", "types-PyYAML"]
+anatomy = ["trimesh", "fast-simplification", "requests"]
+
+[tool.pytest.ini_options]
+testpaths = ["ml/tests", "backend/tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 110

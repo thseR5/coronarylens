@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.DS_Store
+node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+tools/.cache/
+*.log

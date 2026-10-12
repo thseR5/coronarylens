@@ -1,0 +1,106 @@
+# Single source of truth for model input features.
+# Every model, the API schema and the dashboard input form are generated from this file.
+#
+# Fields:
+#   id          snake_case key used everywhere in code / API / frontend
+#   column      exact column name in the source xlsx
+#   label       display name
+#   unit        display unit ("" if none)
+#   type        numeric | binary | ordinal | categorical
+#   encoding    binary only: yn (Y/N strings) | 01 (0/1 ints)
+#   levels      ordinal/categorical: ordered list of raw values (ordinal order = code 0..k)
+#   group       one of the ids in `groups`
+#   range       [min, max] accepted by the API (plausibility bounds, wider than the data)
+#   ref         [low, high] adult reference range, display only (null if not applicable)
+#   default     value used for imputation display (training median/mode is recomputed in-fold)
+#   modifiable  true = allowed in counterfactual suggestions
+#   monotone    expected direction of CAD risk: 1 increases, -1 decreases, 0 unknown (documentation only)
+#   quick       true = shown in the dashboard Quick mode
+#   description one line
+
+groups:
+  - {id: demographics, label: "Demographics & anthropometrics"}
+  - {id: risk_factors, label: "Risk factors & history"}
+  - {id: symptoms_exam, label: "Symptoms & exam"}
+  - {id: ecg, label: "ECG"}
+  - {id: labs, label: "Labs"}
+  - {id: echo, label: "Echocardiography"}
+
+dropped:
+  - {column: "Exertional CP", reason: "constant (all N) in the dataset"}
+
+features:
+  # ---------------- Demographics & anthropometrics ----------------
+  - {id: age, column: Age, label: Age, unit: years, type: numeric, group: demographics, range: [18, 100], ref: null, default: 58, modifiable: false, monotone: 1, quick: true, description: "Age at presentation"}
+  - {id: sex_male, column: Sex, label: Sex (male), unit: "", type: binary, encoding: sex, group: demographics, range: [0, 1], ref: null, default: 1, modifiable: false, monotone: 1, quick: true, description: "1 = male, 0 = female (source spells female as 'Fmale')"}
+  - {id: weight, column: Weight, label: Weight, unit: kg, type: numeric, group: demographics, range: [30, 200], ref: null, default: 74, modifiable: true, monotone: 0, quick: false, description: "Body weight"}
+  - {id: height, column: Length, label: Height, unit: cm, type: numeric, group: demographics, range: [120, 210], ref: null, default: 165, modifiable: false, monotone: 0, quick: false, description: "Height (source column 'Length')"}
+  - {id: bmi, column: BMI, label: BMI, unit: kg/m², type: numeric, group: demographics, range: [12, 60], ref: [18.5, 24.9], default: 26.8, modifiable: true, monotone: 0, quick: false, description: "Body-mass index"}
+
+  # ---------------- Risk factors & history ----------------
+  - {id: dm, column: DM, label: Diabetes mellitus, unit: "", type: binary, encoding: "01", group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: true, description: "Diabetes mellitus"}
+  - {id: htn, column: HTN, label: Hypertension, unit: "", type: binary, encoding: "01", group: risk_factors, range: [0, 1], ref: null, default: 1, modifiable: false, monotone: 1, quick: true, description: "Hypertension"}
+  - {id: current_smoker, column: Current Smoker, label: Current smoker, unit: "", type: binary, encoding: "01", group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: true, monotone: 1, quick: false, description: "Current smoker"}
+  - {id: ex_smoker, column: EX-Smoker, label: Ex-smoker, unit: "", type: binary, encoding: "01", group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Former smoker"}
+  - {id: fh, column: FH, label: Family history, unit: "", type: binary, encoding: "01", group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Family history of premature CAD"}
+  - {id: obesity, column: Obesity, label: Obesity, unit: "", type: binary, encoding: yn, group: risk_factors, range: [0, 1], ref: null, default: 1, modifiable: false, monotone: 1, quick: false, description: "Obesity flag as coded in the source"}
+  - {id: crf, column: CRF, label: Chronic renal failure, unit: "", type: binary, encoding: yn, group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Chronic renal failure (6 positives)"}
+  - {id: cva, column: CVA, label: Prior stroke (CVA), unit: "", type: binary, encoding: yn, group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Cerebrovascular accident (5 positives)"}
+  - {id: airway_disease, column: Airway disease, label: Airway disease, unit: "", type: binary, encoding: yn, group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 0, quick: false, description: "Airway disease"}
+  - {id: thyroid_disease, column: Thyroid Disease, label: Thyroid disease, unit: "", type: binary, encoding: yn, group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 0, quick: false, description: "Thyroid disease"}
+  - {id: chf, column: CHF, label: Heart failure (CHF), unit: "", type: binary, encoding: yn, group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Congestive heart failure (1 positive)"}
+  - {id: dlp, column: DLP, label: Dyslipidaemia, unit: "", type: binary, encoding: yn, group: risk_factors, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Dyslipidaemia"}
+
+  # ---------------- Symptoms & exam ----------------
+  - {id: bp, column: BP, label: Blood pressure, unit: mmHg, type: numeric, group: symptoms_exam, range: [60, 250], ref: [90, 129], default: 130, modifiable: true, monotone: 1, quick: true, description: "Blood pressure (single value in source, no diastolic)"}
+  - {id: pr, column: PR, label: Pulse rate, unit: bpm, type: numeric, group: symptoms_exam, range: [30, 180], ref: [60, 100], default: 70, modifiable: false, monotone: 0, quick: false, description: "Pulse rate; drives the 3D heartbeat"}
+  - {id: edema, column: Edema, label: Edema, unit: "", type: binary, encoding: "01", group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 0, quick: false, description: "Peripheral edema"}
+  - {id: weak_peripheral_pulse, column: Weak Peripheral Pulse, label: Weak peripheral pulse, unit: "", type: binary, encoding: yn, group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Weak peripheral pulse (5 positives)"}
+  - {id: lung_rales, column: Lung rales, label: Lung rales, unit: "", type: binary, encoding: yn, group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 0, quick: false, description: "Lung rales"}
+  - {id: systolic_murmur, column: Systolic Murmur, label: Systolic murmur, unit: "", type: binary, encoding: yn, group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 0, quick: false, description: "Systolic murmur"}
+  - {id: diastolic_murmur, column: Diastolic Murmur, label: Diastolic murmur, unit: "", type: binary, encoding: yn, group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 0, quick: false, description: "Diastolic murmur"}
+  - {id: typical_chest_pain, column: Typical Chest Pain, label: Typical chest pain, unit: "", type: binary, encoding: "01", group: symptoms_exam, range: [0, 1], ref: null, default: 1, modifiable: false, monotone: 1, quick: true, description: "Typical angina"}
+  - {id: atypical, column: Atypical, label: Atypical chest pain, unit: "", type: binary, encoding: yn, group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: -1, quick: true, description: "Atypical chest pain"}
+  - {id: nonanginal, column: Nonanginal, label: Non-anginal pain, unit: "", type: binary, encoding: yn, group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: -1, quick: false, description: "Non-anginal chest pain"}
+  - {id: dyspnea, column: Dyspnea, label: Dyspnoea, unit: "", type: binary, encoding: yn, group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 0, quick: false, description: "Dyspnoea"}
+  - {id: function_class, column: Function Class, label: Functional class, unit: "", type: ordinal, levels: [0, 1, 2, 3], group: symptoms_exam, range: [0, 3], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Functional class 0-3 as coded in source (only one patient has 1)"}
+  - {id: lowth_ang, column: LowTH Ang, label: Low-threshold angina, unit: "", type: binary, encoding: yn, group: symptoms_exam, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Low-threshold angina (2 positives)"}
+
+  # ---------------- ECG ----------------
+  - {id: q_wave, column: Q Wave, label: Q wave, unit: "", type: binary, encoding: "01", group: ecg, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Pathological Q wave"}
+  - {id: st_elevation, column: St Elevation, label: ST elevation, unit: "", type: binary, encoding: "01", group: ecg, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "ST-segment elevation"}
+  - {id: st_depression, column: St Depression, label: ST depression, unit: "", type: binary, encoding: "01", group: ecg, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: true, description: "ST-segment depression"}
+  - {id: t_inversion, column: Tinversion, label: T inversion, unit: "", type: binary, encoding: "01", group: ecg, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: true, description: "T-wave inversion"}
+  - {id: lvh, column: LVH, label: LVH (ECG), unit: "", type: binary, encoding: yn, group: ecg, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 0, quick: false, description: "Left-ventricular hypertrophy on ECG"}
+  - {id: poor_r_progression, column: Poor R Progression, label: Poor R progression, unit: "", type: binary, encoding: yn, group: ecg, range: [0, 1], ref: null, default: 0, modifiable: false, monotone: 1, quick: false, description: "Poor R-wave progression"}
+  - {id: bbb, column: BBB, label: Bundle branch block, unit: "", type: categorical, levels: [N, LBBB, RBBB], group: ecg, range: null, ref: null, default: N, modifiable: false, monotone: 0, quick: false, description: "None, left or right bundle branch block (one-hot encoded)"}
+
+  # ---------------- Labs ----------------
+  - {id: fbs, column: FBS, label: Fasting blood sugar, unit: mg/dL, type: numeric, group: labs, range: [40, 600], ref: [70, 99], default: 98, modifiable: true, monotone: 1, quick: true, description: "Fasting blood sugar"}
+  - {id: cr, column: CR, label: Creatinine, unit: mg/dL, type: numeric, group: labs, range: [0.3, 10], ref: [0.6, 1.2], default: 1.0, modifiable: false, monotone: 1, quick: false, description: "Serum creatinine"}
+  - {id: tg, column: TG, label: Triglycerides, unit: mg/dL, type: numeric, group: labs, range: [20, 2000], ref: [0, 149], default: 122, modifiable: true, monotone: 1, quick: false, description: "Triglycerides"}
+  - {id: ldl, column: LDL, label: LDL cholesterol, unit: mg/dL, type: numeric, group: labs, range: [10, 400], ref: [0, 99], default: 100, modifiable: true, monotone: 1, quick: true, description: "LDL cholesterol"}
+  - {id: hdl, column: HDL, label: HDL cholesterol, unit: mg/dL, type: numeric, group: labs, range: [5, 150], ref: [40, 150], default: 39, modifiable: true, monotone: -1, quick: false, description: "HDL cholesterol"}
+  - {id: bun, column: BUN, label: BUN, unit: mg/dL, type: numeric, group: labs, range: [2, 150], ref: [7, 20], default: 16, modifiable: false, monotone: 0, quick: false, description: "Blood urea nitrogen"}
+  - {id: esr, column: ESR, label: ESR, unit: mm/h, type: numeric, group: labs, range: [0, 150], ref: [0, 20], default: 15, modifiable: false, monotone: 0, quick: false, description: "Erythrocyte sedimentation rate"}
+  - {id: hb, column: HB, label: Haemoglobin, unit: g/dL, type: numeric, group: labs, range: [5, 22], ref: [12, 17.5], default: 13.2, modifiable: false, monotone: 0, quick: false, description: "Haemoglobin"}
+  - {id: k, column: K, label: Potassium, unit: mEq/L, type: numeric, group: labs, range: [2, 8], ref: [3.5, 5.0], default: 4.2, modifiable: false, monotone: 0, quick: false, description: "Serum potassium"}
+  - {id: na, column: Na, label: Sodium, unit: mEq/L, type: numeric, group: labs, range: [115, 170], ref: [135, 145], default: 141, modifiable: false, monotone: 0, quick: false, description: "Serum sodium"}
+  - {id: wbc, column: WBC, label: White cell count, unit: cells/µL, type: numeric, group: labs, range: [1000, 40000], ref: [4000, 11000], default: 7100, modifiable: false, monotone: 0, quick: false, description: "White blood cell count"}
+  - {id: lymph, column: Lymph, label: Lymphocytes, unit: "%", type: numeric, group: labs, range: [1, 90], ref: [20, 40], default: 32, modifiable: false, monotone: 0, quick: false, description: "Lymphocyte percentage"}
+  - {id: neut, column: Neut, label: Neutrophils, unit: "%", type: numeric, group: labs, range: [10, 99], ref: [40, 70], default: 60, modifiable: false, monotone: 0, quick: false, description: "Neutrophil percentage"}
+  - {id: plt, column: PLT, label: Platelets, unit: "×10³/µL", type: numeric, group: labs, range: [10, 1000], ref: [150, 400], default: 210, modifiable: false, monotone: 0, quick: false, description: "Platelet count"}
+
+  # ---------------- Echocardiography ----------------
+  - {id: ef_tte, column: EF-TTE, label: Ejection fraction (TTE), unit: "%", type: numeric, group: echo, range: [5, 80], ref: [55, 70], default: 50, modifiable: false, monotone: -1, quick: true, description: "Left-ventricular ejection fraction on transthoracic echo"}
+  - {id: region_rwma, column: Region RWMA, label: Region with RWMA, unit: "", type: ordinal, levels: [0, 1, 2, 3, 4], group: echo, range: [0, 4], ref: null, default: 0, modifiable: false, monotone: 1, quick: true, description: "Regional wall-motion abnormality code 0-4 as in source (exact coding unverified); an input, never a lesion map"}
+  - {id: vhd, column: VHD, label: Valvular heart disease, unit: "", type: ordinal, levels: [N, mild, Moderate, Severe], group: echo, range: [0, 3], ref: null, default: mild, modifiable: false, monotone: 0, quick: false, description: "Valvular heart disease severity (ordinal 0-3)"}
+
+# Engineered features, computed inside the pipeline (inside CV folds). Kept only if nested CV supports them.
+engineered:
+  - {id: egfr, label: eGFR (CKD-EPI 2021), unit: mL/min/1.73m², group: labs, inputs: [cr, age, sex_male], description: "Race-free CKD-EPI 2021"}
+  - {id: tg_hdl, label: TG/HDL ratio, unit: "", group: labs, inputs: [tg, hdl]}
+  - {id: ldl_hdl, label: LDL/HDL ratio, unit: "", group: labs, inputs: [ldl, hdl]}
+  - {id: nlr, label: Neutrophil/lymphocyte ratio, unit: "", group: labs, inputs: [neut, lymph]}
+  - {id: risk_factor_count, label: Risk-factor count, unit: "", group: risk_factors, inputs: [dm, htn, current_smoker, fh, dlp, obesity]}
+  - {id: ecg_abnormality_count, label: ECG abnormality count, unit: "", group: ecg, inputs: [q_wave, st_elevation, st_depression, t_inversion, lvh, poor_r_progression, bbb]}

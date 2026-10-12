@@ -1,0 +1,35 @@
+# Registered models. Adding a model = one class implementing the PatternModel protocol in
+# ml/models.py + one entry here. `served` is the model the API loads.
+
+seed: 42
+
+served: joint_ensemble
+
+validation:
+  test_fraction: 0.20          # locked, stratified on vessel pattern; used once
+  outer_folds: 5
+  outer_repeats: 5
+  inner_folds: 3
+  bootstrap_ci_resamples: 2000
+  uncertainty_bootstrap_models: 50
+
+pattern_models:
+  joint_ensemble:
+    kind: joint                 # one 8-class model over vessel patterns
+    members:
+      - {name: logreg, cls: ElasticNetLogReg, params: {C: 0.3, l1_ratio: 0.5}, weight: 1.0}
+      - {name: rf, cls: RandomForest, params: {n_estimators: 500, min_samples_leaf: 3, max_features: sqrt}, weight: 1.0}
+      - {name: et, cls: ExtraTrees, params: {n_estimators: 500, min_samples_leaf: 3, max_features: sqrt}, weight: 1.0}
+    calibration: temperature    # temperature | vector | none (chosen in CV, see DECISIONS.md)
+
+benchmarks:
+  independent_ensemble:
+    kind: independent           # one binary ensemble per target (CAD, LAD, LCX, RCA)
+    members: [logreg, rf, et]
+  classifier_chains:
+    kind: chain                 # ensemble of chains, random vessel orders, OOF probabilities
+    n_chains: 6
+  lightgbm:
+    kind: joint
+    members:
+      - {name: lgbm, cls: LightGBM, params: {n_estimators: 300, learning_rate: 0.03, num_leaves: 7, min_child_samples: 10, subsample: 0.8, colsample_bytree: 0.8}, weight: 1.0}
