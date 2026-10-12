@@ -1,0 +1,6 @@
+nested_cv_s: 178.8
+final_fit_s: 28.7
+learning_curve_s: 9.3
+bootstrap_s: 12.0
+explain_s: 81.7
+total_s: 322.3

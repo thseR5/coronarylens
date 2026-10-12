@@ -1,4 +1,5 @@
-import type { AnalyzeResponse } from '../types/api'
+import type { AnalyzeResponse, Contribution, ExplainResponse, TargetExplanation } from '../types/api'
+
 
 /** Fixture matching the API contract; used by tests and the 3D scene before the backend is up. */
 export const mockAnalysis: AnalyzeResponse = {
@@ -14,5 +15,41 @@ export const mockAnalysis: AnalyzeResponse = {
   imputed: [],
   out_of_range: [],
   mode: 'f1',
+  model_version: 'mock',
+}
+
+const mockTarget = (base: number, output: number): TargetExplanation => {
+  const contributions: Contribution[] = [
+    { feature: 'typical_chest_pain', value: 1, shap: 0.12 * (output - base) / 0.3 },
+    { feature: 'age', value: 67, shap: 0.08 * (output - base) / 0.3 },
+    { feature: 'region_rwma', value: 2, shap: 0.06 * (output - base) / 0.3 },
+    { feature: 'dm', value: 1, shap: 0.05 * (output - base) / 0.3 },
+    { feature: 'ef_tte', value: 45, shap: 0.03 * (output - base) / 0.3 },
+    { feature: 'atypical', value: 0, shap: 0.02 * (output - base) / 0.3 },
+    { feature: 'hdl', value: 52, shap: -0.04 * (output - base) / 0.3 },
+    { feature: 'bp', value: 140, shap: 0.02 * (output - base) / 0.3 },
+  ]
+  const sum = contributions.reduce((a, c) => a + c.shap, 0)
+  contributions.push({ feature: 'other', value: null, shap: output - base - sum })
+  return {
+    base_value: base,
+    output,
+    contributions,
+    group_totals: { demographics: 0.08, risk_factors: 0.05, symptoms_exam: 0.14, ecg: 0.0, labs: -0.02, echo: 0.09 },
+    narrative: ['Typical chest pain is the largest factor raising the estimate.', 'Higher HDL lowers it.'],
+    narrative_patient: ['Your chest-pain pattern is the main reason the estimate is high.'],
+  }
+}
+
+export const mockExplanation: ExplainResponse = {
+  method: 'mock',
+  scale: 'probability',
+  targets: {
+    CAD: mockTarget(0.71, 0.92),
+    LAD: mockTarget(0.58, 0.78),
+    LCX: mockTarget(0.39, 0.65),
+    RCA: mockTarget(0.38, 0.63),
+    P_GE2: mockTarget(0.39, 0.72),
+  },
   model_version: 'mock',
 }

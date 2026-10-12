@@ -1,0 +1,31 @@
+{
+ "served": "joint_ensemble",
+ "variant": "joint_vector",
+ "feature_engineering": false,
+ "calibration": "vector",
+ "model_version": "joint_ensemble-joint_vector-73934324-59f919ac",
+ "seed": 42,
+ "data_sha256": "739343245c2ba578b541370217531750d8e936022f928b83e0d91756caa3ff0b",
+ "quick": false,
+ "explain": {
+  "method": "owen-partition-sampled",
+  "n_perm": 4,
+  "seed": 42,
+  "background": 50
+ },
+ "trees": {
+  "cv": 200,
+  "final": "models.yaml (500)",
+  "bootstrap": 50
+ },
+ "versions": {
+  "python": "3.12.7",
+  "numpy": "2.5.4",
+  "pandas": "3.0.6",
+  "scikit-learn": "1.9.1",
+  "scipy": "1.18.1",
+  "shap": "0.53.0",
+  "lightgbm": "4.7.0",
+  "joblib": "1.6.0"
+ }
+}

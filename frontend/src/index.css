@@ -15,3 +15,15 @@
 
 html, body, #root { height: 100%; }
 body { background: var(--color-ink); color: var(--color-text); font-family: var(--font-sans); margin: 0; }
+
+@layer components {
+  .btn {
+    @apply rounded-md bg-panel-2 px-2.5 py-1.5 text-xs text-text ring-1 ring-line transition hover:ring-accent/60 focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-40;
+  }
+  .card {
+    @apply rounded-lg bg-panel-2/60 p-3 ring-1 ring-line;
+  }
+  .h-section {
+    @apply mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted;
+  }
+}

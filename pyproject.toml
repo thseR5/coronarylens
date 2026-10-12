@@ -4,9 +4,22 @@ version = "0.1.0"
 description = "Coherent, uncertainty-aware coronary digital twin (decision support / education only)"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-  "pandas", "numpy", "openpyxl", "scikit-learn", "shap", "joblib", "pyyaml",
-  "pydantic>=2", "fastapi", "uvicorn[standard]", "lightgbm", "dice-ml",
-  "matplotlib", "scipy", "pandera",
+  "pandas",
+  "numpy",
+  "openpyxl",
+  "scikit-learn",
+  "shap",
+  "joblib",
+  "pyyaml",
+  "pydantic>=2",
+  "fastapi",
+  "uvicorn[standard]",
+  "lightgbm",
+  "dice-ml",
+  "matplotlib",
+  "scipy",
+  "pandera",
+  "imbalanced-learn>=0.14.2",
 ]
 
 [dependency-groups]
