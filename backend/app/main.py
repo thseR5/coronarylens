@@ -9,7 +9,7 @@ import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -28,7 +28,7 @@ from backend.app.schemas import (
     SimilarRequest,
     SimilarResponse,
 )
-from backend.app.service import Service, artifacts_dir
+from backend.app.service import Service, Superseded, artifacts_dir
 from ml import config
 from ml.ingest import InputError
 from ml.leakage import LeakageError
@@ -43,12 +43,19 @@ async def lifespan(app: FastAPI):
     STATE["presets"] = load_presets(artifacts_dir())
     STATE["config"] = config.all_configs()
     yield
+    svc.close()
     STATE.clear()
 
 
 app = FastAPI(title="CoronaryLens API", version="1", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
                    allow_methods=["*"], allow_headers=["*"])
+
+
+@app.exception_handler(Superseded)
+async def _superseded(request: Request, exc: Exception):
+    # A newer request from the same browser tab replaced this one; the client has already moved on.
+    return JSONResponse(status_code=409, content={"detail": "superseded by a newer request"})
 
 
 @app.exception_handler(InputError)
@@ -89,6 +96,9 @@ def metrics():
     ablation = artifacts_dir() / "ablation.json"
     if ablation.exists():  # analysis-only leakage ablation, shown in the Model performance tab
         out["ablation"] = json.loads(ablation.read_text(encoding="utf-8"))
+    bench = config.REPORTS / "benchmarks"  # extra benchmarks scored on the same outer folds (ml/benchmark_extra.py)
+    if bench.is_dir():
+        out["benchmarks"] = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted(bench.glob("*.json"))}
     return out
 
 
@@ -98,18 +108,18 @@ def global_explanations():
 
 
 @app.post("/api/analyze", response_model=AnalyzeResponse)
-def analyze(req: AnalyzeRequest):
-    return _guard(svc().analyze, req.features, req.mode)
+def analyze(req: AnalyzeRequest, x_client_id: str | None = Header(default=None)):
+    return _guard(svc().analyze, req.features, req.mode, x_client_id)
 
 
 @app.post("/api/explain", response_model=ExplainResponse)
-def explain(req: ExplainRequest):
-    return _guard(svc().explain, req.features)
+def explain(req: ExplainRequest, x_client_id: str | None = Header(default=None)):
+    return _guard(svc().explain, req.features, x_client_id)
 
 
 @app.post("/api/counterfactual", response_model=CounterfactualResponse)
-def counterfactual(req: CounterfactualRequest):
-    return _guard(svc().counterfactual, req.features, req.target, req.max_changes)
+def counterfactual(req: CounterfactualRequest, x_client_id: str | None = Header(default=None)):
+    return _guard(svc().counterfactual, req.features, req.target, req.max_changes, x_client_id)
 
 
 @app.post("/api/similar", response_model=SimilarResponse)

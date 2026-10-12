@@ -23,7 +23,6 @@ import joblib
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-from sklearn.cluster import KMeans
 from sklearn.model_selection import RepeatedStratifiedKFold, StratifiedKFold, train_test_split
 
 from ml import config, conformal, dca, plots
@@ -37,6 +36,7 @@ from ml.explain import (
     global_summary,
     local_explanations,
     permutation_importance,
+    representative_background,
 )
 from ml.ingest import data_sha256, decode_row, imputation_values, load_dataset, model_columns, training_ranges
 from ml.joint import EXPLAIN_OUTPUTS, TARGETS, explain_matrix, marginals
@@ -298,7 +298,7 @@ def main(quick: bool = False, out_dir: Path = config.ARTIFACTS, reports: Path = 
                                        "threshold": domain.threshold_,
                                        "test_frac_in_domain": float(np.mean(dte <= domain.threshold_))}
     knn = NeighborIndex().fit(Xtr, tr_idx, Ttr["pattern"].to_numpy(), Ttr["cad"].to_numpy())
-    bg = KMeans(S["bg"], random_state=seed, n_init=10).fit(Xtr).cluster_centers_
+    bg = representative_background(Xtr, S["bg"], seed)
 
     # ---------------------------------------------------------------- explanations
     t0 = time.time()

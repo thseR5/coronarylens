@@ -37,10 +37,12 @@ interface Metrics {
   subgroups: { groups: Record<string, { n: number } & Record<string, { roc_auc: number }>> }
   explanations: { deletion_auc_shap: number; deletion_auc_random: number; max_additivity_error: number }
   ablation?: { model: string; cv: string; targets: Record<string, Record<string, { roc_auc: Stat; accuracy: Stat }>> }
+  benchmarks?: Record<string, { summary: { coherence_violation_rate: Stat } }>
 }
 
 const TARGETS = ['CAD', 'LAD', 'LCX', 'RCA'] as const
 const VARIANT_LABEL: Record<string, string> = {
+  naive_lr: 'Naive logistic regression ×4',
   joint_vector: 'Joint (served)',
   joint_none: 'Joint, uncalibrated',
   independent: 'Independent',
@@ -72,6 +74,7 @@ export default function ModelPerformance() {
   const [m, setM] = useState<Metrics | null>(null)
   const [err, setErr] = useState(false)
   const [dcaTarget, setDcaTarget] = useState<(typeof TARGETS)[number]>('CAD')
+  const reg = m?.benchmarks?.regularized_lr
 
   useEffect(() => {
     api.metrics().then((x) => setM(x as unknown as Metrics)).catch(() => setErr(true))
@@ -97,14 +100,14 @@ export default function ModelPerformance() {
       </p>
 
       <Section
-        title="Locked test set · served model"
-        note="Threshold metrics use the max-F1 operating threshold chosen on out-of-fold training predictions. Small test set: CIs are wide."
+        title={`Headline · nested CV, served model (mean ± SD over ${m.cv.settings.outer_repeats}×${m.cv.settings.outer_folds} outer folds)`}
+        note="Every number here comes from patients the model (and every choice about it) never saw while training. Threshold metrics use the max-F1 threshold chosen inside each training fold."
       >
         <table className="w-full">
           <thead className="text-[10px] uppercase text-muted">
             <tr>
               <Th>Target</Th>
-              <Th>ROC-AUC [95% CI]</Th>
+              <Th>ROC-AUC</Th>
               <Th>PR-AUC</Th>
               <Th>Brier</Th>
               <Th>Acc</Th>
@@ -115,21 +118,21 @@ export default function ModelPerformance() {
           </thead>
           <tbody>
             {[...TARGETS, 'P_GE2', 'P_3VD'].map((t) => {
-              const r = served[t]
+              const r = m.cv.variants[m.test.served.variant]?.[t]
               if (!r) return null
               return (
                 <tr key={t} className="border-t border-line/60">
                   <Td strong>{t === 'P_GE2' ? '≥2 vessels' : t === 'P_3VD' ? '3 vessels' : t}</Td>
                   <Td strong>
-                    {f3(r.roc_auc?.value)}
-                    <span className="block text-[9px] text-muted">[{f2(r.roc_auc?.ci95[0])}–{f2(r.roc_auc?.ci95[1])}]</span>
+                    {f3(r.roc_auc?.mean)}
+                    <span className="block text-[9px] text-muted">±{f2(r.roc_auc?.sd)}</span>
                   </Td>
-                  <Td>{f2(r.pr_auc?.value)}</Td>
-                  <Td>{f3(r.brier?.value)}</Td>
-                  <Td>{f2(r.accuracy?.value)}</Td>
-                  <Td>{f2(r.precision?.value)}</Td>
-                  <Td>{f2(r.recall?.value)}</Td>
-                  <Td>{f2(r.f1?.value)}</Td>
+                  <Td>{f2(r.pr_auc?.mean)}</Td>
+                  <Td>{f3(r.brier?.mean)}</Td>
+                  <Td>{f2(r.accuracy?.mean)}</Td>
+                  <Td>{f2(r.precision?.mean)}</Td>
+                  <Td>{f2(r.recall?.mean)}</Td>
+                  <Td>{f2(r.f1?.mean)}</Td>
                 </tr>
               )
             })}
@@ -184,7 +187,20 @@ export default function ModelPerformance() {
 
       <Section
         title="Coherence · patients where P(CAD) < some vessel's P(stenosis)"
-        note="Logically impossible, since CAD means at least one stenotic vessel. Measured on nested-CV out-of-fold predictions. The joint model is 0% by construction: P(CAD) = 1 − P(no vessel stenotic)."
+        note={
+          <>
+            Logically impossible, since CAD means at least one stenotic vessel. Measured on nested-CV out-of-fold predictions. The
+            joint model is 0% by construction: P(CAD) = 1 − P(no vessel stenotic). Naive logistic regression = four separate
+            scikit-learn LogisticRegression models (L2, C = 1, lbfgs, standardized inputs).
+            {reg && (
+              <>
+                {' '}
+                Footnote: four elastic-net logistic regressions (C = 0.3, l1_ratio 0.5) on the same folds still contradict themselves
+                in {pc(reg.summary.coherence_violation_rate.mean)} of patients.
+              </>
+            )}
+          </>
+        }
       >
         <div className="h-36">
           <ResponsiveContainer>
@@ -196,6 +212,47 @@ export default function ModelPerformance() {
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </Section>
+
+      <Section
+        title={`Secondary · locked test set (n = ${m.data.n_test}), served model`}
+        note={`Held out before any modelling and scored after model selection. With n = ${m.data.n_test} the 95% bootstrap CIs are wide, so nested CV above is the primary estimate.`}
+      >
+        <table className="w-full">
+          <thead className="text-[10px] uppercase text-muted">
+            <tr>
+              <Th>Target</Th>
+              <Th>ROC-AUC [95% CI]</Th>
+              <Th>PR-AUC</Th>
+              <Th>Brier</Th>
+              <Th>Acc</Th>
+              <Th>Prec</Th>
+              <Th>Rec</Th>
+              <Th>F1</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...TARGETS, 'P_GE2', 'P_3VD'].map((t) => {
+              const r = served[t]
+              if (!r) return null
+              return (
+                <tr key={t} className="border-t border-line/60">
+                  <Td strong>{t === 'P_GE2' ? '≥2 vessels' : t === 'P_3VD' ? '3 vessels' : t}</Td>
+                  <Td strong>
+                    {f3(r.roc_auc?.value)}
+                    <span className="block text-[9px] text-muted">[{f2(r.roc_auc?.ci95[0])}–{f2(r.roc_auc?.ci95[1])}]</span>
+                  </Td>
+                  <Td>{f2(r.pr_auc?.value)}</Td>
+                  <Td>{f3(r.brier?.value)}</Td>
+                  <Td>{f2(r.accuracy?.value)}</Td>
+                  <Td>{f2(r.precision?.value)}</Td>
+                  <Td>{f2(r.recall?.value)}</Td>
+                  <Td>{f2(r.f1?.value)}</Td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </Section>
 
       <Section
@@ -313,7 +370,10 @@ export default function ModelPerformance() {
         </Section>
       )}
 
-      <Section title="Subgroups (nested-CV out-of-fold ROC-AUC)">
+      <Section
+        title="Subgroups (nested-CV out-of-fold ROC-AUC)"
+        note="Small subgroups give noisy AUCs; check n before reading a number. Performance is weakest in patients aged ≥ 65 (see Limitations)."
+      >
         <table className="w-full">
           <thead className="text-[10px] uppercase text-muted">
             <tr>

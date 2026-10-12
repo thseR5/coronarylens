@@ -1,5 +1,6 @@
 import { useStore } from '../store'
 import { DISCLAIMER } from '../lib/disclaimer'
+import TerritoryAgreement from './TerritoryAgreement'
 
 export default function About() {
   const anatomy = useStore((s) => s.config?.anatomy)
@@ -31,6 +32,7 @@ export default function About() {
           <code>config/anatomy.yaml</code>. {anatomy?.territory_note} The left main artery is shown grey because the dataset has no
           left-main label.
         </p>
+        <TerritoryAgreement detailed />
       </section>
       <section>
         <h3 className="h-section">Limitations</h3>

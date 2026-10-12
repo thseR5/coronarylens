@@ -5,8 +5,13 @@ Method "owen-partition-sampled": Owen values for the two-level clinical hierarch
 (group -> feature). Estimated by sampling hierarchy-respecting permutations (a random order of the groups,
 then a random order of the features inside each group) with antithetic pairs; for each permutation the
 marginal contributions telescope, so base + sum(phi) == f(x) exactly (additivity, tested). Value function is
-interventional: v(S) = mean over background rows b of f(x_S, b_~S). Background = k-means centroids of the
-training split. Group totals are the Owen group values (= Shapley values of the groups as players).
+interventional: v(S) = mean over background rows b of f(x_S, b_~S). Background = representative real training
+patients (the patient nearest each k-means centroid in standardized feature space), so binary features stay 0/1.
+Group totals are the Owen group values (= Shapley values of the groups as players).
+
+Speed: walking a permutation, coalition j differs from coalition j-1 only in feature order[j]; for background rows
+that already hold x's value of that feature the row is unchanged, so its output is carried forward instead of
+re-evaluated. This is exact (tested against the plain implementation).
 
 shap.PartitionExplainer was measured at 0.7-3.3 s per patient on this laptop (too slow for the 400 ms
 budget); shap.PermutationExplainer (plain Shapley, no hierarchy) is used as a cross-check in tests.
@@ -49,25 +54,56 @@ def owen_values(f, x: np.ndarray, background: np.ndarray, groups: list[list[int]
     d, nb = x.size, bg.shape[0]
     orders = _orders(groups, n_perm, seed)
     P = len(orders)
-    # coalition j of permutation p = first j features of the order come from x (j = 1..d-1; 0 and d shared)
-    masks = np.zeros((P, d - 1, d), dtype=bool)
+    same = bg == x[None, :]  # (nb, d): background row already holds x's value for that feature
+    # Rows that actually change when feature order[j] joins the coalition (j = 1..d-1); others are carried forward.
+    rows, where = [], []  # where: (p, j, b) of each evaluated row
     for p, order in enumerate(orders):
+        Z = bg.copy()
         for j in range(1, d):
-            masks[p, j - 1, order[:j]] = True
-    masks = masks.reshape(-1, d)
-    Z = np.where(masks[:, None, :], x[None, None, :], bg[None, :, :]).reshape(-1, d)
-    Z = np.vstack([bg, x[None, :], Z])
-    out = f(Z)
+            fj = order[j - 1]
+            Z[:, fj] = x[fj]
+            changed = np.flatnonzero(~same[:, fj])
+            if changed.size:
+                rows.append(Z[changed].copy())
+                where.append((p, j, changed))
+    out = f(np.vstack([bg, x[None, :], *rows]))
     k = out.shape[1]
-    v0 = out[:nb].mean(0)
-    fx = out[nb]
-    vmid = out[nb + 1:].reshape(P, d - 1, nb, k).mean(2)
+    f_bg, fx = out[:nb], out[nb]
+    vals = np.empty((P, d + 1, nb, k))  # vals[p, j] = f(coalition of the first j features of order p, each bg row)
+    vals[:, 0] = f_bg
+    vals[:, d] = fx
+    pos = nb + 1
+    for p, j, changed in where:
+        vals[p, j, changed] = out[pos:pos + changed.size]
+        pos += changed.size
+    for p in range(P):  # carry forward unchanged rows (in coalition order)
+        for j in range(1, d):
+            fj = orders[p][j - 1]
+            keep = same[:, fj]
+            if keep.any():
+                vals[p, j, keep] = vals[p, j - 1, keep]
+    v = vals.mean(2)  # (P, d+1, k)
+    v0 = v[0, 0]
     phi = np.zeros((d, k))
     for p, order in enumerate(orders):
-        v = np.vstack([v0, vmid[p], fx])
-        phi[order] += np.diff(v, axis=0)
+        phi[order] += np.diff(v[p], axis=0)
     phi /= P
     return phi, v0, fx
+
+
+def representative_background(X: np.ndarray, k: int, seed: int) -> np.ndarray:
+    """k real training patients: the one nearest each k-means centroid in standardized space (distinct rows)."""
+    from sklearn.cluster import KMeans
+
+    X = np.asarray(X, dtype=float)
+    Zs = (X - X.mean(0)) / np.where(X.std(0) > 0, X.std(0), 1.0)
+    C = KMeans(k, random_state=seed, n_init=10).fit(Zs).cluster_centers_
+    picked: list[int] = []
+    for c in C:
+        dist = np.linalg.norm(Zs - c, axis=1)
+        dist[picked] = np.inf
+        picked.append(int(np.argmin(dist)))
+    return X[sorted(picked)]
 
 
 def aggregate_features(phi: np.ndarray, columns: list[str], fcfg: dict) -> dict[str, np.ndarray]:

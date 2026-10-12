@@ -7,7 +7,7 @@ const PORT = 4179
 
 export default defineConfig({
   testDir: '.',
-  testIgnore: 'app.spec.ts', // full-stack test has its own config (app.config.ts)
+  testIgnore: ['app.spec.ts', 'latency.spec.ts'], // these have their own configs
   timeout: 120_000,
   workers: 1,
   reporter: [['list']],

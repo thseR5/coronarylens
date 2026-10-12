@@ -5,13 +5,22 @@ import featuresRaw from '../../../config/features.yaml?raw'
 import targetsRaw from '../../../config/targets.yaml?raw'
 import anatomyRaw from '../../../config/anatomy.yaml?raw'
 
+/** Per-tab id: the server drops this tab's queued explain/counterfactual jobs when a newer one arrives. */
+const CLIENT_ID = globalThis.crypto?.randomUUID?.() ?? `tab-${Math.random().toString(36).slice(2)}`
+
+/** Thrown when the server reports that a newer request from this tab replaced this one (HTTP 409). */
+export class SupersededError extends Error {
+  name = 'AbortError' // handled exactly like a client-side abort
+}
+
 async function post<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
   const res = await fetch(`/api/${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Client-Id': CLIENT_ID },
     body: JSON.stringify(body),
     signal,
   })
+  if (res.status === 409) throw new SupersededError(path)
   if (!res.ok) throw new Error(`${path}: ${res.status} ${await res.text()}`)
   return res.json() as Promise<T>
 }

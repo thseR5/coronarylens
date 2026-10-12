@@ -22,9 +22,16 @@
   "scale_per_mm": 0.017286831755909938,
   "heart_max_extent_units": 2.0
  },
+ "landmarks": {
+  "rv_cavity_centroid": [
+   -0.0243,
+   -0.022,
+   0.3756
+  ]
+ },
  "compression": "EXT_meshopt_compression + KHR_mesh_quantization (gltf-transform meshopt)",
- "glb_bytes": 412468,
- "total_triangles": 85922,
+ "glb_bytes": 452740,
+ "total_triangles": 91777,
  "missing": [],
  "dropped_unmapped_coronary_elements": [
   "FJ2670",
@@ -272,8 +279,8 @@
    ]
   },
   "LV_Anterior": {
-   "triangles": 531,
-   "raw_triangles": 531,
+   "triangles": 795,
+   "raw_triangles": 795,
    "role": "territory",
    "target": "LAD",
    "fma": [
@@ -287,12 +294,12 @@
     "FJ2418",
     "FJ2429"
    ],
-   "geometry": "LV cavity surface (FJ2422) faces nearest to LAD",
+   "geometry": "LV cavity surface (FJ2422) faces nearest to the LV-supplying branches of LAD (nearest-artery Voronoi partition)",
    "bounds": [
     [
-     -0.1255,
+     -0.2606,
      -0.7044,
-     -0.2279
+     -0.2823
     ],
     [
      0.8419,
@@ -302,8 +309,8 @@
    ]
   },
   "LV_Lateral": {
-   "triangles": 450,
-   "raw_triangles": 450,
+   "triangles": 474,
+   "raw_triangles": 474,
    "role": "territory",
    "target": "LCX",
    "fma": [
@@ -319,10 +326,10 @@
     "FJ2418",
     "FJ2429"
    ],
-   "geometry": "LV cavity surface (FJ2422) faces nearest to LCX",
+   "geometry": "LV cavity surface (FJ2422) faces nearest to the LV-supplying branches of LCX (nearest-artery Voronoi partition)",
    "bounds": [
     [
-     -0.1652,
+     -0.1993,
      -0.661,
      -0.6386
     ],
@@ -334,8 +341,8 @@
    ]
   },
   "LV_Inferior": {
-   "triangles": 741,
-   "raw_triangles": 741,
+   "triangles": 453,
+   "raw_triangles": 453,
    "role": "territory",
    "target": "RCA",
    "fma": [
@@ -350,16 +357,16 @@
    "fma_resolved_elements": [
     "FJ2432"
    ],
-   "geometry": "LV cavity surface (FJ2422) faces nearest to RCA",
+   "geometry": "LV cavity surface (FJ2422) faces nearest to the LV-supplying branches of RCA (nearest-artery Voronoi partition)",
    "bounds": [
     [
-     -0.2606,
+     -0.1681,
      -0.7458,
      -0.6269
     ],
     [
      0.7979,
-     0.367,
+     0.0204,
      0.4292
     ]
    ]
@@ -1274,6 +1281,516 @@
      0.1017,
      1.6965,
      1.5658
+    ]
+   ]
+  },
+  "AHA_01": {
+   "triangles": 495,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 1,
+   "target": "LAD",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 1 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     -0.0527,
+     0.0711,
+     -0.3847
+    ],
+    [
+     0.5237,
+     0.4208,
+     0.0504
+    ]
+   ]
+  },
+  "AHA_02": {
+   "triangles": 1344,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 2,
+   "target": "LAD",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 2 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     -0.2606,
+     -0.0175,
+     -0.3177
+    ],
+    [
+     0.2965,
+     0.4164,
+     0.133
+    ]
+   ]
+  },
+  "AHA_03": {
+   "triangles": 421,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 3,
+   "target": "RCA",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 3 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     -0.2606,
+     -0.295,
+     -0.3278
+    ],
+    [
+     0.042,
+     0.2186,
+     0.0932
+    ]
+   ]
+  },
+  "AHA_04": {
+   "triangles": 462,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 4,
+   "target": "RCA",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 4 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     -0.1681,
+     -0.5186,
+     -0.5513
+    ],
+    [
+     0.1003,
+     0.0711,
+     -0.0808
+    ]
+   ]
+  },
+  "AHA_05": {
+   "triangles": 598,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 5,
+   "target": "LCX",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 5 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     -0.0503,
+     -0.4917,
+     -0.6386
+    ],
+    [
+     0.4137,
+     0.0907,
+     -0.3561
+    ]
+   ]
+  },
+  "AHA_06": {
+   "triangles": 324,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 6,
+   "target": "LCX",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 6 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.0147,
+     -0.1623,
+     -0.6078
+    ],
+    [
+     0.5335,
+     0.2112,
+     -0.2851
+    ]
+   ]
+  },
+  "AHA_07": {
+   "triangles": 253,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 7,
+   "target": "LAD",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 7 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.2965,
+     -0.1521,
+     -0.2851
+    ],
+    [
+     0.804,
+     0.2887,
+     0.349
+    ]
+   ]
+  },
+  "AHA_08": {
+   "triangles": 269,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 8,
+   "target": "LAD",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 8 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.0339,
+     -0.269,
+     0.0494
+    ],
+    [
+     0.6283,
+     0.2565,
+     0.4449
+    ]
+   ]
+  },
+  "AHA_09": {
+   "triangles": 108,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 9,
+   "target": "RCA",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 9 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     -0.0487,
+     -0.5165,
+     -0.0653
+    ],
+    [
+     0.3609,
+     -0.0175,
+     0.3813
+    ]
+   ]
+  },
+  "AHA_10": {
+   "triangles": 349,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 10,
+   "target": "RCA",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 10 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     -0.0704,
+     -0.7376,
+     -0.4347
+    ],
+    [
+     0.4233,
+     -0.2928,
+     0.1908
+    ]
+   ]
+  },
+  "AHA_11": {
+   "triangles": 204,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 11,
+   "target": "LCX",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 11 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.1003,
+     -0.7067,
+     -0.5352
+    ],
+    [
+     0.7072,
+     -0.1494,
+     -0.1246
+    ]
+   ]
+  },
+  "AHA_12": {
+   "triangles": 115,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 12,
+   "target": "LCX",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 12 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.4322,
+     -0.431,
+     -0.4743
+    ],
+    [
+     0.804,
+     0.1601,
+     0.0377
+    ]
+   ]
+  },
+  "AHA_13": {
+   "triangles": 198,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 13,
+   "target": "LAD",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 13 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.5159,
+     -0.4823,
+     -0.0263
+    ],
+    [
+     0.8419,
+     0.0365,
+     0.5503
+    ]
+   ]
+  },
+  "AHA_14": {
+   "triangles": 180,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 14,
+   "target": "LAD",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 14 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.3353,
+     -0.6209,
+     0.225
+    ],
+    [
+     0.7462,
+     -0.0226,
+     0.6002
+    ]
+   ]
+  },
+  "AHA_15": {
+   "triangles": 161,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 15,
+   "target": "RCA",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 15 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.2979,
+     -0.7458,
+     -0.1752
+    ],
+    [
+     0.7437,
+     -0.4454,
+     0.4271
+    ]
+   ]
+  },
+  "AHA_16": {
+   "triangles": 92,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 16,
+   "target": "LCX",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 16 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.5082,
+     -0.725,
+     -0.3289
+    ],
+    [
+     0.8419,
+     -0.1962,
+     0.2799
+    ]
+   ]
+  },
+  "AHA_17": {
+   "triangles": 282,
+   "raw_triangles": 1722,
+   "role": "segment",
+   "segment": 17,
+   "target": "LAD",
+   "fma": [
+    "FMA9466"
+   ],
+   "fma_names": {
+    "FMA9466": "cavity of left ventricle"
+   },
+   "elements": [],
+   "fma_resolved_elements": [
+    "FJ2422"
+   ],
+   "geometry": "AHA segment 17 of the LV cavity surface (FJ2422)",
+   "bounds": [
+    [
+     0.5428,
+     -0.7264,
+     0.1795
+    ],
+    [
+     0.8315,
+     -0.2864,
+     0.6081
     ]
    ]
   }

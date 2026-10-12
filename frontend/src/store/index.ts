@@ -11,6 +11,7 @@ export interface ViewState {
   showLungs: boolean
   showAorta: boolean
   showTerritories: boolean
+  territoryMode: 'aha' | 'voronoi' // AHA 17-segment (default) or nearest-artery (Voronoi) estimate
   xray: boolean
   autoRotate: boolean
   cameraPreset: string | null // id from anatomy.yaml camera_presets; consumed then cleared by the scene
@@ -26,6 +27,7 @@ export interface AppState {
   error: string | null
   selected: TargetId | null // selected vessel (LAD/LCX/RCA) or null = CAD overview
   hovered: string | null // vessel id hovered in 3D, bullseye or cards
+  hoveredSegment: number | null // AHA segment (1-17) hovered in 3D or in the bullseye
   view: ViewState
 
   setConfig: (c: AppConfig) => void
@@ -38,6 +40,7 @@ export interface AppState {
   setError: (e: string | null) => void
   select: (t: TargetId | null) => void
   hover: (v: string | null) => void
+  hoverSegment: (segment: number | null, vessel: string | null) => void
   setView: (patch: Partial<ViewState>) => void
 }
 
@@ -51,11 +54,13 @@ export const useStore = create<AppState>((set) => ({
   error: null,
   selected: null,
   hovered: null,
+  hoveredSegment: null,
   view: {
     showRibs: true,
     showLungs: false,
     showAorta: true,
     showTerritories: true,
+    territoryMode: 'aha',
     xray: false,
     autoRotate: false,
     cameraPreset: null,
@@ -71,6 +76,7 @@ export const useStore = create<AppState>((set) => ({
   setError: (error) => set({ error }),
   select: (selected) => set({ selected }),
   hover: (hovered) => set({ hovered }),
+  hoverSegment: (hoveredSegment, vessel) => set({ hoveredSegment, hovered: vessel }),
   setView: (patch) => set((s) => ({ view: { ...s.view, ...patch } })),
 }))
 

@@ -28,10 +28,11 @@ function Btn({ active, onClick, children, title, testId }: {
 /** Overlay toolbar: angiographic presets, layer toggles, x-ray, auto-rotate, heartbeat, labels, PNG export. */
 export default function SceneControls() {
   const presets = useStore((s) => s.config?.anatomy.camera_presets)
+  const voronoiLabel = useStore((s) => s.config?.anatomy.voronoi_label)
   const view = useStore((s) => s.view)
   const setView = useStore((s) => s.setView)
   const local = useSceneLocal()
-  const toggle = (k: keyof Omit<ViewState, 'cameraPreset'>) => setView({ [k]: !view[k] })
+  const toggle = (k: keyof Omit<ViewState, 'cameraPreset' | 'territoryMode'>) => setView({ [k]: !view[k] })
 
   const screenshot = () => {
     const url = local.screenshot?.()
@@ -53,9 +54,19 @@ export default function SceneControls() {
       </div>
       <div className="flex flex-wrap gap-1" aria-label="Layers">
         <Btn active={view.showRibs} onClick={() => toggle('showRibs')}>Ribs</Btn>
-        <Btn active={view.showLungs} onClick={() => toggle('showLungs')} title="Bronchial and pulmonary vascular trees">Lungs</Btn>
+        <Btn active={view.showLungs} onClick={() => toggle('showLungs')} title="Bronchial tree and pulmonary vessels (BodyParts3D 4.0 has no lung-surface mesh)">Airways &amp; pulmonary vessels</Btn>
         <Btn active={view.showAorta} onClick={() => toggle('showAorta')}>Aorta</Btn>
         <Btn active={view.showTerritories} onClick={() => toggle('showTerritories')} testId="toggle-territories">Territories</Btn>
+        {view.showTerritories && (
+          <Btn
+            active={view.territoryMode === 'voronoi'}
+            onClick={() => setView({ territoryMode: view.territoryMode === 'aha' ? 'voronoi' : 'aha' })}
+            testId="toggle-territory-mode"
+            title="Default: the 17 AHA segments with the standard vessel assignment. Toggle: nearest-artery (Voronoi) partition of the LV surface."
+          >
+            {view.territoryMode === 'aha' ? 'AHA 17-segment' : (voronoiLabel ?? 'nearest-artery estimate')}
+          </Btn>
+        )}
         <Btn active={view.xray} onClick={() => toggle('xray')} testId="toggle-xray">X-ray</Btn>
         <Btn active={view.autoRotate} onClick={() => toggle('autoRotate')} testId="toggle-rotate">Rotate</Btn>
         <Btn active={local.heartbeat} onClick={() => local.set({ heartbeat: !local.heartbeat })} testId="toggle-heartbeat">Heartbeat</Btn>

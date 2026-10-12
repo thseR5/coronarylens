@@ -19,11 +19,17 @@ glb_path: /models/anatomy.glb
 
 # role: vessel = colored by its target probability; territory = tinted by its vessel; context = neutral
 structures:
+  # lv_supply: branches that supply the LEFT ventricle; only these seed the nearest-artery (Voronoi) LV territories.
+  # Right-ventricular branches (LAD conus / right anterior branches; RCA trunk, anterior ventricular and marginal
+  # branches) are drawn but excluded as seeds: they run near the LV base without supplying it.
   - {node: LAD, role: vessel, target: LAD, label: "Left anterior descending (LAD)",
-     fma: [FMA74912, FMA3862, FMA3860, FMA3868, FMA3872, FMA3874, FMA3876]}
-  - {node: LCX, role: vessel, target: LCX, label: "Left circumflex (LCX)", fma: [FMA3895]}
+     fma: [FMA74912, FMA3862, FMA3860, FMA3868, FMA3872, FMA3874, FMA3876],
+     lv_supply: {include: [FMA74912, FMA3862, FMA3860], exclude: [FMA3868, FMA3872, FMA3874, FMA3876]}}
+  - {node: LCX, role: vessel, target: LCX, label: "Left circumflex (LCX)", fma: [FMA3895],
+     lv_supply: {include: [FMA3895], exclude: []}}
   - {node: RCA, role: vessel, target: RCA, label: "Right coronary artery (RCA)",
-     fma: [FMA3802, FMA3815, FMA3818, FMA3837, FMA3840]}
+     fma: [FMA3802, FMA3815, FMA3818, FMA3837, FMA3840],
+     lv_supply: {include: [FMA3837, FMA3840], exclude: []}}
   - {node: LeftMain, role: context, target: null, label: "Left main (not modelled)", fma: [FMA3855],
      note: "Dataset has no left-main label; rendered neutral"}
   - {node: LV_Anterior, role: territory, target: LAD, label: "LV anterior wall", fma: [FMA9560]}
@@ -32,11 +38,20 @@ structures:
   - {node: Myocardium, role: context, target: null, label: "Heart", fma: [FMA7088],
      note: "Whole-heart concept minus the LV territory walls and coronaries (subtracted in build)"}
   - {node: Aorta, role: context, target: null, label: "Aorta", fma: [FMA3734]}
-  - {node: Lungs, role: context, target: null, label: "Lungs", fma: [FMA7309, FMA7310]}
+  - {node: Lungs, role: context, target: null, label: "Airways & pulmonary vessels", fma: [FMA7309, FMA7310],
+     note: "BodyParts3D 4.0 lung concepts resolve to the bronchial tree and pulmonary vessels; off by default"}
   - {node: RibCage, role: context, target: null, label: "Rib cage", fma: [FMA7480]}
   - {node: Sternum, role: context, target: null, label: "Sternum", fma: [FMA7485]}
 
 territory_note: "Expected supply territory (illustrative); coronary dominance varies between people."
+
+# Default territories: the LV surface split into the 17 AHA segments (nodes AHA_01..AHA_17, built by
+# tools/build_anatomy.py), each coloured by its vessel under the standard assignment in `bullseye`, so the 3D view
+# and the 2D bullseye always agree. The nearest-artery (Voronoi) territories (LV_* nodes) are an optional toggle.
+aha_segments:
+  node_prefix: AHA_
+  source: LV cavity surface (BodyParts3D FMA9466)
+voronoi_label: "nearest-artery estimate (14/17 agree with AHA)"
 
 # AHA 17-segment model (Cerqueira et al., Circulation 2002), typical coronary assignment.
 bullseye:

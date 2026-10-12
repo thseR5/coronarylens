@@ -27,6 +27,7 @@ from pathlib import Path
 import fast_simplification
 import numpy as np
 import requests
+import territory_check  # sibling script in tools/: shared AHA segment geometry
 import trimesh
 import yaml
 from scipy.spatial import cKDTree
@@ -52,7 +53,8 @@ CLAIM_ORDER = ["LAD", "LCX", "RCA", "LeftMain", "Aorta", "Sternum", "RibCage", "
 CORONARY_TREES = ["FMA50039", "FMA50040"]
 HEART = "FMA7088"
 # Element used for the geometric LV territory partition (see build_territories).
-LV_CAVITY_CONCEPT = "FMA9466"  # cavity of left ventricle (outer blood-pool surface of the LV in BP3D)
+LV_CAVITY_CONCEPT = "FMA9466"
+RV_CAVITY_CONCEPT = "FMA9291"  # cavity of right ventricle: landmark for the AHA septal direction  # cavity of left ventricle (outer blood-pool surface of the LV in BP3D)
 # BP3D -> three.js rotation: (x, y, z) -> (x, z, -y)
 ROT = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]], dtype=float)
 
@@ -114,7 +116,8 @@ def finish(m: trimesh.Trimesh) -> trimesh.Trimesh:
 
 def build_territories(lv: trimesh.Trimesh, vessels: dict[str, trimesh.Trimesh],
                       target_of: dict[str, str]) -> dict[str, trimesh.Trimesh]:
-    """Partition the LV surface by nearest supplying vessel (illustrative expected supply territory)."""
+    """Nearest-artery (Voronoi) partition of the LV surface: each face goes to the vessel whose LV-supplying
+    branches are closest (illustrative expected supply territory)."""
     vessel_pts, vessel_lab = [], []
     for i, (node, vm) in enumerate(vessels.items()):
         vessel_pts.append(vm.vertices)
@@ -219,8 +222,19 @@ def main() -> int:
             raw[node] = merge(assigned[node])
             log(f"  {node:12s} {len(assigned[node]):4d} elements  {len(raw[node].faces):7d} raw tris")
     lv = merge(lv_elems)
-    terr_meshes = build_territories(lv, {v: raw[vessel_nodes[v]] for v in vessel_nodes},
-                                    {t: tgt for t, tgt in territory_nodes.items()})
+    # Voronoi seeds: only the LV-supplying branches of each vessel (config lv_supply), not its RV branches.
+    seeds = {}
+    for v, node in vessel_nodes.items():
+        sup = structures[node].get("lv_supply")
+        if not sup:
+            seeds[v] = raw[node]
+            continue
+        inc = set().union(*(concept_elems[c] for c in sup["include"]))
+        exc = set().union(set(), *(concept_elems[c] for c in sup.get("exclude", [])))
+        elems = sorted((inc - exc) & set(assigned[node]))
+        seeds[v] = merge(elems)
+        log(f"  {v:12s} LV-supply seeds: {len(elems)} of {len(assigned[node])} elements")
+    terr_meshes = build_territories(lv, seeds, {t: tgt for t, tgt in territory_nodes.items()})
     raw.update(terr_meshes)
     for t in territory_nodes:
         log(f"  {t:12s} partition of {lv_elems}  {len(raw[t].faces):7d} raw tris")
@@ -253,10 +267,37 @@ def main() -> int:
             "fma_names": {f: concept_name.get(f) for f in s["fma"]},
             "elements": assigned[node] if node not in territory_nodes else [],
             "fma_resolved_elements": sorted(resolved[node]),
-            "geometry": ("LV cavity surface (" + ",".join(lv_elems) + f") faces nearest to {s['target']}"
+            "geometry": ("LV cavity surface (" + ",".join(lv_elems) + f") faces nearest to the LV-supplying branches of {s['target']} (nearest-artery Voronoi partition)"
                          if node in territory_nodes else "merged BP3D elements"),
             "bounds": np.round(m.bounds, 4).tolist(),
         }
+
+    # ---- AHA 17-segment territories (default 3D territories): the LV surface split geometrically into the
+    # 17 segments (rings along the long axis, sectors around it, apex cap), coloured in the app by the standard
+    # vessel assignment in anatomy.yaml `bullseye`. Same geometry function as tools/territory_check.py.
+    rv = merge(sorted(concept_elems[RV_CAVITY_CONCEPT]))
+    rv_centroid = (((rv.vertices.mean(0) - centre) * scale) @ ROT.T).round(4).tolist()
+    lv_s = lv.subdivide() if len(lv.faces) < 3000 else lv.copy()  # finer faces -> smoother segment borders
+    lv_s = decimate(lv_s, BUDGET.get("AHA", 6000))
+    lv_s.vertices = ((lv_s.vertices - centre) * scale) @ ROT.T
+    lv_s = finish(lv_s)
+    aorta_s = ((raw["Aorta"].vertices - centre) * scale) @ ROT.T
+    seg_of_face = territory_check.aha_segments(lv_s.triangles_center, lv_s.area_faces, aorta_s, np.array(rv_centroid))
+    standard = {k: v for v, ks in cfg["bullseye"].items() for k in ks}
+    prefix = cfg["aha_segments"]["node_prefix"]
+    for k in range(1, 18):
+        sub = lv_s.submesh([np.flatnonzero(seg_of_face == k)], append=True)
+        sub.visual = trimesh.visual.ColorVisuals(sub)
+        node = f"{prefix}{k:02d}"
+        scene.add_geometry(sub, node_name=node, geom_name=node)
+        total += len(sub.faces)
+        manifest_nodes[node] = {"triangles": len(sub.faces), "raw_triangles": len(lv.faces), "role": "segment",
+                                "segment": k, "target": standard[k], "fma": [LV_CAVITY_CONCEPT],
+                                "fma_names": {LV_CAVITY_CONCEPT: concept_name.get(LV_CAVITY_CONCEPT)},
+                                "elements": [], "fma_resolved_elements": lv_elems,
+                                "geometry": f"AHA segment {k} of the LV cavity surface ({','.join(lv_elems)})",
+                                "bounds": np.round(sub.bounds, 4).tolist()}
+    log(f"  AHA segments: {[int((seg_of_face == k).sum()) for k in range(1, 18)]} faces (segments 1..17)")
 
     MODELS.mkdir(parents=True, exist_ok=True)
     raw_glb = CACHE / "anatomy_raw.glb"
@@ -277,6 +318,8 @@ def main() -> int:
                  "from_bp3d": "(x, y, z)_three = (x, z, -y)_bp3d, then (p - centre) * scale"},
         "transform": {"centre_bp3d_mm": centre.round(4).tolist(), "scale_per_mm": scale,
                       "heart_max_extent_units": 2.0},
+        # landmark for the AHA segment frame in territory_check (septum = direction from LV axis toward the RV)
+        "landmarks": {"rv_cavity_centroid": rv_centroid},
         "compression": "EXT_meshopt_compression + KHR_mesh_quantization (gltf-transform meshopt)",
         "glb_bytes": size,
         "total_triangles": total,
@@ -286,6 +329,9 @@ def main() -> int:
     }
     MANIFEST.write_text(json.dumps(manifest, indent=1))
     write_licenses(cfg, manifest)
+
+    # Agreement of the optional nearest-artery (Voronoi) territories with the AHA convention.
+    territory_check.main()
 
     log("== Summary")
     log(f"  {'node':12s} {'role':9s} {'tris':>6s} {'raw':>7s}  elements")

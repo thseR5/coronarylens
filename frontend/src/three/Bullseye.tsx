@@ -60,7 +60,8 @@ export default function Bullseye({ size = 220, className = '' }: { size?: number
   const analysis = useStore((s) => s.analysis)
   const hovered = useStore((s) => s.hovered)
   const selected = useStore((s) => s.selected)
-  const hover = useStore((s) => s.hover)
+  const hoveredSegment = useStore((s) => s.hoveredSegment)
+  const hoverSegment = useStore((s) => s.hoverSegment)
   const select = useStore((s) => s.select)
   if (!bullseye) return null
   const map = segmentVesselMap(bullseye)
@@ -81,7 +82,8 @@ export default function Bullseye({ size = 220, className = '' }: { size?: number
           const p = analysis?.vessels[vessel]?.p
           const fill = p == null ? NEUTRAL_VESSEL : riskHex(p)
           const lum = relativeLuminance(p == null ? hexToRgb(NEUTRAL_VESSEL) : riskColor(p))
-          const hot = vessel === hovered || vessel === selected
+          const segHot = s.id === hoveredSegment // the exact segment hovered here or on the 3D heart
+          const hot = segHot || vessel === hovered || vessel === selected
           const dim = (hovered || selected) && !hot
           const mid = s.ring === 'apex' ? 0 : (s.r0 + s.r1) / 2
           const am = (s.a0 + s.a1) / 2
@@ -91,22 +93,23 @@ export default function Bullseye({ size = 220, className = '' }: { size?: number
               role="button"
               tabIndex={0}
               aria-label={`Segment ${s.id}, ${s.name}, ${vessel}${p != null ? ` ${Math.round(p * 100)}%` : ''}`}
-              onMouseEnter={() => hover(vessel)}
-              onMouseLeave={() => hover(null)}
-              onFocus={() => hover(vessel)}
-              onBlur={() => hover(null)}
+              onMouseEnter={() => hoverSegment(s.id, vessel)}
+              onMouseLeave={() => hoverSegment(null, null)}
+              onFocus={() => hoverSegment(s.id, vessel)}
+              onBlur={() => hoverSegment(null, null)}
               onClick={() => select(selected === vessel ? null : (vessel as TargetId))}
               onKeyDown={(e) => onKey(e, vessel)}
               className="cursor-pointer outline-none"
               data-segment={s.id}
+              data-hot={segHot ? 'segment' : hot ? 'vessel' : undefined}
               data-vessel={vessel}
             >
               <path
                 d={sectorPath(s)}
                 fill={fill}
                 fillOpacity={dim ? 0.45 : 1}
-                stroke={hot ? 'var(--color-accent)' : 'var(--color-ink)'}
-                strokeWidth={hot ? 2.5 : 1.2}
+                stroke={segHot ? '#ffffff' : hot ? 'var(--color-accent)' : 'var(--color-ink)'}
+                strokeWidth={segHot ? 4 : hot ? 2.5 : 1.2}
               />
               <text
                 x={mid * Math.cos((am * Math.PI) / 180)}
@@ -124,7 +127,7 @@ export default function Bullseye({ size = 220, className = '' }: { size?: number
         })}
       </svg>
       <figcaption className="text-center text-[10px] leading-tight text-muted">
-        AHA 17-segment · typical supply (illustrative, dominance varies)
+        AHA 17-segment · expected supply territory (illustrative); coronary dominance varies between people
         <br />
         {Object.keys(bullseye).join(' · ')} · anterior top, septum left
       </figcaption>

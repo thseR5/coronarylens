@@ -19,6 +19,7 @@ Mean ± SD over outer folds. Thresholds (max-F1) and calibration fitted on inner
 | lightgbm_none | 0.926 ± 0.032 | 0.851 ± 0.051 | 0.722 ± 0.054 | 0.740 ± 0.049 | 0.745 ± 0.052 | 0.717 ± 0.079 | 0.628 | 0.185 | 2.377 | 0.000 |
 | lightgbm_temperature | 0.923 ± 0.034 | 0.848 ± 0.053 | 0.727 ± 0.055 | 0.736 ± 0.048 | 0.748 ± 0.053 | 0.705 ± 0.086 | 0.517 | 0.172 | 1.639 | 0.000 |
 | independent | 0.924 ± 0.043 | 0.854 ± 0.056 | 0.707 ± 0.052 | 0.742 ± 0.056 | 0.772 ± 0.048 | 0.776 ± 0.069 | 0.501 | 0.166 | 1.663 | 0.059 |
+| naive_lr | 0.897 ± 0.041 | 0.800 ± 0.060 | 0.626 ± 0.069 | 0.706 ± 0.068 | 0.730 ± 0.055 | 0.731 ± 0.081 | 0.718 | 0.211 | 2.432 | 0.321 |
 | chains | 0.914 ± 0.040 | 0.834 ± 0.052 | 0.655 ± 0.065 | 0.724 ± 0.068 | 0.752 ± 0.055 | 0.757 ± 0.082 | 0.544 | 0.181 | 1.843 | 0.234 |
 
 **Selection:** simplest joint variant within 1 SE of best mean log-loss and within 1 SE of best mean ROC-AUC (means over CAD/LAD/LCX/RCA per outer fold). Eligible: joint_vector, joint_fe_vector. **Chosen: joint_vector**.
@@ -77,9 +78,9 @@ DeLong (served − independent): CAD Δ=+0.003 (p=0.76); LAD Δ=+0.022 (p=0.22);
 
 ## Explanations
 
-Method owen-partition-sampled; additivity max error 5.55e-16.
-Agreement of global mean |Owen| with permutation importance (test AUC drop): CAD ρ=0.59, top-10 overlap 8; LAD ρ=0.13, top-10 overlap 4; LCX ρ=0.16, top-10 overlap 2; RCA ρ=0.07, top-10 overlap 4; P_GE2 ρ=0.22, top-10 overlap 5
+Method owen-partition-sampled; additivity max error 1.33e-15.
+Agreement of global mean |Owen| with permutation importance (test AUC drop): CAD ρ=0.57, top-10 overlap 8; LAD ρ=0.14, top-10 overlap 4; LCX ρ=0.13, top-10 overlap 2; RCA ρ=0.12, top-10 overlap 4; P_GE2 ρ=0.25, top-10 overlap 5
 
-Top CAD features (mean |Owen value|, probability scale): typical_chest_pain 0.124, age 0.056, atypical 0.042, htn 0.042, region_rwma 0.038, t_inversion 0.037, ef_tte 0.030, dm 0.026
+Top CAD features (mean |Owen value|, probability scale): typical_chest_pain 0.124, age 0.050, region_rwma 0.040, atypical 0.040, htn 0.039, t_inversion 0.031, ef_tte 0.028, dm 0.022
 
 Figures: `reports/figures/` (cv_auc_comparison, reliability_*, dca_*, learning_curve, deletion_curve, global_shap_cad).

@@ -16,8 +16,8 @@ declare global {
     __coronaryLens?: {
       frames: number
       renderer: string | null
-      /** CSS-pixel position of a point on the vessel (client coordinates), for e2e clicks. */
-      project: (vessel: string) => { x: number; y: number } | null
+      /** CSS-pixel position of a visible point on a vessel (by id) or any node (by name), for e2e pointer tests. */
+      project: (vesselOrNode: string) => { x: number; y: number } | null
       /** Current uniform scale factor of a vessel mesh (heartbeat check). */
       meshScale: (vessel: string) => number
     }
@@ -99,7 +99,12 @@ function ScreenshotHook() {
       meshScale: (vessel) => useSceneLocal.getState().vesselMeshes[vessel]?.scale.x ?? NaN,
       project: (vessel) => {
         // first vessel vertex whose camera ray hits this vessel before anything else
-        const mesh = useSceneLocal.getState().vesselMeshes[vessel]
+        let mesh: THREE.Mesh | undefined = useSceneLocal.getState().vesselMeshes[vessel]
+        if (!mesh) {
+          scene.getObjectByName(vessel)?.traverse((o) => {
+            if (!mesh && (o as THREE.Mesh).isMesh) mesh = o as THREE.Mesh
+          })
+        }
         if (!mesh) return null
         const pos = mesh.geometry.getAttribute('position')
         const ray = new THREE.Raycaster()

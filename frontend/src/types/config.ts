@@ -43,7 +43,7 @@ export interface TargetsConfig {
   threshold_modes: { id: string; label: string }[]
 }
 
-export type StructureRole = 'vessel' | 'territory' | 'context'
+export type StructureRole = 'vessel' | 'territory' | 'segment' | 'context'
 
 export interface StructureSpec {
   node: string
@@ -67,6 +67,8 @@ export interface AnatomyConfig {
   glb_path: string
   structures: StructureSpec[]
   territory_note: string
+  aha_segments: { node_prefix: string; source: string }
+  voronoi_label: string
   bullseye: Record<string, number[]>
   camera_presets: CameraPreset[]
 }

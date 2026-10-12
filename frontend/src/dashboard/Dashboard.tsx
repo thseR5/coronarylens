@@ -10,6 +10,7 @@ import WhatIf from './WhatIf'
 import WhyPanel from './WhyPanel'
 import ModelPerformance from './ModelPerformance'
 import Bullseye from '../three/Bullseye'
+import TerritoryAgreement from './TerritoryAgreement'
 
 type Tab = 'analysis' | 'model' | 'about'
 
@@ -68,6 +69,7 @@ export default function Dashboard({ latencyMs }: { latencyMs: number | null }) {
           <div className="card flex flex-col items-center gap-1">
             <h2 className="h-section self-start">AHA 17-segment map · expected supply territory</h2>
             <Bullseye size={200} />
+            <TerritoryAgreement />
           </div>
           <WhyPanel />
           <MeasurementsTable />

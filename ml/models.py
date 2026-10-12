@@ -42,6 +42,9 @@ def make_member(cls: str, params: dict, seed: int, n_estimators: int | None = No
         lr = LogisticRegression(C=params.get("C", 1.0), l1_ratio=params.get("l1_ratio", 0.5), solver="saga",
                                 max_iter=params.get("max_iter", 5000), tol=1e-4, random_state=seed)
         steps += [("scale", StandardScaler()), ("clf", lr)]
+    elif cls == "LogReg":  # plain L2 logistic regression: the baseline most teams would build
+        lr = LogisticRegression(C=params.get("C", 1.0), max_iter=params.get("max_iter", 5000), random_state=seed)
+        steps += [("scale", StandardScaler()), ("clf", lr)]
     elif cls in ("RandomForest", "ExtraTrees"):
         if n_estimators is not None:
             params["n_estimators"] = n_estimators
@@ -246,7 +249,9 @@ def build(name: str, mcfg: dict, *, n_estimators: int | None = None, fe: bool = 
         return JointEnsemble(spec["members"], seed, n_estimators, fe, columns)
     lookup = member_lookup(mcfg)
     if kind == "independent":
-        return IndependentEnsemble([lookup[m] for m in spec["members"]], seed, n_estimators)
+        # members are names of joint_ensemble members, or inline member specs
+        members = [lookup[m] if isinstance(m, str) else m for m in spec["members"]]
+        return IndependentEnsemble(members, seed, n_estimators)
     if kind == "chain":
         return ClassifierChains(lookup["logreg"], seed, int(spec.get("n_chains", 6)),
                                 int(mcfg["validation"]["inner_folds"]))

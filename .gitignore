@@ -11,3 +11,5 @@ frontend/test-results/
 frontend/playwright-report/
 tools/.cache/
 *.log
+.scratch/
+test-results/

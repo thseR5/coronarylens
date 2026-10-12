@@ -8,6 +8,7 @@ import type { StructureSpec } from '../types/config'
 import { NEUTRAL_VESSEL, NOT_MODELLED, riskColor } from './colorScale'
 import { makeContextMaterial, makeVesselMaterial, makeXrayMaterial, stripeUniforms, type LitMaterial } from './materials'
 import { prefersReducedMotion, useSceneLocal } from './sceneState'
+import { ahaSegmentSpecs, type SegmentSpec } from './aha'
 
 const MYOCARDIUM = '#9b7f7a'
 const CONTEXT_STYLE: Record<string, { color: string; opacity: number }> = {
@@ -20,7 +21,7 @@ const CONTEXT_STYLE: Record<string, { color: string; opacity: number }> = {
 const TRANSITION_MS = 400
 const TERRITORY_MIX = 0.55
 // Nodes that beat with the myocardium (scaled about the heart centre = origin). Aorta pulses subtly.
-const BEAT_AMPLITUDE: Record<string, number> = { vessel: 0.035, territory: 0.035, Myocardium: 0.035, LeftMain: 0.035, Aorta: 0.01 }
+const BEAT_AMPLITUDE: Record<string, number> = { vessel: 0.035, territory: 0.035, segment: 0.035, Myocardium: 0.035, LeftMain: 0.035, Aorta: 0.01 }
 
 export interface Hit {
   node: string
@@ -29,8 +30,10 @@ export interface Hit {
   y: number
 }
 
+const isTerritory = (role: string) => role === 'territory' || role === 'segment'
+
 interface NodeRec {
-  spec: StructureSpec
+  spec: StructureSpec & { segment?: number }
   mesh: THREE.Mesh
   basePos: THREE.Vector3
   baseScale: THREE.Vector3
@@ -95,13 +98,16 @@ function computeAnchor(mesh: THREE.Mesh): { anchor: THREE.Vector3 } {
 }
 
 export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h: Hit | null) => void }) {
-  const structures = useStore((s) => s.config!.anatomy.structures)
+  const anatomy = useStore((s) => s.config!.anatomy)
+  // config structures + the 17 AHA segment meshes (vessel mapping shared with the 2D bullseye)
+  const structures = useMemo<(StructureSpec | SegmentSpec)[]>(() => [...anatomy.structures, ...ahaSegmentSpecs(anatomy)], [anatomy])
+  const hoveredSegment = useStore((s) => s.hoveredSegment)
+  const hoverSegment = useStore((s) => s.hoverSegment)
   const analysis = useStore((s) => s.analysis)
   const hovered = useStore((s) => s.hovered)
   const selected = useStore((s) => s.selected)
   const view = useStore((s) => s.view)
   const pr = useStore((s) => s.features.pr)
-  const hover = useStore((s) => s.hover)
   const select = useStore((s) => s.select)
   const heartbeat = useSceneLocal((s) => s.heartbeat)
   const labels = useSceneLocal((s) => s.labels)
@@ -121,7 +127,7 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
       if (spec.role === 'vessel') {
         solid = makeVesselMaterial(lite)
         ;(solid as LitMaterial).side = THREE.DoubleSide
-      } else if (spec.role === 'territory') {
+      } else if (isTerritory(spec.role)) {
         solid = makeContextMaterial(MYOCARDIUM, 1, lite)
         xray = makeXrayMaterial('#e8b4a8')
       } else if (spec.node === 'LeftMain') {
@@ -135,7 +141,7 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
       mesh.renderOrder = (solid as THREE.Material).transparent ? 2 : 0
       const interactive = spec.role !== 'context' || spec.node === 'LeftMain' || spec.node === 'Myocardium'
       if (!interactive) mesh.raycast = () => {}
-      const initial = new THREE.Color(spec.role === 'vessel' ? NEUTRAL_VESSEL : spec.role === 'territory' ? MYOCARDIUM : '#000000')
+      const initial = new THREE.Color(spec.role === 'vessel' ? NEUTRAL_VESSEL : isTerritory(spec.role) ? MYOCARDIUM : '#000000')
       if (spec.role === 'vessel') (solid as LitMaterial).color.copy(initial)
       const a = spec.role === 'vessel' || spec.node === 'LeftMain' ? computeAnchor(mesh) : undefined
       recs.set(spec.node, {
@@ -182,10 +188,12 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
       let to: THREE.Color | null = null
       const p = spec.target ? analysis?.vessels[spec.target]?.p : undefined
       if (spec.role === 'vessel') to = p == null ? new THREE.Color(NEUTRAL_VESSEL) : new THREE.Color().setRGB(...riskColor(p), THREE.SRGBColorSpace)
-      if (spec.role === 'territory') {
+      if (isTerritory(spec.role)) {
         to = new THREE.Color(MYOCARDIUM)
         if (p != null && view.showTerritories)
           to.lerp(new THREE.Color().setRGB(...riskColor(p), THREE.SRGBColorSpace), TERRITORY_MIX)
+        // alternate lightness by segment so borders between same-vessel segments stay visible (hue unchanged)
+        if (spec.role === 'segment' && (spec as { segment?: number }).segment! % 2 === 0) to.multiplyScalar(0.86)
       }
       if (!to || to.equals(r.color.to)) continue
       r.color.from.copy(r.color.cur)
@@ -196,12 +204,17 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
   }, [nodes, analysis, view.showTerritories, invalidate])
 
   // ---- visibility / x-ray / highlight
+  const hasSegments = useMemo(() => [...nodes.values()].some((r) => r.spec.role === 'segment'), [nodes])
   useEffect(() => {
     for (const r of nodes.values()) {
       const n = r.spec.node
       if (n === 'RibCage' || n === 'Sternum') r.mesh.visible = view.showRibs
       if (n === 'Lungs') r.mesh.visible = view.showLungs
       if (n === 'Aorta') r.mesh.visible = view.showAorta
+      // AHA segments (default) and nearest-artery (Voronoi) territories are alternative views of the same LV surface;
+      // the procedural fallback has no segment meshes, so it always shows its territories
+      if (r.spec.role === 'segment') r.mesh.visible = view.territoryMode === 'aha'
+      if (r.spec.role === 'territory') r.mesh.visible = view.territoryMode === 'voronoi' || !hasSegments
       // Always (re)bind: under React StrictMode the memo above runs twice and the mesh may hold the
       // discarded run's material, so colour/stripe updates on `r.solid` would never be drawn.
       r.mesh.material = view.xray && r.xray ? r.xray : r.solid
@@ -209,9 +222,10 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
       const target = r.spec.target
       // 0 = normal, 1 = hovered, 2 = selected; applied in useFrame as an emissive boost in the vessel's own hue
       r.hot = target == null ? 0 : target === selected ? 2 : target === hovered ? 1 : 0
+      if (r.spec.segment != null && r.spec.segment === hoveredSegment) r.hot = 3 // the exact hovered segment
     }
     invalidate()
-  }, [nodes, view.showRibs, view.showLungs, view.showAorta, view.xray, hovered, selected, invalidate])
+  }, [nodes, view.showRibs, view.showLungs, view.showAorta, view.xray, view.territoryMode, hasSegments, hovered, hoveredSegment, selected, invalidate])
 
   // ---- uncertain-status stripes (target values; faded in useFrame)
   const stripeTarget = useRef(new Map<string, number>())
@@ -236,10 +250,10 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
       const e = k < 1 ? 1 - (1 - k) ** 3 : 1
       if (k < 1) animating = true
       r.color.cur.copy(r.color.from).lerp(r.color.to, e)
-      if (r.spec.role === 'vessel' || r.spec.role === 'territory') {
+      if (r.spec.role === 'vessel' || isTerritory(r.spec.role)) {
         const m = r.solid as LitMaterial
         m.color.copy(r.color.cur)
-        const boost = r.spec.role === 'vessel' ? [0, 0.35, 0.6][r.hot] : [0, 0.12, 0.18][r.hot]
+        const boost = r.spec.role === 'vessel' ? [0, 0.35, 0.6, 0.6][r.hot] : [0, 0.12, 0.18, 0.5][r.hot]
         m.emissive.copy(r.color.cur).multiplyScalar(boost)
       }
       // stripes fade
@@ -273,12 +287,14 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
     const r = nodes.get(node)
     if (!r) return
     const v = vesselOf(node)
-    if (v !== useStore.getState().hovered) hover(v)
+    const seg = r.spec.segment ?? null
+    const st = useStore.getState()
+    if (v !== st.hovered || seg !== st.hoveredSegment) hoverSegment(seg, v)
     onHit({ node, label: r.spec.label, x: e.nativeEvent.clientX, y: e.nativeEvent.clientY })
     document.body.style.cursor = v ? 'pointer' : 'default'
   }
   const onOut = () => {
-    hover(null)
+    hoverSegment(null, null)
     onHit(null)
     document.body.style.cursor = 'default'
   }

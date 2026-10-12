@@ -1,0 +1,61 @@
+{
+ "build": "vite production build + preview, real FastAPI backend",
+ "machine": "Apple M2, 8 GB; idle (iCloud paused, Chrome quiet); load before runs 2-3 is the previous run's processes winding down",
+ "n_per_run": 40,
+ "debounce_ms": 100,
+ "targets_p95_ms": {
+  "analyze_path": 300,
+  "explain_path": 700
+ },
+ "runs": [
+  {
+   "run": 1,
+   "load_1min_before": 3.95,
+   "analyze_path_ms": {
+    "p50": 157,
+    "p95": 159
+   },
+   "explain_path_ms": {
+    "p50": 253,
+    "p95": 271
+   },
+   "explain_response_ms": {
+    "p50": 224,
+    "p95": 240
+   }
+  },
+  {
+   "run": 2,
+   "load_1min_before": 21.91,
+   "analyze_path_ms": {
+    "p50": 157,
+    "p95": 159
+   },
+   "explain_path_ms": {
+    "p50": 240,
+    "p95": 242
+   },
+   "explain_response_ms": {
+    "p50": 213,
+    "p95": 220
+   }
+  },
+  {
+   "run": 3,
+   "load_1min_before": 14.36,
+   "analyze_path_ms": {
+    "p50": 156,
+    "p95": 158
+   },
+   "explain_path_ms": {
+    "p50": 240,
+    "p95": 242
+   },
+   "explain_response_ms": {
+    "p50": 213,
+    "p95": 218
+   }
+  }
+ ],
+ "note": "input change -> painted probabilities + vessel colour targets (analyze) / painted SHAP panel (explain); includes the debounce"
+}

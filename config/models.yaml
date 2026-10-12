@@ -26,6 +26,13 @@ benchmarks:
   independent_ensemble:
     kind: independent           # one binary ensemble per target (CAD, LAD, LCX, RCA)
     members: [logreg, rf, et]
+  regularized_logreg:
+    kind: independent           # four separate elastic-net LRs (same settings as the joint model's LR member)
+    members: [logreg]
+  naive_logreg:
+    kind: independent           # four separate default logistic regressions: the typical baseline
+    members:
+      - {name: naive_lr, cls: LogReg, params: {C: 1.0}, weight: 1.0}
   classifier_chains:
     kind: chain                 # ensemble of chains, random vessel orders, OOF probabilities
     n_chains: 6

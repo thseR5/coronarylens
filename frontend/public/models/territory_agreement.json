@@ -1,0 +1,225 @@
+{
+ "method": "nearest-artery (Voronoi) partition of the LV surface vs AHA 17-segment standard assignment",
+ "summary": "aligned with the AHA 17-segment convention (14/17 segments agree); the partition was adjusted toward the AHA convention during development, so this is not independent validation",
+ "disagreeing_segments": [
+  {
+   "segment": 1,
+   "name": "basal anterior",
+   "standard": "LAD",
+   "partition": "LCX",
+   "share": 0.958,
+   "reason": "basal boundary segment: the LCX runs in the left AV groove right next to the base, so surface distance favours it over the proximal LAD"
+  },
+  {
+   "segment": 3,
+   "name": "basal inferoseptal",
+   "standard": "RCA",
+   "partition": "LAD",
+   "share": 0.511,
+   "reason": "basal boundary segment: the septum is really supplied by intramyocardial septal perforators (LAD) and the PDA (RCA); perforators are not in the mesh, so surface distance decides"
+  },
+  {
+   "segment": 11,
+   "name": "mid inferolateral",
+   "standard": "LCX",
+   "partition": "RCA",
+   "share": 0.597,
+   "reason": "inferolateral boundary: supplied by RCA posterolateral branches in right-dominant hearts and by the LCX in left-dominant hearts"
+  }
+ ],
+ "area_weighted_agreement": 0.742,
+ "segments_majority_agree": 14,
+ "segments_total": 17,
+ "agreeing_segments": [
+  2,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17
+ ],
+ "per_vessel_area_agreement": {
+  "LAD": 0.765,
+  "LCX": 0.623,
+  "RCA": 0.834
+ },
+ "per_segment": {
+  "1": {
+   "standard": "LAD",
+   "majority": "LCX",
+   "faces": 136,
+   "area_share": {
+    "LAD": 0.042,
+    "LCX": 0.958
+   }
+  },
+  "2": {
+   "standard": "LAD",
+   "majority": "LAD",
+   "faces": 334,
+   "area_share": {
+    "LAD": 0.779,
+    "LCX": 0.221
+   }
+  },
+  "3": {
+   "standard": "RCA",
+   "majority": "LAD",
+   "faces": 106,
+   "area_share": {
+    "LAD": 0.511,
+    "LCX": 0.147,
+    "RCA": 0.342
+   }
+  },
+  "4": {
+   "standard": "RCA",
+   "majority": "RCA",
+   "faces": 113,
+   "area_share": {
+    "LCX": 0.051,
+    "RCA": 0.949
+   }
+  },
+  "5": {
+   "standard": "LCX",
+   "majority": "LCX",
+   "faces": 155,
+   "area_share": {
+    "LCX": 0.562,
+    "RCA": 0.438
+   }
+  },
+  "6": {
+   "standard": "LCX",
+   "majority": "LCX",
+   "faces": 91,
+   "area_share": {
+    "LCX": 1.0
+   }
+  },
+  "7": {
+   "standard": "LAD",
+   "majority": "LAD",
+   "faces": 101,
+   "area_share": {
+    "LAD": 0.818,
+    "LCX": 0.182
+   }
+  },
+  "8": {
+   "standard": "LAD",
+   "majority": "LAD",
+   "faces": 86,
+   "area_share": {
+    "LAD": 1.0
+   }
+  },
+  "9": {
+   "standard": "RCA",
+   "majority": "RCA",
+   "faces": 26,
+   "area_share": {
+    "LAD": 0.292,
+    "RCA": 0.708
+   }
+  },
+  "10": {
+   "standard": "RCA",
+   "majority": "RCA",
+   "faces": 90,
+   "area_share": {
+    "RCA": 1.0
+   }
+  },
+  "11": {
+   "standard": "LCX",
+   "majority": "RCA",
+   "faces": 72,
+   "area_share": {
+    "LCX": 0.403,
+    "RCA": 0.597
+   }
+  },
+  "12": {
+   "standard": "LCX",
+   "majority": "LCX",
+   "faces": 48,
+   "area_share": {
+    "LAD": 0.115,
+    "LCX": 0.885
+   }
+  },
+  "13": {
+   "standard": "LAD",
+   "majority": "LAD",
+   "faces": 76,
+   "area_share": {
+    "LAD": 1.0
+   }
+  },
+  "14": {
+   "standard": "LAD",
+   "majority": "LAD",
+   "faces": 75,
+   "area_share": {
+    "LAD": 0.917,
+    "RCA": 0.083
+   }
+  },
+  "15": {
+   "standard": "RCA",
+   "majority": "RCA",
+   "faces": 58,
+   "area_share": {
+    "RCA": 1.0
+   }
+  },
+  "16": {
+   "standard": "LCX",
+   "majority": "LCX",
+   "faces": 38,
+   "area_share": {
+    "LAD": 0.233,
+    "LCX": 0.4,
+    "RCA": 0.367
+   }
+  },
+  "17": {
+   "standard": "LAD",
+   "majority": "LAD",
+   "faces": 117,
+   "area_share": {
+    "LAD": 0.71,
+    "LCX": 0.057,
+    "RCA": 0.233
+   }
+  }
+ },
+ "history": [
+  {
+   "version": 1,
+   "seeds": "all vessel branches",
+   "frame": "scene frame",
+   "area_weighted_agreement": 0.483,
+   "segments_majority_agree": 9
+  },
+  {
+   "version": 2,
+   "seeds": "LV-supplying branches only",
+   "frame": "scene frame",
+   "area_weighted_agreement": 0.553,
+   "segments_majority_agree": 10
+  }
+ ],
+ "frame": "septum toward the RV cavity centroid (AHA-style)",
+ "note": "Segment geometry approximated from the mesh (PCA long axis; septal direction toward the RV cavity, AHA-style); illustrative only. Real supply territories vary with coronary dominance."
+}

@@ -104,6 +104,8 @@ FAMILIES = {
     "joint_fe": ("joint_ensemble", {"fe": True}, ["none", "temperature", "vector"]),
     "lightgbm": ("lightgbm", {}, ["none", "temperature"]),
     "independent": ("independent_ensemble", {}, ["none"]),
+    "naive_lr": ("naive_logreg", {}, ["none"]),
+    "regularized_lr": ("regularized_logreg", {}, ["none"]),
     "chains": ("classifier_chains", {}, ["none"]),
 }
 

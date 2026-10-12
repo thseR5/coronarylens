@@ -87,11 +87,12 @@ export default function WhyPanel() {
         </div>
       ) : (
         <>
-          <div className="text-xs text-muted">
+          <div className={`text-xs text-muted transition-opacity ${loading ? 'opacity-60' : ''}`} aria-busy={loading}>
+            {loading && <span className="mr-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent align-middle" />}
             {TARGET_LABEL[target]}: from the cohort average <span className="font-mono text-text">{pct(ex.base_value)}</span> to this
             patient's <span className="font-mono text-text">{pct(ex.output)}</span>
           </div>
-          <div className="flex flex-col gap-1" role="list" aria-label="Feature contributions">
+          <div className={`flex flex-col gap-1 transition-opacity ${loading ? 'opacity-60' : ''}`} role="list" aria-label="Feature contributions">
             {rows.map((r, i) => {
               const s = steps[i]
               const left = Math.min(s.start, s.end)

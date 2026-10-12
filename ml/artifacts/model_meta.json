@@ -3,7 +3,7 @@
  "variant": "joint_vector",
  "feature_engineering": false,
  "calibration": "vector",
- "model_version": "joint_ensemble-joint_vector-73934324-59f919ac",
+ "model_version": "joint_ensemble-joint_vector-73934324-96151587",
  "seed": 42,
  "data_sha256": "739343245c2ba578b541370217531750d8e936022f928b83e0d91756caa3ff0b",
  "quick": false,
