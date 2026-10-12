@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { expect, test } from '@playwright/test'
 
 const N = Number(process.env.CL_LATENCY_N ?? 40)
@@ -56,6 +56,7 @@ test('live update latency (production build): analyze path and explain path', as
   console.log(JSON.stringify(out))
   const tag = process.env.CL_REDUCED_MOTION ? '-reduced-motion' : ''
   // single run -> gitignored file; docs/latency.json holds the curated multi-run record
+  mkdirSync('../test-results', { recursive: true })
   writeFileSync(`../test-results/latency-last-run${tag}.json`, JSON.stringify(out, null, 1) + '\n')
   expect(out.analyze_path_ms.p95).toBeLessThanOrEqual(300)
   expect(out.explain_path_ms.p95).toBeLessThanOrEqual(700)

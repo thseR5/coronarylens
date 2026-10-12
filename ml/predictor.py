@@ -27,6 +27,8 @@ TARGET_KEYS = {"CAD": "cad", "LAD": "LAD", "LCX": "LCX", "RCA": "RCA"}
 def load_calibrator(d: dict) -> Calibrator:
     c = Calibrator(d["method"])
     c.T_, c.w_, c.b_ = float(d["T"]), np.array(d["w"]), np.array(d["b"])
+    if d.get("W") is not None:
+        c.W_ = np.array(d["W"])
     return c
 
 
@@ -43,7 +45,8 @@ class ServedModel:
         self.columns: list[str] = pre["columns"]
         self.imputation: dict[str, Any] = pre["imputation"]
         self.train_ranges: dict[str, list[float]] = pre["train_ranges"]
-        self.bootstrap = BootstrapEnsemble(joblib.load(a / "bootstrap_ensemble.joblib"))
+        boot = joblib.load(a / "bootstrap_ensemble.joblib")
+        self.bootstrap = boot if hasattr(boot, "intervals") else BootstrapEnsemble(boot)
         self.domain = joblib.load(a / "domain.joblib")
         self.knn = joblib.load(a / "knn.joblib")
         self.background = np.load(a / "shap_background.npy")

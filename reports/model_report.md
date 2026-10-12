@@ -20,22 +20,38 @@ Mean ± SD over outer folds. Thresholds (max-F1) and calibration fitted on inner
 | lightgbm_temperature | 0.923 ± 0.034 | 0.848 ± 0.053 | 0.727 ± 0.055 | 0.736 ± 0.048 | 0.748 ± 0.053 | 0.705 ± 0.086 | 0.517 | 0.172 | 1.639 | 0.000 |
 | independent | 0.924 ± 0.043 | 0.854 ± 0.056 | 0.707 ± 0.052 | 0.742 ± 0.056 | 0.772 ± 0.048 | 0.776 ± 0.069 | 0.501 | 0.166 | 1.663 | 0.059 |
 | naive_lr | 0.897 ± 0.041 | 0.800 ± 0.060 | 0.626 ± 0.069 | 0.706 ± 0.068 | 0.730 ± 0.055 | 0.731 ± 0.081 | 0.718 | 0.211 | 2.432 | 0.321 |
+| regularized_lr | 0.914 ± 0.041 | 0.833 ± 0.053 | 0.654 ± 0.066 | 0.725 ± 0.069 | 0.752 ± 0.055 | 0.758 ± 0.082 | 0.543 | 0.180 | 1.842 | 0.248 |
 | chains | 0.914 ± 0.040 | 0.834 ± 0.052 | 0.655 ± 0.065 | 0.724 ± 0.068 | 0.752 ± 0.055 | 0.757 ± 0.082 | 0.544 | 0.181 | 1.843 | 0.234 |
 
 **Selection:** simplest joint variant within 1 SE of best mean log-loss and within 1 SE of best mean ROC-AUC (means over CAD/LAD/LCX/RCA per outer fold). Eligible: joint_vector, joint_fe_vector. **Chosen: joint_vector**.
 
 Engineered features (paired, same folds): Δ log-loss -0.0005, Δ AUC +0.0024 → kept: False.
 
-## Locked test split (evaluated once), 95% bootstrap CIs
+## Served model: Part 2 sprint procedure (headline)
+
+748 procedures screened on the training split; 10 finalists (pre-registered rule) went into nested CV (10x5 repeated stratified (seed 42); 5-fold OOF + 5-fold cross-fitted post-processing); selection happens inside every outer fold, so the outer score accounts for the search.
+
+Served on the full training split: **catboost+catboost_d3+svm|avg|vector**.
+
+| metric | served procedure (mean ± SD) | previous served model | paired diff (mean ± SD) | folds improved |
+|---|---|---|---|---|
+| CAD ROC-AUC | 0.934 ± 0.037 | 0.927 ± 0.041 | +0.0073 ± 0.0109 | 39/50 |
+| LAD ROC-AUC | 0.866 ± 0.043 | 0.851 ± 0.048 | +0.0149 ± 0.0193 | 35/50 |
+| LCX ROC-AUC | 0.708 ± 0.059 | 0.714 ± 0.052 | -0.0058 ± 0.0460 | 23/50 |
+| RCA ROC-AUC | 0.737 ± 0.056 | 0.744 ± 0.055 | -0.0068 ± 0.0416 | 23/50 |
+| pattern log-loss | 1.5084 ± 0.0918 | 1.5754 ± 0.0787 | -0.0670 ± 0.0392 | 46/50 |
+| mean Brier | 0.1579 ± 0.0138 | 0.1617 ± 0.0122 | -0.0039 ± 0.0059 | 40/50 |
+
+## Locked test split, 95% bootstrap CIs (second look: after the Part 2 sprint)
 
 | model | target | ROC-AUC | PR-AUC | Brier | F1 | sensitivity | specificity |
 |---|---|---|---|---|---|---|---|
-| served | CAD | 0.920 [0.832, 0.981] | 0.967 [0.923, 0.993] | 0.106 [0.064, 0.156] | 0.874 [0.790, 0.938] | 0.864 [0.756, 0.956] | 0.706 [0.471, 0.909] |
-| served | LAD | 0.842 [0.734, 0.930] | 0.887 [0.794, 0.958] | 0.160 [0.114, 0.212] | 0.822 [0.710, 0.909] | 0.833 [0.703, 0.944] | 0.720 [0.542, 0.889] |
-| served | LCX | 0.692 [0.559, 0.817] | 0.537 [0.393, 0.756] | 0.210 [0.174, 0.244] | 0.676 [0.536, 0.794] | 0.920 [0.800, 1.000] | 0.444 [0.290, 0.615] |
-| served | RCA | 0.685 [0.544, 0.814] | 0.629 [0.445, 0.796] | 0.209 [0.169, 0.251] | 0.552 [0.391, 0.697] | 0.696 [0.500, 0.870] | 0.500 [0.350, 0.659] |
-| served | P_GE2 | 0.690 [0.551, 0.819] | 0.575 [0.419, 0.778] | 0.218 [0.180, 0.257] | 0.657 [0.508, 0.773] | 0.815 [0.654, 0.957] | 0.471 [0.310, 0.639] |
-| served | P_3VD | 0.729 [0.582, 0.868] | 0.376 [0.222, 0.653] | 0.150 [0.100, 0.205] | 0.500 [0.303, 0.681] | 0.769 [0.500, 1.000] | 0.646 [0.511, 0.778] |
+| served | CAD | 0.898 [0.798, 0.971] | 0.958 [0.905, 0.991] | 0.111 [0.065, 0.165] | 0.882 [0.809, 0.942] | 0.932 [0.848, 1.000] | 0.529 [0.308, 0.769] |
+| served | LAD | 0.829 [0.714, 0.925] | 0.877 [0.772, 0.954] | 0.167 [0.116, 0.225] | 0.805 [0.694, 0.892] | 0.861 [0.742, 0.968] | 0.600 [0.400, 0.786] |
+| served | LCX | 0.761 [0.636, 0.875] | 0.651 [0.488, 0.857] | 0.198 [0.162, 0.233] | 0.656 [0.508, 0.776] | 0.840 [0.692, 0.964] | 0.500 [0.342, 0.667] |
+| served | RCA | 0.661 [0.511, 0.797] | 0.529 [0.355, 0.741] | 0.220 [0.179, 0.264] | 0.536 [0.364, 0.679] | 0.652 [0.444, 0.840] | 0.526 [0.366, 0.694] |
+| served | P_GE2 | 0.702 [0.565, 0.826] | 0.612 [0.447, 0.819] | 0.217 [0.176, 0.260] | 0.610 [0.448, 0.738] | 0.667 [0.480, 0.833] | 0.588 [0.417, 0.758] |
+| served | P_3VD | 0.732 [0.580, 0.876] | 0.439 [0.236, 0.705] | 0.150 [0.103, 0.202] | 0.513 [0.308, 0.690] | 0.769 [0.500, 1.000] | 0.667 [0.533, 0.796] |
 | independent | CAD | 0.917 [0.838, 0.977] | 0.968 [0.931, 0.992] | 0.109 [0.071, 0.150] | 0.874 [0.790, 0.938] | 0.864 [0.756, 0.956] | 0.706 [0.471, 0.909] |
 | independent | LAD | 0.820 [0.702, 0.917] | 0.874 [0.774, 0.949] | 0.168 [0.122, 0.219] | 0.805 [0.696, 0.892] | 0.861 [0.742, 0.968] | 0.600 [0.400, 0.792] |
 | independent | LCX | 0.716 [0.576, 0.838] | 0.575 [0.425, 0.795] | 0.212 [0.174, 0.252] | 0.677 [0.536, 0.794] | 0.880 [0.739, 1.000] | 0.500 [0.342, 0.667] |
@@ -45,42 +61,42 @@ Engineered features (paired, same folds): Δ log-loss -0.0005, Δ AUC +0.0024 �
 
 Coherence violation rate on test: served 0.000, independent 0.000.
 
-DeLong (served − independent): CAD Δ=+0.003 (p=0.76); LAD Δ=+0.022 (p=0.22); LCX Δ=-0.023 (p=0.40); RCA Δ=-0.027 (p=0.39); P_GE2 Δ=-0.013 (p=0.53)
+DeLong (served − independent): CAD Δ=-0.019 (p=0.22); LAD Δ=+0.009 (p=0.57); LCX Δ=+0.046 (p=0.18); RCA Δ=-0.051 (p=0.26); P_GE2 Δ=-0.001 (p=0.98)
 
 ## Conformal (90% target), test split
 
 | target | coverage | class-1 cov. | class-0 cov. | mean set size | uncertain | empty |
 |---|---|---|---|---|---|---|
-| CAD | 0.869 | 0.864 | 0.882 | 1.10 | 0.10 | 0.00 |
-| LAD | 0.885 | 0.861 | 0.920 | 1.33 | 0.33 | 0.00 |
-| LCX | 0.918 | 0.920 | 0.917 | 1.62 | 0.62 | 0.00 |
-| RCA | 0.902 | 0.826 | 0.947 | 1.56 | 0.56 | 0.00 |
+| CAD | 0.869 | 0.864 | 0.882 | 1.07 | 0.07 | 0.00 |
+| LAD | 0.836 | 0.861 | 0.800 | 1.25 | 0.25 | 0.00 |
+| LCX | 0.918 | 0.920 | 0.917 | 1.54 | 0.54 | 0.00 |
+| RCA | 0.869 | 0.826 | 0.895 | 1.52 | 0.52 | 0.00 |
 
 ## Calibration (test)
 
 | target | slope | intercept (CITL) | ECE |
 |---|---|---|---|
-| CAD | 1.12 | -0.28 | 0.064 |
-| LAD | 1.25 | -0.14 | 0.084 |
-| LCX | 1.23 | +0.08 | 0.075 |
-| RCA | 0.96 | -0.06 | 0.119 |
-| P_GE2 | 0.93 | +0.01 | 0.169 |
+| CAD | 0.95 | -0.24 | 0.088 |
+| LAD | 1.03 | -0.15 | 0.092 |
+| LCX | 1.34 | +0.04 | 0.140 |
+| RCA | 0.67 | -0.07 | 0.082 |
+| P_GE2 | 0.80 | +0.02 | 0.068 |
 
 ## Subgroups (CV OOF ROC-AUC)
 
 | group | n | CAD | LAD | LCX | RCA |
 |---|---|---|---|---|---|
-| sex=male | 138 | 0.897 | 0.856 | 0.722 | 0.696 |
-| sex=female | 104 | 0.953 | 0.838 | 0.672 | 0.796 |
-| age<50 | 47 | 0.888 | 0.877 | 0.724 | 0.862 |
-| age50-64 | 119 | 0.944 | 0.845 | 0.718 | 0.746 |
-| age>=65 | 76 | 0.825 | 0.769 | 0.516 | 0.605 |
+| sex=male | 138 | 0.905 | 0.870 | 0.718 | 0.689 |
+| sex=female | 104 | 0.960 | 0.854 | 0.693 | 0.792 |
+| age<50 | 47 | 0.911 | 0.902 | 0.740 | 0.832 |
+| age50-64 | 119 | 0.949 | 0.856 | 0.707 | 0.751 |
+| age>=65 | 76 | 0.840 | 0.786 | 0.539 | 0.588 |
 
 ## Explanations
 
-Method owen-partition-sampled; additivity max error 1.33e-15.
-Agreement of global mean |Owen| with permutation importance (test AUC drop): CAD ρ=0.57, top-10 overlap 8; LAD ρ=0.14, top-10 overlap 4; LCX ρ=0.13, top-10 overlap 2; RCA ρ=0.12, top-10 overlap 4; P_GE2 ρ=0.25, top-10 overlap 5
+Method owen-partition-sampled; additivity max error 1.44e-15.
+Agreement of global mean |Owen| with permutation importance (test AUC drop): CAD ρ=-0.01, top-10 overlap 5; LAD ρ=0.46, top-10 overlap 3; LCX ρ=0.35, top-10 overlap 5; RCA ρ=0.16, top-10 overlap 3; P_GE2 ρ=0.17, top-10 overlap 4
 
-Top CAD features (mean |Owen value|, probability scale): typical_chest_pain 0.124, age 0.050, region_rwma 0.040, atypical 0.040, htn 0.039, t_inversion 0.031, ef_tte 0.028, dm 0.022
+Top CAD features (mean |Owen value|, probability scale): typical_chest_pain 0.123, age 0.050, ef_tte 0.048, region_rwma 0.046, atypical 0.035, t_inversion 0.028, htn 0.020, tg 0.019
 
 Figures: `reports/figures/` (cv_auc_comparison, reliability_*, dca_*, learning_curve, deletion_curve, global_shap_cad).

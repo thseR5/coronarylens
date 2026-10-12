@@ -7,7 +7,8 @@
   "analyze_path": 300,
   "explain_path": 700
  },
- "runs": [
+ "note": "input change -> painted probabilities + vessel colour targets (analyze) / painted SHAP panel (explain); includes the debounce",
+ "runs_part1_model": [
   {
    "run": 1,
    "load_1min_before": 3.95,
@@ -57,5 +58,39 @@
    }
   }
  ],
- "note": "input change -> painted probabilities + vessel colour targets (analyze) / painted SHAP panel (explain); includes the debounce"
+ "runs_served_procedure": [
+  {
+   "run": 1,
+   "load_1min_before": 3.38,
+   "analyze_path_ms": {
+    "p50": 174,
+    "p95": 175
+   },
+   "explain_path_ms": {
+    "p50": 225,
+    "p95": 241
+   },
+   "explain_response_ms": {
+    "p50": 203,
+    "p95": 210
+   }
+  },
+  {
+   "run": 2,
+   "load_1min_before": 3.77,
+   "analyze_path_ms": {
+    "p50": 174,
+    "p95": 175
+   },
+   "explain_path_ms": {
+    "p50": 224,
+    "p95": 240
+   },
+   "explain_response_ms": {
+    "p50": 202,
+    "p95": 208
+   }
+  }
+ ],
+ "note_served_procedure": "after Part 2 the served model is the sprint procedure (CatBoost + CatBoost depth-3 + SVM); FastSVC + threaded CatBoost at serving time"
 }

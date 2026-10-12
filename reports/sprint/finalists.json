@@ -1,184 +1,179 @@
 {
- "n_screened": 278,
+ "n_screened": 748,
  "tags": [
-  "A1"
+  "A1",
+  "A2"
  ],
  "rule": "see docs/EXPERIMENTS.md 'Finalist-selection rule'",
  "finalists": [
   {
-   "name": "lr_l2|avg|dirichlet",
+   "name": "catboost_d3+sel_joint+svm|avg|dirichlet",
    "reason": "top-8 log-loss",
    "learners": [
-    "lr_l2"
+    "catboost_d3",
+    "sel_joint",
+    "svm"
    ],
    "combine": "avg",
    "calib": "dirichlet",
    "screen": {
-    "pattern_log_loss": 1.5275529982262626,
-    "auc_CAD": 0.923581872842377,
-    "auc_LAD": 0.8466123756755508,
-    "auc_LCX": 0.7052924648786718,
-    "auc_RCA": 0.732497323849366,
-    "from": "A1"
+    "pattern_log_loss": 1.5048759162115923,
+    "auc_CAD": 0.9357458657122523,
+    "auc_LAD": 0.8736481826716033,
+    "auc_LCX": 0.7268244941856556,
+    "auc_RCA": 0.753979419347441,
+    "from": "A2"
    }
   },
   {
-   "name": "lr_l2_strong|avg|dirichlet",
+   "name": "ebm+bayes_lr+sel_joint|avg|dirichlet",
    "reason": "top-8 log-loss",
    "learners": [
-    "lr_l2_strong"
+    "ebm",
+    "bayes_lr",
+    "sel_joint"
    ],
    "combine": "avg",
    "calib": "dirichlet",
    "screen": {
-    "pattern_log_loss": 1.5286691048194958,
-    "auc_CAD": 0.9309925462026303,
-    "auc_LAD": 0.8550559897280147,
-    "auc_LCX": 0.7127188277206424,
-    "auc_RCA": 0.7437167386101771,
-    "from": "A1"
+    "pattern_log_loss": 1.5051469699798843,
+    "auc_CAD": 0.9404256863584596,
+    "auc_LAD": 0.8691008857666881,
+    "auc_LCX": 0.7149239766081871,
+    "auc_RCA": 0.7386038076426571,
+    "from": "A2"
    }
   },
   {
-   "name": "catboost|avg|dirichlet",
+   "name": "catboost_d3+bayes_lr+sel_joint|avg|dirichlet",
    "reason": "top-8 log-loss",
    "learners": [
-    "catboost"
+    "catboost_d3",
+    "bayes_lr",
+    "sel_joint"
    ],
    "combine": "avg",
    "calib": "dirichlet",
    "screen": {
-    "pattern_log_loss": 1.5291932576155023,
-    "auc_CAD": 0.9358474839819378,
-    "auc_LAD": 0.8752874752105587,
-    "auc_LCX": 0.735260200309202,
-    "auc_RCA": 0.7411485291343475,
-    "from": "A1"
+    "pattern_log_loss": 1.5054489381634475,
+    "auc_CAD": 0.9411893521977555,
+    "auc_LAD": 0.8704247436690613,
+    "auc_LCX": 0.7151681118505075,
+    "auc_RCA": 0.7439827039663252,
+    "from": "A2"
    }
   },
   {
-   "name": "catboost_d3|avg|dirichlet",
+   "name": "catboost_d3+sel_joint+svm|avg|vector",
    "reason": "top-8 log-loss",
    "learners": [
-    "catboost_d3"
+    "catboost_d3",
+    "sel_joint",
+    "svm"
    ],
    "combine": "avg",
-   "calib": "dirichlet",
+   "calib": "vector",
    "screen": {
-    "pattern_log_loss": 1.5294314440957024,
-    "auc_CAD": 0.934714070243482,
-    "auc_LAD": 0.8733734125498017,
-    "auc_LCX": 0.7408322914566109,
-    "auc_RCA": 0.740344921971807,
-    "from": "A1"
+    "pattern_log_loss": 1.5057583098913263,
+    "auc_CAD": 0.936071769500341,
+    "auc_LAD": 0.8739234466388559,
+    "auc_LCX": 0.7270936344693151,
+    "auc_RCA": 0.7533618518148628,
+    "from": "A2"
    }
   },
   {
-   "name": "ebm|avg|dirichlet",
-   "reason": "top-8 log-loss",
-   "learners": [
-    "ebm"
-   ],
-   "combine": "avg",
-   "calib": "dirichlet",
-   "screen": {
-    "pattern_log_loss": 1.5304001421586326,
-    "auc_CAD": 0.9333804570779362,
-    "auc_LAD": 0.8670641665283442,
-    "auc_LCX": 0.7078268468105129,
-    "auc_RCA": 0.7279109454006089,
-    "from": "A1"
-   }
-  },
-  {
-   "name": "lr_en|avg|dirichlet",
-   "reason": "top-8 log-loss",
-   "learners": [
-    "lr_en"
-   ],
-   "combine": "avg",
-   "calib": "dirichlet",
-   "screen": {
-    "pattern_log_loss": 1.5309459061034345,
-    "auc_CAD": 0.9217963735610795,
-    "auc_LAD": 0.8475934362452381,
-    "auc_LCX": 0.7207314646770182,
-    "auc_RCA": 0.7371670384056281,
-    "from": "A1"
-   }
-  },
-  {
-   "name": "catboost+catboost_d3|avg|vector",
+   "name": "catboost+bayes_lr+sel_joint|avg|dirichlet",
    "reason": "top-8 log-loss",
    "learners": [
     "catboost",
-    "catboost_d3"
+    "bayes_lr",
+    "sel_joint"
+   ],
+   "combine": "avg",
+   "calib": "dirichlet",
+   "screen": {
+    "pattern_log_loss": 1.5059180416406883,
+    "auc_CAD": 0.9401652241316107,
+    "auc_LAD": 0.8709409401994312,
+    "auc_LCX": 0.7148533978624724,
+    "auc_RCA": 0.7428679383468159,
+    "from": "A2"
+   }
+  },
+  {
+   "name": "catboost+sel_joint+svm|avg|dirichlet",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "catboost",
+    "sel_joint",
+    "svm"
+   ],
+   "combine": "avg",
+   "calib": "dirichlet",
+   "screen": {
+    "pattern_log_loss": 1.5059441277353232,
+    "auc_CAD": 0.9368991288823222,
+    "auc_LAD": 0.874320283467289,
+    "auc_LCX": 0.7311211937890704,
+    "auc_RCA": 0.7515226723777607,
+    "from": "A2"
+   }
+  },
+  {
+   "name": "catboost+sel_joint+svm|avg|vector",
+   "reason": "top-8 log-loss",
+   "learners": [
+    "catboost",
+    "sel_joint",
+    "svm"
    ],
    "combine": "avg",
    "calib": "vector",
    "screen": {
-    "pattern_log_loss": 1.532962500069398,
-    "auc_CAD": 0.9366945939214847,
-    "auc_LAD": 0.8772120869588678,
-    "auc_LCX": 0.7498968878134032,
-    "auc_RCA": 0.7480465542942325,
-    "from": "A1"
+    "pattern_log_loss": 1.506030597445928,
+    "auc_CAD": 0.9369808846615568,
+    "auc_LAD": 0.8749101589953721,
+    "auc_LCX": 0.7283407945150233,
+    "auc_RCA": 0.7539689440764044,
+    "from": "A2"
    }
   },
   {
-   "name": "lgbm+catboost_d3|learned|vector",
+   "name": "catboost+svm|avg|vector",
    "reason": "top-8 log-loss",
    "learners": [
-    "lgbm",
-    "catboost_d3"
+    "catboost",
+    "svm"
    ],
-   "combine": "learned",
+   "combine": "avg",
    "calib": "vector",
    "screen": {
-    "pattern_log_loss": 1.5334152232036684,
-    "auc_CAD": 0.936425501669199,
-    "auc_LAD": 0.8732822386197202,
-    "auc_LCX": 0.7481796061033811,
-    "auc_RCA": 0.7478607587913492,
-    "from": "A1"
+    "pattern_log_loss": 1.507784297369025,
+    "auc_CAD": 0.9334136041362933,
+    "auc_LAD": 0.8752755131762996,
+    "auc_LCX": 0.7517127108960139,
+    "auc_RCA": 0.7535888234184449,
+    "from": "A2"
    }
   },
   {
-   "name": "rf+lgbm+catboost|learned|vector",
+   "name": "catboost+catboost_d3+svm|avg|vector",
    "reason": "best LCX+RCA AUC",
    "learners": [
-    "rf",
-    "lgbm",
-    "catboost"
-   ],
-   "combine": "learned",
-   "calib": "vector",
-   "screen": {
-    "pattern_log_loss": 1.5378975833287845,
-    "auc_CAD": 0.9383004912920879,
-    "auc_LAD": 0.8747867022052485,
-    "auc_LCX": 0.7503937621832358,
-    "auc_RCA": 0.7492211384459461,
-    "from": "A1"
-   }
-  },
-  {
-   "name": "lgbm+catboost+ebm|learned|vector",
-   "reason": "best mean AUC",
-   "learners": [
-    "lgbm",
     "catboost",
-    "ebm"
+    "catboost_d3",
+    "svm"
    ],
-   "combine": "learned",
+   "combine": "avg",
    "calib": "vector",
    "screen": {
-    "pattern_log_loss": 1.537842206752626,
-    "auc_CAD": 0.9391272723541632,
-    "auc_LAD": 0.8766928999199329,
-    "auc_LCX": 0.7477652752571083,
-    "auc_RCA": 0.7492731597071954,
-    "from": "A1"
+    "pattern_log_loss": 1.5078814782801107,
+    "auc_CAD": 0.9359119871724915,
+    "auc_LAD": 0.8779314231574191,
+    "auc_LCX": 0.7514757007461182,
+    "auc_RCA": 0.7539182618151957,
+    "from": "A2"
    }
   },
   {

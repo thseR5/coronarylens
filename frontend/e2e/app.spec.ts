@@ -53,13 +53,17 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   await expect(page.getByRole('tab', { name: 'RCA', selected: true })).toBeVisible()
   await page.screenshot({ path: '../docs/img/app-rca-selected.png' })
 
-  // Live update latency: change EF and wait for the CAD gauge to change.
-  const gauge = page.getByRole('img', { name: /CAD probability/ })
-  const before = await gauge.getAttribute('aria-label')
+  // Live update: change EF and wait until the app marks the new analysis as painted (probabilities + colours).
+  // (The rounded CAD gauge can stay at the same whole percentage for a saturated patient, so it is not the signal.)
   const ef = page.locator('#feat-ef_tte')
+  const nBefore = await page.evaluate(() => performance.getEntriesByType('mark').filter((m) => m.name.startsWith('cl:analyze:')).length)
   const t0 = Date.now()
   await ef.fill('20')
-  await expect(gauge).not.toHaveAttribute('aria-label', before!, { timeout: 5_000 })
+  await page.waitForFunction(
+    (n) => performance.getEntriesByType('mark').filter((m) => m.name.startsWith('cl:analyze:')).length > n,
+    nBefore,
+    { timeout: 5_000 },
+  )
   const ms = Date.now() - t0
   // Smoke check only: this runs on the Vite DEV server (unbundled modules, HMR). Latency gates live in
   // e2e/latency.spec.ts on the production build (colours <= 300 ms, SHAP <= 700 ms, p95).

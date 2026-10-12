@@ -1,42 +1,45 @@
 [
  {
   "learners": [
-   "lr_l2"
+   "catboost_d3",
+   "sel_joint",
+   "svm"
   ],
   "combine": "avg",
   "calib": "dirichlet"
  },
  {
   "learners": [
-   "lr_l2_strong"
+   "ebm",
+   "bayes_lr",
+   "sel_joint"
   ],
   "combine": "avg",
   "calib": "dirichlet"
  },
  {
   "learners": [
-   "catboost"
+   "catboost_d3",
+   "bayes_lr",
+   "sel_joint"
   ],
   "combine": "avg",
   "calib": "dirichlet"
  },
  {
   "learners": [
-   "catboost_d3"
+   "catboost_d3",
+   "sel_joint",
+   "svm"
   ],
   "combine": "avg",
-  "calib": "dirichlet"
+  "calib": "vector"
  },
  {
   "learners": [
-   "ebm"
-  ],
-  "combine": "avg",
-  "calib": "dirichlet"
- },
- {
-  "learners": [
-   "lr_en"
+   "catboost",
+   "bayes_lr",
+   "sel_joint"
   ],
   "combine": "avg",
   "calib": "dirichlet"
@@ -44,35 +47,36 @@
  {
   "learners": [
    "catboost",
-   "catboost_d3"
+   "sel_joint",
+   "svm"
+  ],
+  "combine": "avg",
+  "calib": "dirichlet"
+ },
+ {
+  "learners": [
+   "catboost",
+   "sel_joint",
+   "svm"
   ],
   "combine": "avg",
   "calib": "vector"
  },
  {
   "learners": [
-   "lgbm",
-   "catboost_d3"
-  ],
-  "combine": "learned",
-  "calib": "vector"
- },
- {
-  "learners": [
-   "rf",
-   "lgbm",
-   "catboost"
-  ],
-  "combine": "learned",
-  "calib": "vector"
- },
- {
-  "learners": [
-   "lgbm",
    "catboost",
-   "ebm"
+   "svm"
   ],
-  "combine": "learned",
+  "combine": "avg",
+  "calib": "vector"
+ },
+ {
+  "learners": [
+   "catboost",
+   "catboost_d3",
+   "svm"
+  ],
+  "combine": "avg",
   "calib": "vector"
  },
  {

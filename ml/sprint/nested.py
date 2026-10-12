@@ -71,6 +71,7 @@ def _outer_fold(i, a, b, X, Y, cols, procs: list[Procedure], inner: int, seed: i
         fit = fit_post(p, oofs, c_oof, y[a])
         P = apply_post(fit, tests, c_test)
         m = score(Yb, P)
+        out[f"{label}_pred"] = {"test_index": b.tolist(), "P": np.round(P, 6).tolist()}
         # max-F1 thresholds from the post-processed inner OOF (training part only)
         P_oof = apply_post(fit, oofs, c_oof)
         mo, mt = marginals(P_oof), marginals(P)
@@ -95,7 +96,7 @@ def run(tag: str, procs: list[Procedure], folds: int = 5, repeats: int = 10, inn
         rows = Parallel(n_jobs=n_jobs)(delayed(_outer_fold)(i, a, b, X, Y, cols, procs, inner, seed)
                                        for i, (a, b) in enumerate(splits))
     rows = sorted(rows, key=lambda r: r["fold"])
-    keys = list(rows[0]["selected"])
+    keys = [k for k in rows[0]["selected"]]
 
     def agg(label):
         return {k: {"mean": float(np.nanmean([r[label][k] for r in rows])),

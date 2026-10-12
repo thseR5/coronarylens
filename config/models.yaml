@@ -3,7 +3,7 @@
 
 seed: 42
 
-served: joint_ensemble
+served: procedure        # Part 2 sprint: the validated selection procedure (docs/EXPERIMENTS.md); was joint_ensemble
 
 validation:
   test_fraction: 0.20          # locked, stratified on vessel pattern; used once
@@ -40,3 +40,25 @@ benchmarks:
     kind: joint
     members:
       - {name: lgbm, cls: LightGBM, params: {n_estimators: 300, learning_rate: 0.03, num_leaves: 7, min_child_samples: 10, subsample: 0.8, colsample_bytree: 0.8}, weight: 1.0}
+
+# Served procedure (Part 2 sprint). On the training split, the same inner selection that the 10x5 nested CV validated
+# (inner 5-fold OOF, cross-fitted post-processing, lowest pattern log-loss) picks one of these finalists; learner
+# specs live in ml/sprint/screen.py SPECS. The finalist list is the output of the pre-registered rule
+# (ml/sprint/finalists.py, reports/sprint/finalists.json); the last entry is the previous served recipe.
+served_procedure:
+  inner_folds: 5
+  bootstrap_overrides:          # lighter refits for the 50-member bootstrap interval ensemble
+    catboost: {iterations: 200}
+    rf: {n_estimators: 100}
+    et: {n_estimators: 100}
+  candidates:
+    - {"learners": ["catboost_d3", "sel_joint", "svm"], "combine": "avg", "calib": "dirichlet"}
+    - {"learners": ["ebm", "bayes_lr", "sel_joint"], "combine": "avg", "calib": "dirichlet"}
+    - {"learners": ["catboost_d3", "bayes_lr", "sel_joint"], "combine": "avg", "calib": "dirichlet"}
+    - {"learners": ["catboost_d3", "sel_joint", "svm"], "combine": "avg", "calib": "vector"}
+    - {"learners": ["catboost", "bayes_lr", "sel_joint"], "combine": "avg", "calib": "dirichlet"}
+    - {"learners": ["catboost", "sel_joint", "svm"], "combine": "avg", "calib": "dirichlet"}
+    - {"learners": ["catboost", "sel_joint", "svm"], "combine": "avg", "calib": "vector"}
+    - {"learners": ["catboost", "svm"], "combine": "avg", "calib": "vector"}
+    - {"learners": ["catboost", "catboost_d3", "svm"], "combine": "avg", "calib": "vector"}
+    - {"learners": ["lr_en", "rf", "et"], "combine": "avg", "calib": "vector"}

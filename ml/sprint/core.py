@@ -24,7 +24,7 @@ from sklearn.preprocessing import StandardScaler
 
 from ml import config
 from ml.calibrate import Calibrator
-from ml.evaluate import auc, brier, multiclass_log_loss
+from ml.evaluate import auc, average_precision, brier, multiclass_log_loss
 from ml.features import FeatureEngineer
 from ml.ingest import load_dataset, model_columns
 from ml.joint import N_VESSELS, TARGETS, marginals
@@ -59,6 +59,12 @@ def score(Y, P) -> dict:
     out = {f"auc_{t}": auc(Y[t], m[t]) for t in TARGETS}
     out["brier_mean"] = float(np.mean([brier(Y[t], m[t]) for t in TARGETS]))
     out["pattern_log_loss"] = multiclass_log_loss(Y["pattern"], P)
+    for t in TARGETS:
+        out[f"brier_{t}"] = brier(Y[t], m[t])
+        out[f"pr_auc_{t}"] = average_precision(Y[t], m[t])
+    n_v = N_VESSELS[Y["pattern"]]
+    out["auc_P_GE2"] = auc((n_v >= 2).astype(int), m["P_GE2"])
+    out["auc_P_3VD"] = auc((n_v == 3).astype(int), m["P_3VD"])
     return out
 
 

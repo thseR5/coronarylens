@@ -19,7 +19,20 @@ import { api } from '../api/client'
 // Loose view of ml/artifacts/metrics.json (+ ablation) — only the fields this tab reads.
 type Stat = { mean: number; sd: number }
 type CI = { value: number; ci95: [number, number] }
+type Diff = { mean: number; sd: number; se: number; folds_improved: number; n_folds: number; better_is: string }
+interface Sprint {
+  n_screened: number
+  n_finalists: number
+  finalists: string[]
+  outer: string
+  chosen_counts: Record<string, number>
+  paired_diff_vs_previous_served: Record<string, Diff>
+  previous_served: Record<string, Record<string, Stat>> & { pattern_log_loss: Stat; brier_mean: Stat }
+  served_on_full_training_split: { chosen: string }
+}
 interface Metrics {
+  sprint?: Sprint
+  test_first_look?: { test: { served: { metrics: Record<string, Record<string, CI>> } } }
   data: { n: number; n_train: number; n_test: number }
   cv: {
     settings: { outer_folds: number; outer_repeats: number; inner_folds: number }
@@ -94,13 +107,28 @@ export default function ModelPerformance() {
   return (
     <div className="flex flex-col gap-3 text-xs">
       <p className="text-muted">
-        n = {m.data.n} patients. Primary estimate: repeated nested cross-validation ({m.cv.settings.outer_repeats}×
-        {m.cv.settings.outer_folds} outer, {m.cv.settings.inner_folds} inner) on the {m.data.n_train}-patient training split. Secondary:
-        a locked {m.data.n_test}-patient test split evaluated once, with 2,000-resample bootstrap 95% CIs.
+        n = {m.data.n} patients.{' '}
+        {m.sprint ? (
+          <>
+            Primary estimate: nested cross-validation of the whole model-selection procedure ({m.sprint.outer}) on the {m.data.n_train}
+            -patient training split. Secondary: a locked {m.data.n_test}-patient test split (looked at twice: before and after the
+            model search; never used to choose anything), with 2,000-resample bootstrap 95% CIs.
+          </>
+        ) : (
+          <>
+            Primary estimate: repeated nested cross-validation ({m.cv.settings.outer_repeats}×{m.cv.settings.outer_folds} outer,{' '}
+            {m.cv.settings.inner_folds} inner) on the {m.data.n_train}-patient training split. Secondary: a locked {m.data.n_test}
+            -patient test split evaluated once, with 2,000-resample bootstrap 95% CIs.
+          </>
+        )}
       </p>
 
       <Section
-        title={`Headline · nested CV, served model (mean ± SD over ${m.cv.settings.outer_repeats}×${m.cv.settings.outer_folds} outer folds)`}
+        title={
+          m.sprint
+            ? `Headline · nested CV of the served procedure (mean ± SD, ${m.sprint.outer})`
+            : `Headline · nested CV, served model (mean ± SD over ${m.cv.settings.outer_repeats}×${m.cv.settings.outer_folds} outer folds)`
+        }
         note="Every number here comes from patients the model (and every choice about it) never saw while training. Threshold metrics use the max-F1 threshold chosen inside each training fold."
       >
         <table className="w-full">
@@ -140,8 +168,68 @@ export default function ModelPerformance() {
         </table>
       </Section>
 
+      {m.sprint && (
+        <Section
+          title={`Model search · ${m.sprint.n_screened} procedures screened, ${m.sprint.n_finalists} finalists in nested CV`}
+          note={
+            <>
+              Screening used the training split only. Finalists were chosen by a rule written before the results were read; inside
+              every outer fold the procedure with the best inner cross-fitted log-loss was selected and then scored on unseen
+              patients, so these numbers already account for the search. Served (selected on the full training split):{' '}
+              <span className="font-mono">{m.sprint.served_on_full_training_split.chosen}</span>. LCX/RCA did not improve: the
+              ceiling held.
+            </>
+          }
+        >
+          <table className="w-full">
+            <thead className="text-[10px] uppercase text-muted">
+              <tr>
+                <Th>Metric</Th>
+                <Th>Previous model</Th>
+                <Th>Paired gain</Th>
+                <Th>Folds better</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {(
+                [
+                  ['pattern_log_loss', 'Pattern log-loss'],
+                  ['brier_mean', 'Mean Brier'],
+                  ['auc_CAD', 'CAD AUC'],
+                  ['auc_LAD', 'LAD AUC'],
+                  ['auc_LCX', 'LCX AUC'],
+                  ['auc_RCA', 'RCA AUC'],
+                ] as const
+              ).map(([k, label]) => {
+                const d = m.sprint!.paired_diff_vs_previous_served[k]
+                const prev = k.startsWith('auc_')
+                  ? m.sprint!.previous_served[k.slice(4)]?.roc_auc?.mean
+                  : (m.sprint!.previous_served[k as 'pattern_log_loss' | 'brier_mean'] as Stat).mean
+                const good = d.better_is === 'lower' ? d.mean < -d.se : d.mean > d.se
+                return (
+                  <tr key={k} className="border-t border-line/60">
+                    <Td strong>{label}</Td>
+                    <Td>{f3(prev)}</Td>
+                    <Td strong>
+                      <span className={good ? 'text-emerald-300' : 'text-muted'}>
+                        {d.mean >= 0 ? '+' : '−'}
+                        {Math.abs(d.mean).toFixed(4)}
+                      </span>
+                      <span className="block text-[9px] text-muted">± {d.sd.toFixed(4)} (SE {d.se.toFixed(4)})</span>
+                    </Td>
+                    <Td>
+                      {d.folds_improved}/{d.n_folds}
+                    </Td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </Section>
+      )}
+
       <Section
-        title="Nested CV · model comparison (ROC-AUC mean ± SD)"
+        title="Benchmarks · same 5×5 nested CV for every approach (ROC-AUC mean ± SD)"
         note={
           <>
             Same outer folds for every model. Selection rule: lowest pattern log-loss, then AUC, simplest within 1 SE. On the test set the
@@ -215,8 +303,21 @@ export default function ModelPerformance() {
       </Section>
 
       <Section
-        title={`Secondary · locked test set (n = ${m.data.n_test}), served model`}
-        note={`Held out before any modelling and scored after model selection. With n = ${m.data.n_test} the 95% bootstrap CIs are wide, so nested CV above is the primary estimate.`}
+        title={`Secondary · locked test set (n = ${m.data.n_test}), served model${m.test_first_look ? ' (second look, after the model search)' : ''}`}
+        note={
+          <>
+            Held out before any modelling. With n = {m.data.n_test} the 95% bootstrap CIs are wide, so nested CV above is the primary
+            estimate.
+            {m.test_first_look && (
+              <>
+                {' '}
+                The test set has been looked at twice: once before the model search (previous model, ROC-AUC CAD/LAD/LCX/RCA{' '}
+                {TARGETS.map((t) => f3(m.test_first_look!.test.served.metrics[t]?.roc_auc?.value)).join(' / ')}) and once after it
+                (this table). Nothing was chosen or tuned on it.
+              </>
+            )}
+          </>
+        }
       >
         <table className="w-full">
           <thead className="text-[10px] uppercase text-muted">

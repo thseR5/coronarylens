@@ -1,9 +1,9 @@
 {
- "served": "joint_ensemble",
- "variant": "joint_vector",
+ "served": "procedure",
+ "variant": "sprint_procedure",
  "feature_engineering": false,
  "calibration": "vector",
- "model_version": "joint_ensemble-joint_vector-73934324-96151587",
+ "model_version": "procedure-sprint_procedure-73934324-ae7f75d9",
  "seed": 42,
  "data_sha256": "739343245c2ba578b541370217531750d8e936022f928b83e0d91756caa3ff0b",
  "quick": false,
@@ -17,6 +17,27 @@
   "cv": 200,
   "final": "models.yaml (500)",
   "bootstrap": 50
+ },
+ "procedure": {
+  "chosen": "catboost+catboost_d3+svm|avg|vector",
+  "weights": [
+   0.333333,
+   0.333333,
+   0.333333
+  ],
+  "inner_scores": {
+   "catboost_d3+sel_joint+svm|avg|dirichlet": 1.525853,
+   "ebm+bayes_lr+sel_joint|avg|dirichlet": 1.509775,
+   "catboost_d3+bayes_lr+sel_joint|avg|dirichlet": 1.518256,
+   "catboost_d3+sel_joint+svm|avg|vector": 1.513348,
+   "catboost+bayes_lr+sel_joint|avg|dirichlet": 1.517358,
+   "catboost+sel_joint+svm|avg|dirichlet": 1.52265,
+   "catboost+sel_joint+svm|avg|vector": 1.510296,
+   "catboost+svm|avg|vector": 1.512588,
+   "catboost+catboost_d3+svm|avg|vector": 1.509361,
+   "lr_en+rf+et|avg|vector": 1.555801
+  },
+  "n_candidates": 10
  },
  "versions": {
   "python": "3.12.7",

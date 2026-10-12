@@ -42,6 +42,9 @@ from ml.ingest import data_sha256, decode_row, imputation_values, load_dataset, 
 from ml.joint import EXPLAIN_OUTPUTS, TARGETS, explain_matrix, marginals
 from ml.leakage import assert_clean, proxy_scan
 from ml.neighbors import NeighborIndex
+from ml.procedure import ProcedureBootstrap, ProcedureModel, candidates_from_config
+from ml.sprint import headline as SH
+from ml.thresholds import fit_thresholds
 from ml.uncertainty import BootstrapEnsemble, fit_bootstrap
 
 JOINT_VARIANTS = ["joint_none", "joint_temperature", "joint_vector",
@@ -174,19 +177,39 @@ def main(quick: bool = False, out_dir: Path = config.ARTIFACTS, reports: Path = 
     t0 = time.time()
     fam = "joint_fe" if fe else "joint"
     final_inner = int(val["outer_folds"])
-    final, cals = E.fit_with_inner(fam, mcfg, Xtr, Ttr, seed, final_inner, S["final_trees"], cols)
-    c = cals[cal_method]
-    calibrator = c["cal"] or Calibrator("none").fit(c["oof_P"], Ytr["pattern"])
-    thr = c["thr"]
-    final.compile()
+    procedure = mcfg["served"] == "procedure"
+    if procedure:
+        # Part 2 sprint: serve the validated selection procedure (same inner selection as the 10x5 nested CV)
+        final = ProcedureModel(candidates_from_config(mcfg), seed,
+                               int(mcfg["served_procedure"]["inner_folds"])).fit(Xtr, Ttr["pattern_code"].to_numpy())
+        final.compile()
+        calibrator = final.calibrator_
+        oof_m = marginals(final.oof_P_)
+        thr = fit_thresholds(Ytr, oof_m, E.EVAL_TARGETS)
+        c = {"cal": calibrator, "thr": thr, "oof_P": final.oof_P_, "oof_m": oof_m}
+        chosen, cal_method = "sprint_procedure", calibrator.method
+        rec = SH.load("B1")
+        metrics["cv"]["variants"]["sprint_procedure"] = SH.variant_summary(rec)
+        metrics["sprint"] = SH.sprint_section(rec) | {"served_on_full_training_split": final.describe()}
+    else:
+        final, cals = E.fit_with_inner(fam, mcfg, Xtr, Ttr, seed, final_inner, S["final_trees"], cols)
+        c = cals[cal_method]
+        calibrator = c["cal"] or Calibrator("none").fit(c["oof_P"], Ytr["pattern"])
+        thr = c["thr"]
+        final.compile()
     Pte = calibrator.transform(final.predict_patterns(Xte))
     Mte = marginals(Pte)
     ind, ind_cals = E.fit_with_inner("independent", mcfg, Xtr, Ttr, seed, final_inner, S["final_trees"], cols)
     Mind = ind.predict_targets(Xte)
     Pind = ind.predict_patterns(Xte)
     timings["final_fit_s"] = time.time() - t0
+    first_look = config.REPORTS / "sprint" / "test_first_look.json"
+    if procedure and first_look.exists():
+        metrics["test_first_look"] = json.loads(first_look.read_text("utf-8"))
     metrics["test"] = {
-        "note": "locked 20% split, evaluated once; 95% CIs from bootstrap resamples of test patients",
+        "note": ("locked 20% split; SECOND look (after the Part 2 sprint; the first look, before the sprint, is in "
+                 "test_first_look); 95% CIs from bootstrap resamples of test patients") if procedure else
+                "locked 20% split, evaluated once; 95% CIs from bootstrap resamples of test patients",
         "n_bootstrap": n_boot_ci,
         "served": {"variant": chosen, "metrics": E.bootstrap_ci(Yte, Mte, thr, n_boot_ci, seed),
                    "pattern_log_loss": E.multiclass_log_loss(Yte["pattern"], Pte),
@@ -237,15 +260,17 @@ def main(quick: bool = False, out_dir: Path = config.ARTIFACTS, reports: Path = 
     age = Xtr[:, cols.index("age")]
     groups_def = {"sex=male": Xtr[:, cols.index("sex_male")] == 1, "sex=female": Xtr[:, cols.index("sex_male")] == 0,
                   "age<50": age < 50, "age50-64": (age >= 50) & (age < 65), "age>=65": age >= 65}
-    sub = {}
-    for g, mask in groups_def.items():
+    sub = SH.subgroups(rec, Xtr, Ytr, cols, n_folds) if procedure else {}
+    for g, mask in ({} if procedure else groups_def).items():
         sub[g] = {"n": int(mask.sum())}
         for t in TARGETS:
             aucs = [E.auc(Ytr[t][mask], oof[chosen][r][t][mask]) for r in range(n_rep)]
             briers = [E.brier(Ytr[t][mask], oof[chosen][r][t][mask]) for r in range(n_rep)]
             sub[g][t] = {"prevalence": float(Ytr[t][mask].mean()), "roc_auc": float(np.nanmean(aucs)),
                          "roc_auc_sd_repeats": float(np.nanstd(aucs)), "brier": float(np.mean(briers))}
-    metrics["subgroups"] = {"source": f"nested-CV out-of-fold predictions ({chosen}), averaged over repeats",
+    metrics["subgroups"] = {"source": ("outer-test predictions of the sprint's 10x5 nested CV of the served procedure, "
+                                       "averaged over repeats") if procedure else
+                            f"nested-CV out-of-fold predictions ({chosen}), averaged over repeats",
                             "groups": sub}
 
     # ---------------------------------------------------------------- learning curve
@@ -283,13 +308,20 @@ def main(quick: bool = False, out_dir: Path = config.ARTIFACTS, reports: Path = 
 
     # ---------------------------------------------------------------- uncertainty ensemble, domain, kNN
     t0 = time.time()
-    specs = mcfg["pattern_models"]["joint_ensemble"]["members"]
-    boot = fit_bootstrap(specs, Xtr, Ttr["pattern_code"].to_numpy(), boot_B, S["boot_trees"], seed, fe, cols)
-    be = BootstrapEnsemble(boot)
+    if procedure:
+        boot = ProcedureBootstrap(final, Xtr, Ttr["pattern_code"].to_numpy(), boot_B, seed,
+                                  mcfg["served_procedure"].get("bootstrap_overrides"))
+        be = boot
+    else:
+        specs = mcfg["pattern_models"]["joint_ensemble"]["members"]
+        boot = fit_bootstrap(specs, Xtr, Ttr["pattern_code"].to_numpy(), boot_B, S["boot_trees"], seed, fe, cols)
+        be = BootstrapEnsemble(boot)
     iv = be.intervals(Xte, calibrator)
     cover = {t: float(np.mean((Mte[t] >= iv[t][:, 0]) & (Mte[t] <= iv[t][:, 1]))) for t in TARGETS}
     width = {t: float(np.mean(iv[t][:, 1] - iv[t][:, 0])) for t in TARGETS}
-    metrics["bootstrap_intervals"] = {"B": boot_B, "trees_per_forest": S["boot_trees"], "level": 0.90,
+    metrics["bootstrap_intervals"] = {"B": boot_B, "level": 0.90,
+                                      "refits": (mcfg["served_procedure"].get("bootstrap_overrides") if procedure
+                                                 else {"trees_per_forest": S["boot_trees"]}),
                                       "test_mean_width": width, "test_frac_point_inside_raw_interval": cover}
     timings["bootstrap_s"] = time.time() - t0
     domain = DomainModel(0.99, seed).fit(Xtr)
@@ -367,6 +399,7 @@ def main(quick: bool = False, out_dir: Path = config.ARTIFACTS, reports: Path = 
             "explain": {"method": METHOD, "n_perm": S["n_perm"], "seed": seed, "background": S["bg"]},
             "trees": {"cv": S["cv_trees"], "final": S["final_trees"] or "models.yaml (500)",
                       "bootstrap": S["boot_trees"]},
+            "procedure": final.describe() if procedure else None,
             "versions": {"python": platform.python_version(), "numpy": np.__version__, "pandas": pd.__version__,
                          "scikit-learn": sklearn.__version__, "scipy": scipy.__version__, "shap": shap.__version__,
                          "lightgbm": lightgbm.__version__, "joblib": joblib.__version__}}
@@ -429,6 +462,28 @@ def build_presets(Xte, Tte, te_idx, Mte, q, domain, cols, fcfg, served) -> list[
     return out
 
 
+def _sprint_lines(m: dict) -> list[str]:
+    sp, hv = m["sprint"], m["cv"]["variants"]["sprint_procedure"]
+    d = sp["paired_diff_vs_previous_served"]
+    L = ["## Served model: Part 2 sprint procedure (headline)", "",
+         (f"{sp['n_screened']} procedures screened on the training split; {sp['n_finalists']} finalists (pre-registered "
+          f"rule) went into nested CV ({sp['outer']}; {sp['inner']}); selection happens inside every outer fold, so the "
+          "outer score accounts for the search."), "",
+         f"Served on the full training split: **{sp['served_on_full_training_split']['chosen']}**.", "",
+         "| metric | served procedure (mean ± SD) | previous served model | paired diff (mean ± SD) | folds improved |",
+         "|---|---|---|---|---|"]
+    prev = sp["previous_served"]
+    for t in ["CAD", "LAD", "LCX", "RCA"]:
+        k = f"auc_{t}"
+        L.append(f"| {t} ROC-AUC | {hv[t]['roc_auc']['mean']:.3f} ± {hv[t]['roc_auc']['sd']:.3f} | "
+                 f"{prev[t]['roc_auc']['mean']:.3f} ± {prev[t]['roc_auc']['sd']:.3f} | "
+                 f"{d[k]['mean']:+.4f} ± {d[k]['sd']:.4f} | {d[k]['folds_improved']}/{d[k]['n_folds']} |")
+    for k, label in (("pattern_log_loss", "pattern log-loss"), ("brier_mean", "mean Brier")):
+        L.append(f"| {label} | {hv[k]['mean']:.4f} ± {hv[k]['sd']:.4f} | {prev[k]['mean']:.4f} ± {prev[k]['sd']:.4f} | "
+                 f"{d[k]['mean']:+.4f} ± {d[k]['sd']:.4f} | {d[k]['folds_improved']}/{d[k]['n_folds']} |")
+    return [*L, ""]
+
+
 def write_report(m: dict, glob: dict, path: Path, variants: list[str]) -> None:
     L = ["# Model report (generated by `python -m ml.train`)", "",
          ("Decision support and educational use only. Not a substitute for formal diagnostic imaging "
@@ -452,7 +507,9 @@ def write_report(m: dict, glob: dict, path: Path, variants: list[str]) -> None:
           "", (f"Engineered features (paired, same folds): Δ log-loss {m['cv']['feature_engineering_paired']['delta_log_loss_fe_minus_base']['mean']:+.4f}, "
           f"Δ AUC {m['cv']['feature_engineering_paired']['delta_roc_auc_fe_minus_base']['mean']:+.4f} → kept: "
           f"{m['cv']['feature_engineering_paired']['kept']}."), "",
-          "## Locked test split (evaluated once), 95% bootstrap CIs", "",
+          *(_sprint_lines(m) if m.get("sprint") else []),
+          ("## Locked test split, 95% bootstrap CIs (second look: after the Part 2 sprint)" if m.get("sprint")
+           else "## Locked test split (evaluated once), 95% bootstrap CIs"), "",
           "| model | target | ROC-AUC | PR-AUC | Brier | F1 | sensitivity | specificity |", "|---|---|---|---|---|---|---|---|"]
     for name in ("served", "independent"):
         for t in ["CAD", "LAD", "LCX", "RCA", "P_GE2", "P_3VD"]:

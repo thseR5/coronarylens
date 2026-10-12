@@ -84,7 +84,7 @@ Top 12 overall by pattern log-loss:
 | rf+lgbm+catboost_d3 \| learned \| vector | 0.937±0.036 | 0.873±0.039 | 0.749±0.061 | 0.749±0.053 | 1.5344±0.0157 | 0.158±0.016 |
 
 A1 reading: (i) Dirichlet calibration gives the lowest log-loss for most learners (≈1.53 vs baseline 1.572, ~3 SE) but can lower AUC; (b) CatBoost is the strongest single learner on AUC (LAD 0.875, LCX 0.747 with vector scaling); (j) learned weights and (h) the vessel-count blend give no gain over the baseline (within / worse than 1 SE). With 278 procedures screened, winner's-curse risk is high: only nested CV decides.
-Configurations so far: 12 + 278 = 290.
+Configurations so far: 12 + 278 = 290 (A1).
 
 ### Finalist-selection rule (written 2026-10-13 before A2 results were read)
 
@@ -105,3 +105,81 @@ log-loss or mean AUC, or equal performance with a simpler procedure.
 | Selected procedure beats the served recipe by > 1 SE (paired outer folds) and most folds improve | real gain | adopt; rerun all tests; update artifacts, dashboard and docs |
 | Small mean gain but < 1 SE, or only about half the folds improve | noise | keep the served model; report "ceiling held after N procedures" |
 | Implausible jump: LCX or RCA AUC > ~0.80, or CAD AUC > ~0.96 | almost certainly a bug or leakage | stop and investigate before adopting anything |
+
+### Screening A2 (training split only; same folds as A1; NOT headline numbers)
+
+498 procedures: learners lr_l2_strong, catboost, catboost_d3, ebm, bayes_lr (clinical prior), bayes_lr_flat (same model, no prior), sel_joint (in-fold L1 selection), stack (per-target in-fold feature sets → OOF logits → joint LR), svm; each alone with vector / Dirichlet calibration; all 2–3 learner averages and learned weights with vector and Dirichlet calibration. Wall time 404.2 s (3 single-threaded workers).
+
+New candidates on their own:
+
+| Procedure | CAD | LAD | LCX | RCA | Pattern log-loss (±SE) | Mean Brier |
+|---|---|---|---|---|---|---|
+| bayes_lr \| avg \| dirichlet | 0.923±0.037 | 0.846±0.053 | 0.708±0.046 | 0.725±0.067 | 1.5366±0.0176 | 0.166±0.017 |
+| bayes_lr_flat \| avg \| dirichlet | 0.916±0.041 | 0.839±0.055 | 0.703±0.047 | 0.722±0.070 | 1.5555±0.0193 | 0.168±0.019 |
+| bayes_lr \| avg \| vector | 0.924±0.036 | 0.840±0.054 | 0.699±0.054 | 0.733±0.063 | 1.6044±0.0148 | 0.167±0.013 |
+| bayes_lr_flat \| avg \| vector | 0.916±0.041 | 0.837±0.056 | 0.695±0.053 | 0.728±0.066 | 1.6188±0.0158 | 0.170±0.014 |
+| sel_joint \| avg \| dirichlet | 0.936±0.031 | 0.868±0.049 | 0.728±0.055 | 0.734±0.044 | 1.5287±0.0167 | 0.158±0.015 |
+| sel_joint \| avg \| vector | 0.936±0.031 | 0.866±0.047 | 0.712±0.059 | 0.746±0.045 | 1.5587±0.0131 | 0.160±0.012 |
+| stack \| avg \| dirichlet | 0.910±0.046 | 0.835±0.059 | 0.700±0.049 | 0.712±0.069 | 1.5645±0.0210 | 0.171±0.020 |
+| stack \| avg \| vector | 0.912±0.043 | 0.831±0.056 | 0.698±0.051 | 0.723±0.076 | 1.6278±0.0167 | 0.172±0.015 |
+| svm \| avg \| vector | 0.914±0.043 | 0.843±0.052 | 0.706±0.054 | 0.723±0.059 | 1.5611±0.0140 | 0.168±0.015 |
+| svm \| avg \| dirichlet | 0.913±0.044 | 0.844±0.051 | 0.704±0.051 | 0.727±0.063 | 1.5662±0.0167 | 0.167±0.016 |
+
+Top 10 by pattern log-loss:
+
+| Procedure | CAD | LAD | LCX | RCA | Pattern log-loss (±SE) | Mean Brier |
+|---|---|---|---|---|---|---|
+| catboost_d3+sel_joint+svm \| avg \| dirichlet | 0.936±0.036 | 0.874±0.047 | 0.727±0.060 | 0.754±0.048 | 1.5049±0.0153 | 0.155±0.015 |
+| ebm+bayes_lr+sel_joint \| avg \| dirichlet | 0.940±0.032 | 0.869±0.053 | 0.715±0.056 | 0.739±0.061 | 1.5051±0.0151 | 0.156±0.015 |
+| catboost_d3+bayes_lr+sel_joint \| avg \| dirichlet | 0.941±0.033 | 0.870±0.049 | 0.715±0.051 | 0.744±0.056 | 1.5054±0.0154 | 0.155±0.015 |
+| catboost_d3+sel_joint+svm \| avg \| vector | 0.936±0.036 | 0.874±0.046 | 0.727±0.059 | 0.753±0.044 | 1.5058±0.0121 | 0.156±0.013 |
+| catboost+bayes_lr+sel_joint \| avg \| dirichlet | 0.940±0.034 | 0.871±0.050 | 0.715±0.054 | 0.743±0.055 | 1.5059±0.0157 | 0.155±0.015 |
+| catboost+sel_joint+svm \| avg \| dirichlet | 0.937±0.036 | 0.874±0.047 | 0.731±0.061 | 0.752±0.049 | 1.5059±0.0159 | 0.154±0.015 |
+| catboost+sel_joint+svm \| avg \| vector | 0.937±0.035 | 0.875±0.047 | 0.728±0.059 | 0.754±0.045 | 1.5060±0.0128 | 0.155±0.014 |
+| catboost+svm \| avg \| vector | 0.933±0.038 | 0.875±0.045 | 0.752±0.064 | 0.754±0.059 | 1.5078±0.0152 | 0.157±0.016 |
+| catboost+catboost_d3+svm \| avg \| vector | 0.936±0.036 | 0.878±0.039 | 0.751±0.061 | 0.754±0.055 | 1.5079±0.0147 | 0.156±0.016 |
+| lr_l2_strong+bayes_lr+sel_joint \| avg \| dirichlet | 0.937±0.032 | 0.862±0.054 | 0.716±0.047 | 0.742±0.060 | 1.5081±0.0155 | 0.157±0.015 |
+
+A2 reading: (d) the clinical prior helps the Bayesian LR on its own (1.537 vs 1.556 with Dirichlet, ≈1 SE; CAD AUC 0.923 vs 0.916); (e) in-fold selection is a strong single learner (1.529); (f+g) stacking with per-target feature sets is worse than the baseline (1.565) and is dropped; (k) SVM is weak alone but adds diversity in combinations. Best combinations reach ≈1.505 (baseline 1.572).
+
+**Total screened: 748 unique procedures (A1 278 + A2 498, overlapping names counted once).**
+
+### Finalists (pre-registered rule applied mechanically by `ml/sprint/finalists.py`)
+
+| Finalist | Reason | Screening log-loss | CAD | LAD | LCX | RCA |
+|---|---|---|---|---|---|---|
+| catboost_d3+sel_joint+svm \| avg \| dirichlet | top-8 log-loss | 1.5049 | 0.936 | 0.874 | 0.727 | 0.754 |
+| ebm+bayes_lr+sel_joint \| avg \| dirichlet | top-8 log-loss | 1.5051 | 0.940 | 0.869 | 0.715 | 0.739 |
+| catboost_d3+bayes_lr+sel_joint \| avg \| dirichlet | top-8 log-loss | 1.5054 | 0.941 | 0.870 | 0.715 | 0.744 |
+| catboost_d3+sel_joint+svm \| avg \| vector | top-8 log-loss | 1.5058 | 0.936 | 0.874 | 0.727 | 0.753 |
+| catboost+bayes_lr+sel_joint \| avg \| dirichlet | top-8 log-loss | 1.5059 | 0.940 | 0.871 | 0.715 | 0.743 |
+| catboost+sel_joint+svm \| avg \| dirichlet | top-8 log-loss | 1.5059 | 0.937 | 0.874 | 0.731 | 0.752 |
+| catboost+sel_joint+svm \| avg \| vector | top-8 log-loss | 1.5060 | 0.937 | 0.875 | 0.728 | 0.754 |
+| catboost+svm \| avg \| vector | top-8 log-loss | 1.5078 | 0.933 | 0.875 | 0.752 | 0.754 |
+| catboost+catboost_d3+svm \| avg \| vector | best LCX+RCA AUC | 1.5079 | 0.936 | 0.878 | 0.751 | 0.754 |
+| lr_en+rf+et \| avg \| vector | baseline (served recipe) | 1.5724 | 0.933 | 0.855 | 0.717 | 0.743 |
+
+Note: in the nested run the baseline's forests use 300 trees per forest (the sprint learner spec), the served model 500; the comparison is like-for-like inside the sprint.
+
+### Nested result B1 (headline): 10×5 outer folds, selection inside every fold
+
+Candidates: 10 (9 finalists + previous served recipe). Wall time 1824 s on 3 single-threaded workers. A second run with stored outer predictions reproduced every metric and every per-fold choice exactly.
+
+| Metric | Selected procedure (mean ± SD) | Previous served recipe | Paired diff (mean ± SD) | SE | Folds improved |
+|---|---|---|---|---|---|
+| Pattern log-loss | 1.5084 ± 0.0909 | 1.5754 ± 0.0779 | -0.0670 ± 0.0392 | 0.0055 | 46/50 (lower is better) |
+| Mean Brier | 0.1579 ± 0.0137 | 0.1617 ± 0.0121 | -0.0039 ± 0.0059 | 0.0008 | 40/50 (lower is better) |
+| CAD ROC-AUC | 0.9343 ± 0.0363 | 0.9271 ± 0.0406 | +0.0073 ± 0.0109 | 0.0015 | 39/50 (higher is better) |
+| LAD ROC-AUC | 0.8657 ± 0.0429 | 0.8508 ± 0.0475 | +0.0149 ± 0.0193 | 0.0027 | 35/50 (higher is better) |
+| LCX ROC-AUC | 0.7081 ± 0.0580 | 0.7139 ± 0.0515 | -0.0058 ± 0.0460 | 0.0065 | 23/50 (higher is better) |
+| RCA ROC-AUC | 0.7373 ± 0.0556 | 0.7441 ± 0.0546 | -0.0068 ± 0.0416 | 0.0059 | 23/50 (higher is better) |
+| ≥2 vessels ROC-AUC | 0.7657 ± 0.0515 | 0.7496 ± 0.0540 | +0.0161 ± 0.0444 | 0.0063 | 34/50 (higher is better) |
+| 3-vessel ROC-AUC | 0.7553 ± 0.0625 | 0.7417 ± 0.0730 | +0.0136 ± 0.0562 | 0.0079 | 34/50 (higher is better) |
+
+Inner choice per outer fold: ebm+bayes_lr+sel_joint|avg|dirichlet ×28, catboost+bayes_lr+sel_joint|avg|dirichlet ×10, catboost_d3+bayes_lr+sel_joint|avg|dirichlet ×4, catboost+catboost_d3+svm|avg|vector ×3, catboost_d3+sel_joint+svm|avg|vector ×2, catboost+svm|avg|vector ×2, catboost+sel_joint+svm|avg|vector ×1.
+
+**Decision (pre-registered table):** real gain in calibration/risk estimation (pattern log-loss −0.067, 12 SE, 46/50 folds; mean Brier −0.0039, 40/50) and in CAD and LAD discrimination (+0.007 and +0.015 AUC, both > 1 SE, 39/50 and 35/50 folds) → **adopt**. LCX and RCA: differences within noise (23/50 folds each) → **the LCX/RCA ceiling held after 748 screened procedures**. No implausible jump (CAD 0.934, LCX 0.708, RCA 0.737 ≪ alarm thresholds).
+
+**Stopping rule:** every candidate (a)–(k) has been tried; the last three candidate families screened (stacking (f+g), SVM alone (k), vessel-count blend (h)) brought no gain > 1 SE on their own → stop.
+
+**Total configurations:** 12 (Phase 1 benchmarks) + 748 screened procedures + 10 finalists in nested CV. Selection happened inside nested CV, so the reported performance accounts for that search.
