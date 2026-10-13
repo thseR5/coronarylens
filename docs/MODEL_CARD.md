@@ -8,7 +8,7 @@
 - **Served procedure:** a selection procedure validated by nested CV (`ml/procedure.py`, candidates in `config/models.yaml → served_procedure`). On the full training split it selected **CatBoost (depth 4) + CatBoost (depth 3) + RBF SVM, averaged, vector-scaling calibration**.
 - **Version:** `procedure-sprint_procedure-73934324-192598c9` (see `ml/artifacts/model_meta.json`; data SHA-256 starts `73934324`).
 - **Libraries:** Python 3.12, scikit-learn 1.9.1, CatBoost 1.2.10 (pinned in `uv.lock`).
-- **Authors / contact:** the CoronaryLens hackathon team.
+- **Authors / contact:** TADI HEMA SAI ESWAR REDDY (CoronaryLens, IIT Mandi Multimodal AI Hackathon 2026).
 
 ## Intended use
 

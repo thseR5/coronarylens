@@ -41,7 +41,7 @@ Evidence = a file, a test that runs in `make test` / `make test-e2e`, or a measu
 
 ## Your manual steps
 
-1. **Licence name.** Tell me your full name, or replace `AUTHOR_NAME_TO_CONFIRM` in `LICENSE` and the "Authors / contact" line in `docs/MODEL_CARD.md` yourself.
+1. **Licence name.** Done: `LICENSE` and `docs/MODEL_CARD.md` name TADI HEMA SAI ESWAR REDDY.
 2. **GitHub CLI** (needed for "publish repo"): `brew install gh`, then `! gh auth login` (GitHub.com → HTTPS → log in with a browser).
 3. **Record the video** with `docs/DEMO_SCRIPT.md` and its checklist (English audio; add English subtitles if needed).
 4. **Upload to YouTube** → Visibility **Unlisted** (not Private) → language English → paste the GitHub link in the description → open the link in a private window to confirm it plays without signing in.
