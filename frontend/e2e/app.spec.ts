@@ -16,6 +16,9 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   await page.getByRole('button', { name: 'Reset' }).click()
   await expect(page.getByTestId('imputed-warning')).toBeVisible({ timeout: 10_000 })
   await expect(page.getByTestId('localisation-badge')).toBeVisible()
+  await expect(page.getByTestId('localisation-badge')).toContainText(
+    'Vessel-level estimates are less certain than overall CAD (nested-CV AUC: CAD 0.93 · LAD 0.87 · LCX 0.71 · RCA 0.74)',
+  )
 
   // Disclaimer is visible and non-dismissible.
   await expect(page.getByRole('alert').first()).toContainText('Not a substitute for formal diagnostic imaging')

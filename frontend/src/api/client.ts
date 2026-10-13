@@ -40,10 +40,19 @@ export function bundledConfig(): AppConfig {
   }
 }
 
+let metricsPromise: Promise<Record<string, unknown>> | null = null
+
 export const api = {
   config: () => get<AppConfig>('config').catch(() => bundledConfig()),
   presets: () => get<Preset[]>('presets'),
-  metrics: () => get<Record<string, unknown>>('metrics'),
+  /** Static per build, so fetched once and shared (performance tab, vessel badge). */
+  metrics: () => {
+    metricsPromise ??= get<Record<string, unknown>>('metrics').catch((e) => {
+      metricsPromise = null
+      throw e
+    })
+    return metricsPromise
+  },
   globalExplanations: () => get<Record<string, unknown>>('global-explanations'),
   analyze: (features: Features, mode: ThresholdMode, signal?: AbortSignal) =>
     post<AnalyzeResponse>('analyze', { features, mode }, signal),

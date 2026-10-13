@@ -4,6 +4,7 @@ import { riskColor } from '../lib/color'
 import type { TargetId } from '../types/api'
 import { useWhatIf } from './whatIfStore'
 import StatusChip from './StatusChip'
+import { useHeadlineAuc } from './useHeadlineAuc'
 
 export default function VesselCards() {
   const config = useStore((s) => s.config)
@@ -15,11 +16,18 @@ export default function VesselCards() {
   const baseline = useWhatIf((s) => s.baseline)
   const vessels = config?.targets.vessels ?? []
   const cad = a?.cad.p ?? null
+  const auc = useHeadlineAuc()
 
   return (
     <div className="flex flex-col gap-1">
-    <div className="flex items-center gap-1.5 text-[10px] text-warn" data-testid="localisation-badge">
-      <span aria-hidden>⚠</span> Artery ranking is not reliable: the model estimates risk per artery, not where the lesion is.
+    <div className="flex items-start gap-1.5 text-[10px] text-warn" data-testid="localisation-badge">
+      <span aria-hidden>⚠</span>
+      <span>
+        Vessel-level estimates are less certain than overall CAD
+        {auc &&
+          ` (nested-CV AUC: CAD ${auc.CAD.toFixed(2)} · LAD ${auc.LAD.toFixed(2)} · LCX ${auc.LCX.toFixed(2)} · RCA ${auc.RCA.toFixed(2)})`}
+        . Use them as supporting context.
+      </span>
     </div>
     <div className="grid grid-cols-3 gap-2">
       {vessels.map((v) => {

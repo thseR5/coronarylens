@@ -38,7 +38,7 @@ export default function App() {
         </aside>
       </main>
       <footer className="shrink-0 border-t border-line px-4 py-1.5 text-[11px] text-muted">
-        {DISCLAIMER} · Data: Z-Alizadeh Sani (UCI, CC BY 4.0) · Anatomy: BodyParts3D © DBCLS (CC BY 4.0)
+        {DISCLAIMER} · Data: Z-Alizadeh Sani (UCI, CC BY 4.0) · Anatomy: BodyParts3D © DBCLS (CC BY 4.0) · Code: MIT
       </footer>
     </div>
   )

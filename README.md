@@ -25,7 +25,7 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 | F1 (max-F1 threshold) | 0.916 | 0.845 | 0.638 | 0.647 |
 | Specificity | 0.768 | 0.655 | 0.491 | 0.537 |
 
-Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (wide CIs; see the report). LCX and RCA are hard to predict from clinical data: after 748 procedures their AUC stayed at about 0.71–0.74. Vessel probabilities mostly reflect overall CAD risk: among patients with CAD, the model picks out LAD disease only modestly (within-CAD AUC 0.69) and LCX/RCA barely better than chance (0.52 / 0.57). Full results, statistics and limitations: **[docs/REPORT.pdf](docs/REPORT.pdf)** (5 pages).
+Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (wide CIs; see the report). LCX and RCA are hard to predict from clinical data: after 748 procedures their AUC stayed at about 0.71–0.74. Vessel probabilities mostly reflect overall CAD risk: among patients with CAD, the model picks out LAD disease only modestly (within-CAD AUC 0.69) and LCX/RCA barely better than chance (0.52 / 0.57). The app says so above the vessel cards: *"Vessel-level estimates are less certain than overall CAD (nested-CV AUC: CAD 0.93 · LAD 0.87 · LCX 0.71 · RCA 0.74). Use them as supporting context."* Full results, statistics and limitations: **[docs/REPORT.pdf](docs/REPORT.pdf)** (5 pages).
 
 ## Quickstart
 
@@ -80,4 +80,4 @@ Single-centre data (303 patients, Iran), no external validation, small test set,
 
 - Data: Alizadehsani R, Roshanzamir M, Sani Z. *Extension of Z-Alizadeh Sani dataset.* UCI Machine Learning Repository, id 411, doi:10.24432/C5461K. CC BY 4.0.
 - Anatomy: BodyParts3D, © The Database Center for Life Science, CC BY 4.0 (details and FMA IDs in `frontend/src/three/LICENSES.md`).
-- Code: licence not yet chosen by the authors (no LICENSE file yet).
+- Code: MIT (see [`LICENSE`](LICENSE)). The MIT licence covers our code only; the dataset and anatomy keep their CC BY 4.0 licences. Summary: [`LICENSES.md`](LICENSES.md).

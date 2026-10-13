@@ -84,7 +84,7 @@
 3. Click **Restore baseline**.
 4. **Preset patients…** → **RCA only**.
 
-**Say:** "Pin the patient and change one thing to see every probability move. Now an honest limit. This patient has disease only in the right coronary artery, but the model rates the LAD higher. In this data, clinical findings tell us *whether* there is coronary disease far better than *which* artery. Among patients with disease, the model separates the circumflex and right coronary arteries barely better than chance. The app says so next to every vessel explanation, so nobody over-reads the colours."
+**Say:** "Pin the patient and change one thing to see every probability move. Now an honest limit. This patient has disease only in the right coronary artery, but the model rates the LAD higher. In this data, clinical findings tell us *whether* there is coronary disease far better than *which* artery. Among patients with disease, the model separates the circumflex and right coronary arteries barely better than chance. The app says so above the vessel cards, with the numbers, and next to every vessel explanation, so nobody over-reads the colours."
 
 **Captions:**
 - "Deltas vs pinned baseline"
