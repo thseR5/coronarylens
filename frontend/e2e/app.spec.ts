@@ -117,6 +117,10 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   await expect(page.getByText(/^Headline · nested CV/)).toBeVisible()
   await expect(page.getByText(/Secondary · locked test set \(n = 61\)/)).toBeVisible()
   await expect(page.getByText('Leakage ablation', { exact: false })).toBeVisible()
+  // the localisation finding with corrected CIs, read from metrics.json
+  await expect(page.getByTestId('within-cad-table')).toContainText('0.69 [0.59–0.78]')
+  await expect(page.getByTestId('within-cad-table')).toContainText('0.52 [0.42–0.61]')
+  await expect(page.getByTestId('within-cad-table')).toContainText('0.57 [0.47–0.66]')
   await page.screenshot({ path: '../docs/img/app-model-tab.png', fullPage: false })
   await page.getByRole('complementary', { name: 'Risk dashboard' }).screenshot({ path: '../docs/img/app-model-tab-panel.png' })
 

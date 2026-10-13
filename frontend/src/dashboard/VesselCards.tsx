@@ -84,8 +84,9 @@ export default function VesselCards() {
       {STATUS_LEGEND}
     </p>
     <p className="text-[10px] leading-snug text-muted">
-      Artery estimates mostly follow overall CAD risk. The model cannot reliably tell which artery is affected (among patients
-      with CAD: LAD modestly, LCX/RCA barely better than chance). Use them as risk levels, not lesion locations.
+      Reliable overall CAD risk, with vessel-level estimates as supporting context. Among patients with CAD the model separates
+      LAD modestly and LCX/RCA no better than chance (performance tab), because the inputs carry little artery-specific
+      information. These are risk levels, not lesion locations.
     </p>
     </div>
   )

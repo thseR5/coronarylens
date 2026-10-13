@@ -23,8 +23,10 @@ def _status(r: dict) -> str:
         why = 'only "stenosis" plausible' if r["status"] == "likely" else 'only "no stenosis" plausible'
         return f"{STATUS[r['status']]}: {why} at 90% confidence"
     return f"{STATUS[r['status']]}: {REASON[r['reason']]}"
-LOCALISATION_NOTE = ("Vessel probabilities mostly reflect overall CAD risk: among patients with CAD the model separates "
-                     "LAD only modestly and LCX/RCA barely better than chance (within-CAD AUC 0.69 / 0.52 / 0.57).")
+LOCALISATION_NOTE = ("Reliable overall CAD risk, with vessel-level estimates as supporting context. Vessel probabilities "
+                     "mostly reflect overall CAD risk: among patients with CAD the model separates LAD only modestly and "
+                     "LCX/RCA no better than chance (within-CAD AUC 0.69 / 0.52 / 0.57), because the inputs carry little "
+                     "artery-specific information.")
 
 
 def _pct(p: float) -> str:

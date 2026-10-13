@@ -41,6 +41,10 @@ interface Sprint {
   served_on_full_training_split: { chosen: string }
   vs_independent_same_folds?: Record<string, Diff> & { coherence_independent: { mean: number } }
   served_coherence_measured?: { mean: number; max: number; n_folds: number }
+  within_cad_localisation?: {
+    within_cad_auc_ci?: Record<'LAD' | 'LCX' | 'RCA', { mean: number; ci95: [number, number]; n_folds: number; p_vs_chance: number }>
+    single_vessel_true_vessel_ranked_highest: Record<'100' | '010' | '001', { hits: number; n: number }>
+  }
 }
 interface WhatIf {
   jump_threshold: number
@@ -194,6 +198,52 @@ export default function ModelPerformance() {
           </tbody>
         </table>
       </Section>
+
+      {m.sprint?.within_cad_localisation?.within_cad_auc_ci && (
+        <Section
+          title="Finding · which artery? Among patients with CAD (nested CV)"
+          note={
+            <>
+              CoronaryLens gives a reliable overall CAD risk (AUC {f2(m.cv.variants[m.test.served.variant]?.CAD?.roc_auc?.mean)}), with
+              vessel-level estimates as supporting context. Restricted to patients who have CAD, the vessel probabilities separate LAD
+              disease only modestly and LCX and RCA disease no better than chance (95% CIs include 0.5). Vessel probabilities mostly
+              reflect overall CAD risk because the clinical inputs carry little artery-specific information: the ECG findings are yes/no
+              flags without the leads they appeared in, and wall-motion abnormality is a single code without a documented location.
+              Mean of per-outer-fold AUCs; 95% CI and p versus 0.5 with the Nadeau–Bengio correction.
+            </>
+          }
+        >
+          <table className="w-full" data-testid="within-cad-table">
+            <thead className="text-[10px] uppercase text-muted">
+              <tr>
+                <Th>Artery</Th>
+                <Th>Within-CAD AUC [95% CI]</Th>
+                <Th>p vs chance</Th>
+                <Th>Single-vessel patients: true artery ranked highest</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {(['LAD', 'LCX', 'RCA'] as const).map((v) => {
+                const r = m.sprint!.within_cad_localisation!.within_cad_auc_ci![v]
+                const key = ({ LAD: '100', LCX: '010', RCA: '001' } as const)[v]
+                const top = m.sprint!.within_cad_localisation!.single_vessel_true_vessel_ranked_highest[key]
+                return (
+                  <tr key={v} className="border-t border-line/60">
+                    <Td strong>{v}</Td>
+                    <Td strong>
+                      {f2(r.mean)} <span className="text-muted">[{f2(r.ci95[0])}–{f2(r.ci95[1])}]</span>
+                    </Td>
+                    <Td>{r.p_vs_chance < 0.001 ? '< 0.001' : f3(r.p_vs_chance)}</Td>
+                    <Td>
+                      {top.hits} / {top.n}
+                    </Td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </Section>
+      )}
 
       {m.sprint && (
         <Section

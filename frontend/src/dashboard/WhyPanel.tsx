@@ -143,7 +143,7 @@ export default function WhyPanel() {
           {target !== 'CAD' && target !== 'P_GE2' && (
             <p className="rounded bg-ink/40 px-2 py-1 text-[10px] text-muted">
               Vessel estimates mostly reflect overall CAD risk. Among patients who have CAD, the model separates LAD from the other
-              arteries only modestly and LCX/RCA barely better than chance (within-CAD AUC LAD 0.69, LCX 0.52, RCA 0.57), so similar
+              arteries only modestly and LCX/RCA no better than chance (within-CAD AUC LAD 0.69, LCX 0.52, RCA 0.57), so similar
               drivers appear for every vessel.
             </p>
           )}

@@ -1,6 +1,6 @@
 # CoronaryLens
 
-**A coherent, uncertainty-aware coronary risk twin on real anatomy.** Enter a patient's clinical, ECG, lab and echo findings; CoronaryLens estimates the probability of coronary artery disease (CAD) and of stenosis in the LAD, LCX and RCA, colours those arteries on a real 3-D heart, and explains every number.
+**A coherent, uncertainty-aware coronary risk twin on real anatomy.** Enter a patient's clinical, ECG, lab and echo findings; CoronaryLens estimates the probability of coronary artery disease (CAD) and of stenosis in the LAD, LCX and RCA, colours those arteries on a real 3-D heart, and explains every number. It gives a reliable overall CAD risk, with vessel-level estimates as supporting context.
 
 IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualization & Prediction
 
@@ -13,6 +13,7 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 - **One distribution, so the numbers always fit together.** One calibrated model predicts all 8 LAD/LCX/RCA patterns; CAD, vessel, ≥2- and 3-vessel risks are sums of those. Against a strong ensemble of separate models on identical folds, AUC is equal and risk estimates are significantly better calibrated (log-loss p = 0.0003, Brier p = 0.049); separate models also put P(CAD) below a vessel's risk for 5–32% of patients (for the strong ensemble the gaps were small: mean 0.03, at most 0.18).
 - **Validation that counts its own search.** Nested cross-validation with model selection inside every fold; 748 procedures screened; a 61-patient test set held out from the start; a leakage ablation that shows how CAD AUC 0.930 becomes 0.968.
 - **Real anatomy.** BodyParts3D meshes; LAD/LCX/RCA mapped by FMA ID; the left ventricle split into the 17 AHA segments, synced with a 2-D bullseye.
+- **A clear finding about the data.** The model detects CAD well (nested-CV AUC 0.93), but among patients who have CAD the vessel probabilities separate the diseased artery only modestly for LAD and no better than chance for LCX and RCA (within-CAD AUC LAD 0.69 [0.59–0.78], LCX 0.52 [0.42–0.61], RCA 0.57 [0.47–0.66]; 95% CIs, corrected). Vessel probabilities mostly reflect overall CAD risk because the clinical inputs carry little artery-specific information: the ECG findings are yes/no flags without the leads they appeared in, and wall-motion abnormality is a single code without a documented location.
 - **Honest per-vessel explanations.** Owen-value SHAP on the exact displayed output, measurements beside their contributions, conformal "uncertain" shading, intervals and an out-of-distribution warning.
 
 ## Results (nested CV of the served model, 10×5 folds, mean [95% corrected CI])
@@ -25,7 +26,7 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 | F1 (max-F1 threshold) | 0.916 | 0.845 | 0.638 | 0.647 |
 | Specificity | 0.768 | 0.655 | 0.491 | 0.537 |
 
-Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (wide CIs; see the report). LCX and RCA are hard to predict from clinical data: after 748 procedures their AUC stayed at about 0.71–0.74. Vessel probabilities mostly reflect overall CAD risk: among patients with CAD, the model picks out LAD disease only modestly (within-CAD AUC 0.69) and LCX/RCA barely better than chance (0.52 / 0.57). The app says so above the vessel cards: *"Vessel-level estimates are less certain than overall CAD (nested-CV AUC: CAD 0.93 · LAD 0.87 · LCX 0.71 · RCA 0.74). Use them as supporting context."* Full results, statistics and limitations: **[docs/REPORT.pdf](docs/REPORT.pdf)** (5 pages).
+Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (wide CIs; see the report). LCX and RCA are hard to predict from clinical data: after 748 procedures their AUC stayed at about 0.71–0.74. Vessel probabilities mostly reflect overall CAD risk: among patients with CAD, the model picks out LAD disease only modestly and LCX/RCA no better than chance (within-CAD AUC LAD 0.69 [0.59–0.78], LCX 0.52 [0.42–0.61], RCA 0.57 [0.47–0.66]). The app says so above the vessel cards: *"Vessel-level estimates are less certain than overall CAD (nested-CV AUC: CAD 0.93 · LAD 0.87 · LCX 0.71 · RCA 0.74). Use them as supporting context."* Full results, statistics and limitations: **[docs/REPORT.pdf](docs/REPORT.pdf)** (5 pages).
 
 ## Quickstart
 

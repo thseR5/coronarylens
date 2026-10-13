@@ -12,7 +12,7 @@
 
 ## Inspiration
 
-Risk models for coronary artery disease often output one number for "CAD" and separate numbers for each artery. We noticed that these numbers can disagree: in our tests, separate models put the overall CAD risk below a single artery's risk for 5–32% of patients, which is impossible (for the strong ensemble, by up to 18 percentage points). We wanted a model whose numbers always fit together, on a heart that shows where they point.
+Risk models for coronary artery disease often output one number for "CAD" and separate numbers for each artery. We noticed that these numbers can disagree: in our tests, separate models put the overall CAD risk below a single artery's risk for 5–32% of patients, which is impossible (for the strong ensemble, by up to 18 percentage points). We wanted a model whose numbers always fit together, shown on a real 3D heart.
 
 ## What it does
 
@@ -35,7 +35,7 @@ ROC-AUC: CAD 0.934 [0.896, 0.973] · LAD 0.866 [0.820, 0.911] · LCX 0.708 [0.64
 
 ## Challenges
 
-- **LCX and RCA are hard to predict from clinical data.** We screened 748 approaches and their AUC stayed at 0.71–0.74. Among patients with CAD, the model can barely tell which of these arteries is affected (within-CAD AUC 0.52 / 0.57). We say so in the app and show "uncertain" honestly.
+- **LCX and RCA are hard to predict from clinical data.** We screened 748 approaches and their AUC stayed at 0.71–0.74. Among patients with CAD, the vessel probabilities separate LAD modestly and LCX/RCA no better than chance (within-CAD AUC LAD 0.69 [0.59–0.78], LCX 0.52 [0.42–0.61], RCA 0.57 [0.47–0.66]), because the clinical inputs carry little artery-specific information: the ECG findings are yes/no flags without the leads they appeared in, and wall-motion abnormality is a single code without a documented location. So CoronaryLens gives a reliable overall CAD risk, with vessel-level estimates as supporting context, and the app says so.
 - **Leakage is easy to fall into on this dataset.** In our ablation, oversampling and feature selection on the full data raise CAD AUC from 0.930 to 0.968.
 - **Keeping explanations fast** (p95 360 ms from slider to SHAP panel) while they are computed on the exact displayed output.
 

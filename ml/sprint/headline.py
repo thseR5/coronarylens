@@ -144,7 +144,17 @@ def within_cad_localisation(rec: dict) -> dict:
             s = pat[idx] == k
             top[k][0] += int((V[s].argmax(1) == col).sum())
             top[k][1] += int(s.sum())
+    n_train, n_test = fold_sizes(rec)
+
+    def ci(a: list[float]) -> dict:
+        c = corrected(a, n_train, n_test)
+        return {"mean": c["mean"], "ci95": c["ci95"], "n_folds": c["J"],
+                "p_vs_chance": corrected(np.asarray(a) - 0.5, n_train, n_test)["p"]}
+
     return {"within_cad_auc": {v: float(np.mean(a)) for v, a in aucs.items()},
+            "within_cad_auc_ci": {v: ci(a) for v, a in aucs.items()},
+            "ci_note": "mean of per-outer-fold AUCs among CAD patients; 95% CI and p vs AUC 0.5 with the "
+                       "Nadeau-Bengio correction",
             "single_vessel_true_vessel_ranked_highest": {k: {"hits": a, "n": n} for k, (a, n) in top.items()},
             "note": "outer-test predictions of the 10x5 nested CV; patients with CAD only"}
 

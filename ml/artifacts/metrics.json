@@ -5684,6 +5684,36 @@
     "LCX": 0.515046,
     "RCA": 0.56559
    },
+   "within_cad_auc_ci": {
+    "LAD": {
+     "mean": 0.686371,
+     "ci95": [
+      0.589653,
+      0.783088
+     ],
+     "n_folds": 50,
+     "p_vs_chance": 0.000319
+    },
+    "LCX": {
+     "mean": 0.515046,
+     "ci95": [
+      0.420465,
+      0.609628
+     ],
+     "n_folds": 50,
+     "p_vs_chance": 0.750565
+    },
+    "RCA": {
+     "mean": 0.56559,
+     "ci95": [
+      0.474422,
+      0.656757
+     ],
+     "n_folds": 50,
+     "p_vs_chance": 0.154606
+    }
+   },
+   "ci_note": "mean of per-outer-fold AUCs among CAD patients; 95% CI and p vs AUC 0.5 with the Nadeau-Bengio correction",
    "single_vessel_true_vessel_ranked_highest": {
     "100": {
      "hits": 458,

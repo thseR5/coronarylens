@@ -52,7 +52,7 @@ Owen values (SHAP with clinical groups → features) on the exact displayed outp
 
 - Single-centre, small cohort; no external validation; test set small (wide CIs).
 - LCX and RCA discrimination is modest (AUC ≈ 0.71–0.74); about half of test patients get an "uncertain" LCX/RCA status.
-- The model tells whether CAD is present far better than which artery: within-CAD AUC LAD 0.686, LCX 0.515, RCA 0.566; in single-vessel LCX/RCA patients the true vessel was never ranked highest. Specificity (nested CV): CAD 0.768, LAD 0.655, LCX 0.491, RCA 0.537.
+- The model tells whether CAD is present far better than which artery: within-CAD AUC LAD 0.69 [0.59–0.78], LCX 0.52 [0.42–0.61], RCA 0.57 [0.47–0.66] (mean of 50 outer folds, Nadeau–Bengio corrected 95% CIs; LCX and RCA not distinguishable from chance), because the clinical inputs carry little artery-specific information: the ECG findings are yes/no flags without the leads they appeared in, and wall-motion abnormality is a single code without a documented location; in single-vessel LCX/RCA patients the true vessel was never ranked highest. Specificity (nested CV): CAD 0.768, LAD 0.655, LCX 0.491, RCA 0.537.
 - Weakest in patients aged ≥ 65.
 - Vessel-level labels only: no lesion location, severity grading or left-main label.
 - Coronary territories are typical (AHA assignment), not patient-specific.
