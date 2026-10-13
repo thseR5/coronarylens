@@ -25,9 +25,30 @@ export interface SceneLocalState {
 export const prefersReducedMotion = (): boolean =>
   typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
+/** Probe WebGL once: availability + whether it is a software rasteriser (SwiftShader, llvmpipe, WARP). */
+export function probeWebGL(): { ok: boolean; software: boolean; renderer: string } {
+  try {
+    const c = document.createElement('canvas')
+    const g = (c.getContext('webgl2') || c.getContext('webgl')) as WebGLRenderingContext | null
+    if (!g) return { ok: false, software: false, renderer: '' }
+    const ext = g.getExtension('WEBGL_debug_renderer_info')
+    const renderer = String(ext ? g.getParameter(ext.UNMASKED_RENDERER_WEBGL) : g.getParameter(g.RENDERER))
+    g.getExtension('WEBGL_lose_context')?.loseContext()
+    const forced = new URLSearchParams(window.location.search).get('lowpower')
+    const software = forced != null ? forced !== '0' : /swiftshader|llvmpipe|software|basic render|warp/i.test(renderer)
+    return { ok: true, software, renderer }
+  } catch {
+    return { ok: false, software: false, renderer: '' }
+  }
+}
+
+/** Probed once at module load (browser only), so low-power mode is known before the first render. */
+export const WEBGL =
+  typeof document !== 'undefined' ? probeWebGL() : { ok: true, software: false, renderer: '' }
+
 export const useSceneLocal = create<SceneLocalState>((set) => ({
   heartbeat: !prefersReducedMotion(),
-  lowPower: false,
+  lowPower: WEBGL.software,
   labels: true,
   clip: { enabled: false, depth: 0 },
   activeRenderer: null,

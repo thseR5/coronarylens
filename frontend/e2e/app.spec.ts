@@ -4,8 +4,14 @@ const pctText = (p: number) => `${Math.round(p * 100)}%`
 
 test('full stack: preset → API → dashboard + 3D agree; slider updates live', async ({ page, request }) => {
   const errors: string[] = []
+  const reactErrors: string[] = []
   page.on('pageerror', (e) => errors.push(e.message))
+  page.on('console', (m) => {
+    if (m.type() === 'error' && /unmount|Cannot update a component|Maximum update depth/i.test(m.text())) reactErrors.push(m.text())
+  })
   await page.goto('/')
+  // lands on a real preset patient, not on mode-imputed defaults
+  await expect(page.getByLabel('Load preset patient')).toHaveValue('low-risk', { timeout: 15_000 })
 
   // Disclaimer is visible and non-dismissible.
   await expect(page.getByRole('alert').first()).toContainText('Not a substitute for formal diagnostic imaging')
@@ -71,6 +77,7 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
     { timeout: 5_000 },
   )
   const ms = Date.now() - t0
+  await expect(page.getByTestId('preset-modified')).toBeVisible() // true pattern no longer shown as applying
   // Smoke check only: this runs on the Vite DEV server (unbundled modules, HMR). Latency gates live in
   // e2e/latency.spec.ts on the production build (colours <= 300 ms, SHAP <= 700 ms, p95).
   console.log(`slider→gauge update (dev server, smoke only): ${ms} ms`)
@@ -107,4 +114,5 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   await page.getByRole('complementary', { name: 'Risk dashboard' }).screenshot({ path: '../docs/img/app-model-tab-panel.png' })
 
   expect(errors).toEqual([])
+  expect(reactErrors).toEqual([])
 })

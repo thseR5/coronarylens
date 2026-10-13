@@ -92,5 +92,30 @@
    }
   }
  ],
- "note_served_procedure": "after Part 2 the served model is the sprint procedure (CatBoost + CatBoost depth-3 + SVM); FastSVC + threaded CatBoost at serving time"
+ "note_served_procedure": "after Part 2 the served model is the sprint procedure (CatBoost + CatBoost depth-3 + SVM); FastSVC + threaded CatBoost at serving time",
+ "explain_in_process_ms": {
+  "p50": 57,
+  "p95": 91,
+  "n": 37,
+  "note": "served model, ServedModel.explain on 40 unique default-patient variants, after warm-up (2026-10-13)"
+ },
+ "runs_after_judge_fixes": [
+  {
+   "run": 1,
+   "load_1min_before": 8.2,
+   "note": "served model with full-strength bootstrap intervals; machine under normal desktop load (not idle)",
+   "analyze_path_ms": {
+    "p50": 173,
+    "p95": 226
+   },
+   "explain_path_ms": {
+    "p50": 241,
+    "p95": 360
+   },
+   "explain_response_ms": {
+    "p50": 219,
+    "p95": 329
+   }
+  }
+ ]
 }

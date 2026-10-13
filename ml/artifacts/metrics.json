@@ -9381,7 +9381,7 @@
    0.501895,
    0.496137
   ],
-  "note": "joint ensemble, uncalibrated, single 5-fold CV on the training split"
+  "note": "benchmark joint LR+RF+ET ensemble (not the served procedure), uncalibrated, single 5-fold CV on the training split"
  },
  "bootstrap_intervals": {
   "B": 50,

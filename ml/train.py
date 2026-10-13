@@ -303,7 +303,7 @@ def main(quick: bool = False, out_dir: Path = config.ARTIFACTS, reports: Path = 
         n_train_fold = round(len(Xtr) * (n_folds - 1) / n_folds)
         metrics["learning_curve"] = {"train_fraction": fracs, "n_train": [round(f * n_train_fold) for f in fracs],
                                      "roc_auc": lc, "mean_log_loss": lc_ll,
-                                     "note": "joint ensemble, uncalibrated, single 5-fold CV on the training split"}
+                                     "note": "benchmark joint LR+RF+ET ensemble (not the served procedure), uncalibrated, single 5-fold CV on the training split"}
         plots.lines({t: (metrics["learning_curve"]["n_train"], lc[t]) for t in TARGETS},
                     figs / "learning_curve.png", "training patients", "ROC-AUC (5-fold CV)", "Learning curve")
         timings["learning_curve_s"] = time.time() - t0

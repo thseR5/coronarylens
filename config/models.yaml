@@ -20,7 +20,7 @@ pattern_models:
       - {name: logreg, cls: ElasticNetLogReg, params: {C: 0.3, l1_ratio: 0.5}, weight: 1.0}
       - {name: rf, cls: RandomForest, params: {n_estimators: 500, min_samples_leaf: 3, max_features: sqrt}, weight: 1.0}
       - {name: et, cls: ExtraTrees, params: {n_estimators: 500, min_samples_leaf: 3, max_features: sqrt}, weight: 1.0}
-    calibration: temperature    # temperature | vector | none (chosen in CV, see DECISIONS.md)
+    calibration: vector         # benchmark CV chose vector (metrics.json cv.selection); served model: served_procedure
 
 benchmarks:
   independent_ensemble:

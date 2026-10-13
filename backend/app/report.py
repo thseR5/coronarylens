@@ -7,7 +7,12 @@ from html import escape
 DISCLAIMER = ("Decision support and educational use only. Not a substitute for formal diagnostic imaging "
               "(e.g., coronary angiography) or clinical judgment.")
 
-STATUS = {"likely": "likely", "uncertain": "uncertain (conformal set {0,1})", "unlikely": "unlikely"}
+STATUS = {"likely": "likely (90% conformal set = stenosis, agrees with threshold)",
+          "uncertain": "uncertain (90% conformal set has both outcomes or disagrees with the threshold, "
+                       "or the patient is out of distribution / many inputs were imputed)",
+          "unlikely": "unlikely (90% conformal set = no stenosis, agrees with threshold)"}
+LOCALISATION_NOTE = ("Vessel probabilities mostly reflect overall CAD risk: among patients with CAD the model separates "
+                     "LAD only modestly and LCX/RCA barely better than chance (within-CAD AUC 0.69 / 0.52 / 0.57).")
 
 
 def _pct(p: float) -> str:
@@ -55,6 +60,7 @@ td, th {{ border-bottom: 1px solid #ddd; padding: 4px 6px; text-align: left; }}
 <table><tr><th>Target</th><th>P</th><th>90% interval</th><th>Conformal status</th><th>Threshold</th><th></th></tr>
 {''.join(rows)}</table>
 <p>Multi-vessel (≥2): {_pct(mv['p_ge2'])} · three-vessel: {_pct(mv['p_3vd'])}</p>
+<p><em>{escape(LOCALISATION_NOTE)}</em></p>
 <h2>Explanation (SHAP/Owen values, probability scale)</h2>{narr}
 <h2>Plain-language summary</h2><ul>{pat}</ul>
 <h2>Inputs</h2><table><tr><th>Feature</th><th>Value</th><th></th></tr>{feat_rows}</table>

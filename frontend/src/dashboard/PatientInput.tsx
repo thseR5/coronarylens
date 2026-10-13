@@ -138,8 +138,20 @@ export default function PatientInput() {
   const groups = config?.features.groups ?? []
 
   useEffect(() => {
-    api.presets().then(setPresets).catch(() => setPresets([]))
-  }, [])
+    api
+      .presets()
+      .then((ps) => {
+        setPresets(ps)
+        // land on a real patient (Low risk), not on mode-imputed defaults (which describe a typical angina patient)
+        const first = ps.find((p) => p.id === 'low-risk') ?? ps[0]
+        const st = useStore.getState()
+        if (first && specs.length) {
+          setPresetId(first.id)
+          st.setFeatures({ ...defaultFeatures(specs), ...first.features })
+        }
+      })
+      .catch(() => setPresets([]))
+  }, [specs])
 
   useEffect(() => {
     if (specs.length && Object.keys(features).length === 0) setFeatures(defaultFeatures(specs))
@@ -147,6 +159,7 @@ export default function PatientInput() {
 
   const shown = full ? specs : specs.filter((f) => f.quick)
   const preset = presets.find((p) => p.id === presetId)
+  const modified = !!preset && Object.entries(preset.features).some(([k, v]) => String(features[k]) !== String(v))
 
   const loadPreset = (id: string) => {
     setPresetId(id)
@@ -177,12 +190,17 @@ export default function PatientInput() {
           Randomize
         </button>
       </div>
-      {preset && (
+      {preset && !modified && (
         <p className="text-xs text-muted">
           {preset.description}
           {preset.true_pattern && (
             <> · true angiography pattern (LAD/LCX/RCA): <span className="font-mono text-text">{preset.true_pattern}</span></>
           )}
+        </p>
+      )}
+      {preset && modified && (
+        <p className="text-xs text-warn" data-testid="preset-modified">
+          {preset.label} (modified): the true angiography result no longer applies to these inputs.
         </p>
       )}
 

@@ -21,6 +21,9 @@ from ml.ingest import InputError, decode_row, encode_input, encode_value, featur
 from ml.joint import EXPLAIN_OUTPUTS, PATTERNS, VESSELS, explain_matrix, marginals
 from ml.uncertainty import BootstrapEnsemble, centered_intervals
 
+# with this many imputed (missing) inputs the estimate rests largely on typical cohort values: show "uncertain"
+MAX_IMPUTED_FOR_CONFIDENT = 10
+
 TARGET_KEYS = {"CAD": "cad", "LAD": "LAD", "LCX": "LCX", "RCA": "RCA"}
 
 
@@ -86,13 +89,17 @@ class ServedModel:
         iv, _ = centered_intervals(Pc, {t: m[t] for t in ["CAD", *VESSELS]})
         dom = float(self.domain.score(x)[0])
 
+        in_domain = bool(dom <= self.domain.threshold_)
+        # never show a confident status for patients unlike the training data or with many guessed inputs
+        force_uncertain = (not in_domain) or len(imputed) >= MAX_IMPUTED_FOR_CONFIDENT
+
         def risk(t):
             p = float(m[t][0])
             lo, hi = float(iv[t][0, 0]), float(iv[t][0, 1])  # centred bootstrap interval (contains p by design)
             thr = float(self.thresholds[t][mode])
             positive = bool(p >= thr)
-            return {"p": p, "interval": (lo, hi), "status": conformal.reconciled_status(p, self.conformal[t], positive),
-                    "threshold": thr, "positive": positive}
+            status = "uncertain" if force_uncertain else conformal.reconciled_status(p, self.conformal[t], positive)
+            return {"p": p, "interval": (lo, hi), "status": status, "threshold": thr, "positive": positive}
 
         nv = {str(n): float(m[f"N{n}"][0]) for n in range(len(VESSELS) + 1)}
         return {
@@ -100,7 +107,7 @@ class ServedModel:
             "cad": risk("CAD"),
             "vessels": {v: risk(v) for v in VESSELS},
             "multivessel": {"p_ge2": float(m["P_GE2"][0]), "p_3vd": float(m["P_3VD"][0]), "n_vessels_dist": nv},
-            "applicability": {"in_domain": bool(dom <= self.domain.threshold_), "score": dom,
+            "applicability": {"in_domain": in_domain, "score": dom,
                               "threshold": float(self.domain.threshold_)},
             "imputed": imputed,
             "out_of_range": oor,

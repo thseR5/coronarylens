@@ -19,11 +19,11 @@
 3. In the left panel, click **Typical chest pain** to switch it to *No*. Watch the arteries recolour.
 4. Click it back to *Yes*.
 
-**Say:** "This is CoronaryLens. Enter a patient's clinical findings and it shows how likely each coronary artery is to be narrowed, on a real 3D heart, and explains why. Change one finding, here typical chest pain, and every artery and number updates in about a fifth of a second."
+**Say:** "This is CoronaryLens. Enter a patient's clinical findings and it shows how likely each coronary artery is to be narrowed, on a real 3D heart, and explains why. Change one finding, here typical chest pain, and every artery and number updates in under a quarter of a second."
 
 **Captions:**
 - "Real 3D anatomy · live risk per artery"
-- "Update in 175 ms (p95)"
+- "Update in 226 ms (p95)"
 
 ## 0:40–0:55 · Disclaimer and data
 

@@ -6,16 +6,17 @@ export const pct = (p: number | null | undefined, digits = 0) =>
 export const signedPct = (d: number, digits = 1) => `${d >= 0 ? '+' : '−'}${Math.abs(d * 100).toFixed(digits)} pts`
 
 export const STATUS_LABEL: Record<Status, string> = {
-  likely: 'Likely',
+  likely: 'Confident',
   uncertain: 'Uncertain',
-  unlikely: 'Unlikely',
+  unlikely: 'Confident',
 }
 
 export const STATUS_HELP: Record<Status, string> = {
   likely: 'The 90% conformal prediction set contains only "stenosis", and it agrees with the threshold decision.',
   uncertain:
     'The 90% conformal set contains both outcomes (patients without stenosis in this artery also often score this high), ' +
-    'or it disagrees with the threshold decision. Calibrated per artery, so a higher % can still be uncertain.',
+    'or it disagrees with the threshold decision, or the patient is out of distribution / 10+ inputs were imputed. ' +
+    'Calibrated per artery, so a higher % can still be uncertain.',
   unlikely: 'The 90% conformal prediction set contains only "no stenosis", and it agrees with the threshold decision.',
 }
 

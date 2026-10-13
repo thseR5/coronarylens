@@ -30,7 +30,7 @@ The test set has 61 patients and only 17 without CAD, so its 95% CIs are wide (C
 It is small, which is why we use nested CV with corrected CIs, report Brier and log-loss next to AUC, show uncertainty in the UI, and name the limits: no external validation, a single centre, and a weaker subgroup aged 65 and over (CAD AUC 0.840, n = 76).
 
 **Why didn't you use TabPFN?**
-We considered it. Its current weights require accepting a separate licence and an API token. Its CPU inference is also too slow for our live explanations: each explanation evaluates the model on about 5,000 coalition rows, within a 700 ms budget. Our served model explains in 47 ms per request in-process.
+We considered it. Its current weights require accepting a separate licence and an API token. Its CPU inference is also too slow for our live explanations: each explanation evaluates the model on about 5,000 coalition rows, within a 700 ms budget. Our served model explains in 57 ms median (p95 91 ms) per request in-process.
 
 **What happens at an ejection fraction of 55%?**
 In the what-if check, P(LAD) drops by about 0.07 as EF crosses roughly 55%, the upper end of the normal reference range. The tree-based learners split there. The step is below our 0.15 jump threshold, and P(CAD) still moves in the expected direction (higher EF → lower risk). It is a real artefact of tree models on 242 patients, visible in the performance tab.
@@ -57,7 +57,7 @@ It distorts calibrated probabilities, and our colours are probabilities. We keep
 Yes. SHAP (Owen values over clinical groups) runs on the exact displayed function, including calibration and the step from pattern to vessel probabilities. Base value + contributions equals the displayed probability exactly. Removing the top-ranked features changes the prediction four times more than removing random ones (0.217 vs 0.051).
 
 **How fast is it without a GPU?**
-On the production build on a laptop, colours update at p95 175 ms after a slider change and the explanation at 241 ms. The 3-D scene ran at 46–60 FPS with the GPU disabled (software rendering).
+On the production build on a laptop, colours update at p95 226 ms after a slider change and the explanation at 241 ms. The 3-D scene ran at 46–60 FPS with the GPU disabled (software rendering).
 
 **How would you add a new vessel or feature?**
 Add it to the YAML config (`features.yaml` or `anatomy.yaml`) and retrain or rebuild. The input form, API schema, explanations and 3-D mapping follow automatically, and tests check the mapping. A new vessel target grows the joint pattern space to 2^k.

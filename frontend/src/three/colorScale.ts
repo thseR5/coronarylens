@@ -59,3 +59,7 @@ export function cssGradient(direction = 'to right', steps = 10): string {
   const parts = Array.from({ length: steps + 1 }, (_, i) => `${riskHex(i / steps)} ${(100 * i) / steps}%`)
   return `linear-gradient(${direction}, ${parts.join(', ')})`
 }
+
+/** Categorical colours for "which artery usually supplies this region" (territories and bullseye). Pastel ColorBrewer
+ *  Set2 hues, chosen to be distinct from the viridis risk scale so a territory colour is never read as risk. */
+export const ARTERY_COLORS: Record<string, string> = { LAD: '#8da0cb', LCX: '#fc8d62', RCA: '#66c2a5' }

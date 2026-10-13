@@ -1,0 +1,48 @@
+{
+ "note": "exploratory; best-of-3 is optimistic; not adopted (would need a new nested run + test look)",
+ "n_cad_patients": 172,
+ "results": {
+  "LAD": {
+   "l2_logistic": {
+    "auc_mean": 0.5796938775510204,
+    "auc_sd": 0.09531414602030192
+   },
+   "random_forest": {
+    "auc_mean": 0.5972789115646259,
+    "auc_sd": 0.12791670934476915
+   },
+   "catboost_d3": {
+    "auc_mean": 0.5669047619047619,
+    "auc_sd": 0.12026725103311783
+   }
+  },
+  "LCX": {
+   "l2_logistic": {
+    "auc_mean": 0.4789634502923977,
+    "auc_sd": 0.08283000832567396
+   },
+   "random_forest": {
+    "auc_mean": 0.6219020467836256,
+    "auc_sd": 0.08915957834249603
+   },
+   "catboost_d3": {
+    "auc_mean": 0.6207266081871344,
+    "auc_sd": 0.084468546296416
+   }
+  },
+  "RCA": {
+   "l2_logistic": {
+    "auc_mean": 0.5107017543859649,
+    "auc_sd": 0.07832407684681358
+   },
+   "random_forest": {
+    "auc_mean": 0.548140264877881,
+    "auc_sd": 0.0808467881670396
+   },
+   "catboost_d3": {
+    "auc_mean": 0.5357125042999656,
+    "auc_sd": 0.07991645416977845
+   }
+  }
+ }
+}

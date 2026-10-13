@@ -1,7 +1,7 @@
 import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Html, useGLTF } from '@react-three/drei'
+import { useGLTF } from '@react-three/drei'
 import { useStore } from '../store'
 import { mockAnalysis } from '../api/mock'
 import { AnatomyModel, type Hit } from './AnatomyModel'
@@ -9,7 +9,7 @@ import { CameraRig, DEFAULT_DISTANCE } from './CameraRig'
 import Legend from './Legend'
 import SceneControls from './SceneControls'
 import { buildProceduralAnatomy } from './procedural'
-import { prefersReducedMotion, useSceneLocal } from './sceneState'
+import { WEBGL, prefersReducedMotion, useSceneLocal } from './sceneState'
 
 declare global {
   interface Window {
@@ -21,23 +21,6 @@ declare global {
       /** Current uniform scale factor of a vessel mesh (heartbeat check). */
       meshScale: (vessel: string) => number
     }
-  }
-}
-
-/** Probe WebGL once: availability + whether it is a software rasteriser (SwiftShader, llvmpipe, WARP). */
-function probeWebGL(): { ok: boolean; software: boolean; renderer: string } {
-  try {
-    const c = document.createElement('canvas')
-    const g = (c.getContext('webgl2') || c.getContext('webgl')) as WebGLRenderingContext | null
-    if (!g) return { ok: false, software: false, renderer: '' }
-    const ext = g.getExtension('WEBGL_debug_renderer_info')
-    const renderer = String(ext ? g.getParameter(ext.UNMASKED_RENDERER_WEBGL) : g.getParameter(g.RENDERER))
-    g.getExtension('WEBGL_lose_context')?.loseContext()
-    const forced = new URLSearchParams(window.location.search).get('lowpower')
-    const software = forced != null ? forced !== '0' : /swiftshader|llvmpipe|software|basic render|warp/i.test(renderer)
-    return { ok: true, software, renderer }
-  } catch {
-    return { ok: false, software: false, renderer: '' }
   }
 }
 
@@ -194,12 +177,11 @@ export default function CoronaryScene() {
   const select = useStore((s) => s.select)
   const activeRenderer = useSceneLocal((s) => s.activeRenderer)
   const fallbackReason = useSceneLocal((s) => s.fallbackReason)
+  const anatomyReady = useSceneLocal((s) => Object.keys(s.vesselMeshes).length > 0)
   const [hit, setHit] = useState<Hit | null>(null)
-  const [probe] = useState(probeWebGL) // pure: no store writes during render
+  const probe = WEBGL // probed once when the 3D state module loads; lowPower is already correct on first render
   useEffect(() => {
-    // apply low-power defaults after mount (writing to stores while rendering triggers React warnings)
-    useSceneLocal.getState().set({ lowPower: probe.software })
-    if (probe.software) useStore.getState().setView({ showRibs: false })
+    if (probe.software) useStore.getState().setView({ showRibs: false }) // after mount, never during render
   }, [probe])
   const lowPower = probe.software
   const down = useRef<{ x: number; y: number } | null>(null)
@@ -245,13 +227,8 @@ export default function CoronaryScene() {
         <ScreenshotHook />
         <FrameDriver />
         <CameraRig />
-        <Suspense
-          fallback={
-            <Html center>
-              <div className="text-sm text-muted">Loading anatomy…</div>
-            </Html>
-          }
-        >
+        {/* no <Html> fallback: it mounts its own React root and unmounting it mid-render triggers a React race */}
+        <Suspense fallback={null}>
           {renderer === 'procedural' ? (
             procedural
           ) : (
@@ -262,6 +239,11 @@ export default function CoronaryScene() {
         </Suspense>
       </Canvas>
 
+      {!anatomyReady && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted">
+          Loading anatomy…
+        </div>
+      )}
       <div className="pointer-events-none absolute inset-x-2 top-2 flex flex-col items-start gap-1">
         <SceneControls />
         <div className="pointer-events-auto">
@@ -279,7 +261,7 @@ export default function CoronaryScene() {
           {lowPower && ' · software rendering: reduced quality'}
         </div>
       </div>
-      <Legend className="pointer-events-auto absolute right-2 bottom-2" />
+      <Legend className="pointer-events-auto absolute right-2 bottom-2 hidden sm:block" />
       <Tooltip hit={hit} />
     </div>
   )

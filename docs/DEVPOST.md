@@ -12,7 +12,7 @@
 
 ## Inspiration
 
-Risk models for coronary artery disease often output one number for "CAD" and separate numbers for each artery. We noticed that these numbers often disagree. A model can say the LAD artery is 70% likely to be narrowed while saying the patient has only a 30% chance of CAD at all, which is impossible. We wanted a model whose numbers always fit together, on a heart that shows where they point.
+Risk models for coronary artery disease often output one number for "CAD" and separate numbers for each artery. We noticed that these numbers can disagree: in our tests, separate models put the overall CAD risk below a single artery's risk for 5–32% of patients (by up to 18 percentage points), which is impossible. We wanted a model whose numbers always fit together, on a heart that shows where they point.
 
 ## What it does
 
@@ -25,19 +25,19 @@ Risk models for coronary artery disease often output one number for "CAD" and se
 ## How we built it
 
 - **Model:** one model predicts all 8 possible LAD/LCX/RCA patterns, and every displayed number, including ≥2- and 3-vessel risk, is a sum of those 8 probabilities, so the numbers always fit together. Separate models put P(CAD) below a vessel's probability for 32.1% (naive logistic regression) to 5.4% (strong ensemble) of patients; ours for 0%.
-- **Validation:** nested cross-validation with model selection inside every fold; 748 procedures screened on the training split; 10 finalists chosen by a rule written in advance; a 61-patient test set held out from the start; Nadeau–Bengio corrected statistics.
+- **Validation:** nested cross-validation with model selection inside every fold; 748 procedures screened on the training split; 10 finalists chosen by a rule written down before the second screening round's results were read; a 61-patient test set held out from the start; Nadeau–Bengio corrected statistics.
 - **Served model:** CatBoost + CatBoost (depth 3) + SVM, averaged and calibrated, chosen by the validated selection procedure.
 - **Stack:** Python, scikit-learn, CatBoost, FastAPI; React, TypeScript, React Three Fiber, Tailwind; Playwright and pytest; Docker. Explanations run in a separate worker process. An exact vectorised SVM probability routine keeps them fast.
 
 ## Results (nested CV, served model)
 
-ROC-AUC: CAD 0.934 [0.896, 0.973] · LAD 0.866 [0.820, 0.911] · LCX 0.708 [0.647, 0.769] · RCA 0.737 [0.679, 0.796]. Compared with a strong ensemble of separate models on the same folds, AUC is equal and log-loss and Brier score are significantly better (p = 0.0003 and 0.049). Live updates on a laptop CPU: colours 175 ms, explanation 241 ms (p95).
+ROC-AUC: CAD 0.934 [0.896, 0.973] · LAD 0.866 [0.820, 0.911] · LCX 0.708 [0.647, 0.769] · RCA 0.737 [0.679, 0.796]. Compared with a strong ensemble of separate models on the same folds, AUC is equal and log-loss and Brier score are significantly better (p = 0.0003 and 0.049). Live updates on a laptop CPU: colours 226 ms, explanation 360 ms (p95).
 
 ## Challenges
 
 - **LCX and RCA are hard to predict from clinical data.** We screened 748 approaches and their AUC stayed at 0.71–0.74. Among patients with CAD, the model can barely tell which of these arteries is affected (within-CAD AUC 0.52 / 0.57). We say so in the app and show "uncertain" honestly.
 - **Leakage is easy to fall into on this dataset.** In our ablation, oversampling and feature selection on the full data raise CAD AUC from 0.930 to 0.968.
-- **Keeping explanations under a quarter of a second** while they are computed on the exact displayed output.
+- **Keeping explanations fast** (p95 360 ms from slider to SHAP panel) while they are computed on the exact displayed output.
 
 ## Accomplishments we're proud of
 
@@ -63,6 +63,6 @@ python · scikit-learn · catboost · fastapi · react · typescript · three.js
 
 - [ ] Public GitHub repo with README (setup, prerequisites, run steps)
 - [ ] YouTube video, 3–10 min, **Unlisted** (not Private), English audio, shows the working system
-- [ ] Report PDF linked (`docs/REPORT.pdf`, 4 pages)
+- [ ] Report PDF linked (`docs/REPORT.pdf`, 5 pages)
 - [ ] All teammates added on Devpost with their real names
 - [ ] Track A selected; links tested in a private browser window

@@ -38,7 +38,7 @@ flowchart LR
 | `backend/app/main.py` | FastAPI endpoints (`docs/API.md`); serves the built frontend in production |
 | `backend/app/service.py` | LRU cache; explain/counterfactual in a separate worker process; per-tab cancellation; explain prefetch on analyze |
 
-**Latency design.** `/analyze` runs in the main process. Explanations run in a spawned worker with its own model copy, so they never hold the GIL during `/analyze`. Each browser tab sends `X-Client-Id`; a newer request cancels that tab's queued jobs (HTTP 409, treated as an abort). `/analyze` starts the explanation early so `/explain` usually joins a running job. Measured on the production build: colours p95 175 ms, SHAP panel p95 241 ms.
+**Latency design.** `/analyze` runs in the main process. Explanations run in a spawned worker with its own model copy, so they never hold the GIL during `/analyze`. Each browser tab sends `X-Client-Id`; a newer request cancels that tab's queued jobs (HTTP 409, treated as an abort). `/analyze` starts the explanation early so `/explain` usually joins a running job. Measured on the production build: colours p95 226 ms, SHAP panel p95 360 ms.
 
 ## Frontend
 

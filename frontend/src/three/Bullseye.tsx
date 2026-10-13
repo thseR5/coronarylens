@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react'
 import { useStore } from '../store'
 import type { TargetId } from '../types/api'
-import { relativeLuminance, riskColor, riskHex, NEUTRAL_VESSEL, hexToRgb } from './colorScale'
+import { ARTERY_COLORS, NEUTRAL_VESSEL } from './colorScale'
 
 /** AHA 17-segment model (Cerqueira et al., Circulation 2002). Anterior at top, septum left, lateral right. */
 export interface Segment {
@@ -80,8 +80,7 @@ export default function Bullseye({ size = 220, className = '' }: { size?: number
         {segs.map((s) => {
           const vessel = map.get(s.id) ?? ''
           const p = analysis?.vessels[vessel]?.p
-          const fill = p == null ? NEUTRAL_VESSEL : riskHex(p)
-          const lum = relativeLuminance(p == null ? hexToRgb(NEUTRAL_VESSEL) : riskColor(p))
+          const fill = ARTERY_COLORS[vessel] ?? NEUTRAL_VESSEL // which artery usually supplies it (not risk)
           const segHot = s.id === hoveredSegment // the exact segment hovered here or on the 3D heart
           const hot = segHot || vessel === hovered || vessel === selected
           const dim = (hovered || selected) && !hot
@@ -117,7 +116,7 @@ export default function Bullseye({ size = 220, className = '' }: { size?: number
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontSize={10}
-                fill={lum > 0.3 ? '#0b1118' : '#f2f5f8'}
+                fill="#0b1118"
                 pointerEvents="none"
               >
                 {s.id}
@@ -127,9 +126,16 @@ export default function Bullseye({ size = 220, className = '' }: { size?: number
         })}
       </svg>
       <figcaption className="text-center text-[10px] leading-tight text-muted">
-        AHA 17-segment · expected supply territory (illustrative); coronary dominance varies between people
-        <br />
-        {Object.keys(bullseye).join(' · ')} · anterior top, septum left
+        <span className="mb-0.5 flex justify-center gap-2">
+          {Object.keys(bullseye).map((v) => (
+            <span key={v} className="flex items-center gap-1">
+              <span className="inline-block h-2 w-2 rounded-sm" style={{ background: ARTERY_COLORS[v] }} />
+              {v}
+            </span>
+          ))}
+        </span>
+        Colour = artery that usually supplies the segment (AHA), not risk · illustrative; coronary dominance varies · anterior
+        top, septum left
       </figcaption>
     </figure>
   )

@@ -50,6 +50,7 @@ interface WhatIf {
   flags: { preset: string; feature: string; output: string; kind: string; delta?: number; max_step?: number }[]
 }
 interface Metrics {
+  conformal_displayed_status_test?: Record<string, { likely: number; uncertain: number; unlikely: number }>
   whatif?: WhatIf
   sprint?: Sprint
   test_first_look?: { test: { served: { metrics: Record<string, Record<string, CI>> } } }
@@ -551,14 +552,18 @@ export default function ModelPerformance() {
         </div>
       </Section>
 
-      <Section title={`Conformal prediction · ${pc(m.conformal.target_coverage, 0)} target coverage (test)`}>
+      <Section
+        title={`Conformal prediction · ${pc(m.conformal.target_coverage, 0)} target coverage (test)`}
+        note="The app shows 'uncertain' when the 90% set contains both outcomes or disagrees with the threshold decision (and always for out-of-distribution patients or 10+ imputed inputs)."
+      >
         <table className="w-full">
           <thead className="text-[10px] uppercase text-muted">
             <tr>
               <Th>Target</Th>
               <Th>Coverage</Th>
               <Th>Mean set size</Th>
-              <Th>"Uncertain" rate</Th>
+              <Th>Set has both</Th>
+              <Th>Shown as uncertain</Th>
             </tr>
           </thead>
           <tbody>
@@ -568,6 +573,7 @@ export default function ModelPerformance() {
                 <Td>{pc(m.conformal.test[t]?.coverage)}</Td>
                 <Td>{f2(m.conformal.test[t]?.mean_set_size)}</Td>
                 <Td>{pc(m.conformal.test[t]?.frac_uncertain)}</Td>
+                <Td strong>{pc(m.conformal_displayed_status_test?.[t]?.uncertain)}</Td>
               </tr>
             ))}
           </tbody>

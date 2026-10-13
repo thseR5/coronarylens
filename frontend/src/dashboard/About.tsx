@@ -22,7 +22,9 @@ export default function About() {
           One calibrated model predicts the probability of each of the 8 possible LAD/LCX/RCA patterns. Every number shown is a sum
           of those 8 probabilities, so the overall CAD risk can never be lower than any single vessel's risk. LAD, LCX, RCA and Cath
           are never used as inputs. Intervals come from a bootstrap ensemble; "uncertain" means the 90% conformal prediction set
-          contains both outcomes.
+          contains both outcomes or disagrees with the threshold decision, or that the patient is out of distribution or many
+          inputs were imputed. Artery estimates mostly follow overall CAD risk: among patients with CAD, the model separates LAD
+          modestly and LCX/RCA barely better than chance, so they are risk levels, not lesion locations.
         </p>
       </section>
       <section>

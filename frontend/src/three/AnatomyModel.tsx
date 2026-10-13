@@ -5,7 +5,7 @@ import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import { useStore } from '../store'
 import type { TargetId } from '../types/api'
 import type { StructureSpec } from '../types/config'
-import { NEUTRAL_VESSEL, NOT_MODELLED, riskColor } from './colorScale'
+import { ARTERY_COLORS, NEUTRAL_VESSEL, NOT_MODELLED, riskColor } from './colorScale'
 import { makeContextMaterial, makeVesselMaterial, makeXrayMaterial, stripeUniforms, type LitMaterial } from './materials'
 import { prefersReducedMotion, useSceneLocal } from './sceneState'
 import { ahaSegmentSpecs, type SegmentSpec } from './aha'
@@ -19,7 +19,7 @@ const CONTEXT_STYLE: Record<string, { color: string; opacity: number }> = {
   Sternum: { color: '#e2d8c6', opacity: 0.25 },
 }
 const TRANSITION_MS = 400
-const TERRITORY_MIX = 0.35 // subtle, so the coloured vessels stand out against the LV surface
+const TERRITORY_MIX = 0.45 // categorical artery tint on the LV surface
 // Nodes that beat with the myocardium (scaled about the heart centre = origin). Aorta pulses subtly.
 const BEAT_AMPLITUDE: Record<string, number> = { vessel: 0.035, territory: 0.035, segment: 0.035, Myocardium: 0.035, LeftMain: 0.035, Aorta: 0.01 }
 
@@ -191,9 +191,11 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
       const p = spec.target ? analysis?.vessels[spec.target]?.p : undefined
       if (spec.role === 'vessel') to = p == null ? new THREE.Color(NEUTRAL_VESSEL) : new THREE.Color().setRGB(...riskColor(p), THREE.SRGBColorSpace)
       if (isTerritory(spec.role)) {
+        // territories show WHICH artery usually supplies the region (categorical), not risk: the model has no
+        // regional information, so a risk tint here would imply localisation it cannot provide
         to = new THREE.Color(MYOCARDIUM)
-        if (p != null && view.showTerritories)
-          to.lerp(new THREE.Color().setRGB(...riskColor(p), THREE.SRGBColorSpace), TERRITORY_MIX)
+        if (view.showTerritories && spec.target && ARTERY_COLORS[spec.target])
+          to.lerp(new THREE.Color(ARTERY_COLORS[spec.target]), TERRITORY_MIX)
         // alternate lightness by segment so borders between same-vessel segments stay visible (hue unchanged)
         if (spec.role === 'segment' && (spec as { segment?: number }).segment! % 2 === 0) to.multiplyScalar(0.86)
       }

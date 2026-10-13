@@ -10,7 +10,7 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 
 ## What is different
 
-- **One distribution, so the numbers always fit together.** One calibrated model predicts all 8 LAD/LCX/RCA patterns; CAD, vessel, ≥2- and 3-vessel risks are sums of those. Separate per-target models put P(CAD) below a vessel's risk for 32.1% (naive logistic regression) to 5.4% (strong ensemble) of patients; ours 0%. On identical folds AUC is equal and log-loss and Brier score are significantly better.
+- **One distribution, so the numbers always fit together.** One calibrated model predicts all 8 LAD/LCX/RCA patterns; CAD, vessel, ≥2- and 3-vessel risks are sums of those. Against a strong ensemble of separate models on identical folds, AUC is equal and risk estimates are significantly better calibrated (log-loss p = 0.0003, Brier p = 0.049); separate models also put P(CAD) below a vessel's risk for 5–32% of patients (small gaps, mean 0.03).
 - **Validation that counts its own search.** Nested cross-validation with model selection inside every fold; 748 procedures screened; a 61-patient test set held out from the start; a leakage ablation that shows how CAD AUC 0.930 becomes 0.968.
 - **Real anatomy.** BodyParts3D meshes; LAD/LCX/RCA mapped by FMA ID; the left ventricle split into the 17 AHA segments, synced with a 2-D bullseye.
 - **Honest per-vessel explanations.** Owen-value SHAP on the exact displayed output, measurements beside their contributions, conformal "uncertain" shading, intervals and an out-of-distribution warning.
@@ -25,7 +25,7 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 | F1 (max-F1 threshold) | 0.916 | 0.845 | 0.638 | 0.647 |
 | Specificity | 0.768 | 0.655 | 0.491 | 0.537 |
 
-Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (wide CIs; see the report). LCX and RCA are hard to predict from clinical data: after 748 procedures their AUC stayed at about 0.71–0.74. Vessel probabilities mostly reflect overall CAD risk: among patients with CAD, the model picks out LAD disease only modestly (within-CAD AUC 0.69) and LCX/RCA barely better than chance (0.52 / 0.57). Full results, statistics and limitations: **[docs/REPORT.pdf](docs/REPORT.pdf)** (4 pages).
+Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (wide CIs; see the report). LCX and RCA are hard to predict from clinical data: after 748 procedures their AUC stayed at about 0.71–0.74. Vessel probabilities mostly reflect overall CAD risk: among patients with CAD, the model picks out LAD disease only modestly (within-CAD AUC 0.69) and LCX/RCA barely better than chance (0.52 / 0.57). Full results, statistics and limitations: **[docs/REPORT.pdf](docs/REPORT.pdf)** (5 pages).
 
 ## Quickstart
 
@@ -39,7 +39,7 @@ make dev            # API on http://localhost:8000, app on http://localhost:5173
 
 Or with Docker: `docker compose up --build`, then open http://localhost:8000. A free Hugging Face Space can host the same image: see [deploy/hf-space/DEPLOY.md](deploy/hf-space/DEPLOY.md).
 
-Other commands: `make test` (70 Python + 21 frontend tests), `make test-e2e` (Playwright; run `cd frontend && npx playwright install chromium` once), `make train` (retrain the served model, benchmarks and all artifacts: 316 s on an M2 laptop; the model search itself, `ml/sprint/`, is a separate run of about 25–40 min: screening 4 + 7 min, nested CV 13–30 min), `make anatomy` (rebuild the 3-D model from BodyParts3D), `uv run python tools/build_report.py` (report PDF).
+Other commands: `make test` (70 Python + 21 frontend tests), `make test-e2e` (Playwright; run `cd frontend && npx playwright install chromium` once), `make train` (retrain the served model, benchmarks and all artifacts: 470 s on an M2 laptop; the model search itself, `ml/sprint/`, is a separate run of about 25–40 min: screening 4 + 7 min, nested CV 13–30 min), `make anatomy` (rebuild the 3-D model from BodyParts3D), `uv run python tools/build_report.py` (report PDF).
 
 ## Using the app
 
@@ -62,7 +62,7 @@ flowchart LR
 
 - **No leakage:** LAD, LCX, RCA and Cath are rejected as inputs everywhere (tests + HTTP 422); all preprocessing runs inside CV folds.
 - **Extensible:** features, targets, anatomy and models are defined in four YAML files; adding a feature or structure needs no code change (tested).
-- **Fast:** production build, laptop CPU: slider → probabilities and colours p95 175 ms; → SHAP panel p95 241 ms.
+- **Fast:** production build, laptop CPU: slider → probabilities and colours p95 226 ms; → SHAP panel p95 360 ms.
 
 More: [architecture](docs/ARCHITECTURE.md) · [model card](docs/MODEL_CARD.md) · [datasheet](docs/DATASHEET.md) · [TRIPOD+AI checklist](docs/TRIPOD_AI_CHECKLIST.md) · [API](docs/API.md) · [judge Q&A](docs/JUDGE_QA.md) · development history: [decisions](docs/DECISIONS.md), [experiments](docs/EXPERIMENTS.md).
 
