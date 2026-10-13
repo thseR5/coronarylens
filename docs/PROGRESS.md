@@ -19,7 +19,7 @@ No deadline (user, 2026-10-12): optimize for the best result.
 | 1 Fixes | done | coherence table incl. naive LR (32.1%) + regularized-LR footnote (24.8%); AHA 17-segment territories default (test: 3D == bullseye); Voronoi toggle (14/17); airways layer; latency gate passed (docs/latency.json); nested CV headline; 61 pytest + 21 vitest + 3D/full-stack e2e green |
 | 2 Performance sprint | next | harness in ml/sprint/ |
 | 3 Tier 2/3 completion | pending | |
-| 4 Docs, packaging, review | done; features frozen after judge review 4 (≈82/100) | user-only: confirm licence name, public repo, video, Devpost, HF Space |
+| 4 Docs, packaging, review | done; final round steps 1–5 done, features refrozen (see DECISIONS) | user-only: licence name, publish repo, video, Devpost, HF Space (`docs/SUBMISSION_CHECKLIST.md`) |
 
 ### Live-update latency (Part 1 gate) — production build, idle machine, 2026-10-12
 
