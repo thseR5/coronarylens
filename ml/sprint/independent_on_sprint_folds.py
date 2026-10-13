@@ -31,7 +31,9 @@ def main(n_jobs: int = 3) -> dict:
     folds = []
     for i, te, r in sorted(res, key=lambda x: x[0]):
         mt = r["independent"]["metrics"]
+        pred = r["independent"]["pred"]
         folds.append({"fold": i, "test_index": [int(j) for j in te],
+                      "pred": {t: [round(float(x), 6) for x in pred[t]] for t in ["CAD", "LAD", "LCX", "RCA"]},
                       **{f"auc_{t}": mt[t]["roc_auc"] for t in ["CAD", "LAD", "LCX", "RCA"]},
                       "brier_mean": float(np.mean([mt[t]["brier"] for t in ["CAD", "LAD", "LCX", "RCA"]])),
                       "pattern_log_loss": mt["pattern_log_loss"], "coherence": mt["coherence_violation_rate"]})
@@ -44,4 +46,4 @@ def main(n_jobs: int = 3) -> dict:
 if __name__ == "__main__":
     o = main()
     f = o["folds"]
-    print({k: round(float(np.mean([x[k] for x in f])), 4) for k in f[0] if k not in ("fold", "test_index")})
+    print({k: round(float(np.mean([x[k] for x in f])), 4) for k in f[0] if k not in ("fold", "test_index", "pred")})

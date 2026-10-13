@@ -124,3 +124,24 @@ class BootstrapEnsemble:
             v = v.reshape(B, n)
             out[k] = np.stack([np.percentile(v, lo, axis=0), np.percentile(v, hi, axis=0)], axis=1)
         return out
+
+
+def centered_intervals(Pc_boot: np.ndarray, point: dict[str, np.ndarray], lo: float = 5.0, hi: float = 95.0
+                       ) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
+    """Centred bootstrap percentile intervals around the SERVED point estimate.
+
+    Pc_boot: (B, n, 8) calibrated pattern probabilities of the bootstrap members. Bootstrap refits see ~63% unique
+    patients, so their median can sit away from the full-data model; the interval keeps the bootstrap spread
+    (median - 5th pct, 95th pct - median) but is centred on the served estimate, clipped to [0, 1].
+    Returns (centred, raw) dicts of (n, 2) arrays per marginal.
+    """
+    B, n, _ = Pc_boot.shape
+    cen, raw = {}, {}
+    for k, v in marginals(Pc_boot.reshape(B * n, -1)).items():
+        v = v.reshape(B, n)
+        a, med, b = np.percentile(v, lo, axis=0), np.median(v, axis=0), np.percentile(v, hi, axis=0)
+        raw[k] = np.stack([a, b], axis=1)
+        if k in point:
+            p = np.asarray(point[k], dtype=float)
+            cen[k] = np.stack([np.clip(p - (med - a), 0, 1), np.clip(p + (b - med), 0, 1)], axis=1)
+    return cen, raw

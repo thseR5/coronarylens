@@ -6,8 +6,8 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 
 ## Summary: four results
 
-1. **One coherent model for CAD and all three vessels.** Every displayed probability is a marginal of one calibrated distribution over the 8 possible LAD/LCX/RCA stenosis patterns, so overall CAD risk can never be lower than a single vessel's risk. Separate per-target models break this rule for 32.1% of patients (naive logistic regression) and 5.4% (a strong LR + RF + ExtraTrees ensemble); ours for 0%. On identical cross-validation folds our model matches the ensemble's AUC (no significant difference for any target) and gives significantly better risk estimates (pattern log-loss 1.508 vs 1.662, p = 0.0003; mean Brier 0.158 vs 0.166, p = 0.049; Nadeau–Bengio corrected tests).
-2. **Validation that accounts for its own search.** Repeated nested cross-validation (CV) on a 242-patient training split; 748 modelling procedures screened; model selection inside every outer fold; a 61-patient test split held out from the start. A leakage ablation shows how preprocessing on the full dataset inflates results (CAD AUC 0.925 → 0.968).
+1. **One coherent model for CAD and all three vessels.** Every displayed probability is a marginal of one calibrated distribution over the 8 possible LAD/LCX/RCA stenosis patterns, so CAD, vessel, ≥2-vessel and 3-vessel risks always fit together. Separate per-target models contradict themselves (P(CAD) below a vessel's risk) for 32.1% of patients (naive logistic regression) and 5.4% (a strong LR + RF + ExtraTrees ensemble); ours for 0%. These contradictions are small (mean gap 0.03) and a post-hoc patch can hide them, so the main gain is elsewhere: on identical folds our model matches the ensemble's AUC (no significant difference for any target) and gives significantly better risk estimates (pattern log-loss 1.508 vs 1.662, p = 0.0003; mean Brier 0.158 vs 0.166, p = 0.049; Nadeau–Bengio corrected tests).
+2. **Validation that accounts for its own search.** Repeated nested cross-validation (CV) on a 242-patient training split; 748 modelling procedures screened; model selection inside every outer fold; a 61-patient test split held out from the start. A leakage ablation shows how oversampling and feature selection on the full dataset inflate results (CAD AUC 0.930 → 0.968). We also report plainly what the data cannot do: it tells *whether* coronary disease is present far better than *which* artery is affected.
 3. **Real anatomy.** BodyParts3D meshes (CC BY 4.0) with LAD, LCX and RCA mapped to model outputs by FMA identifiers, and the left ventricle split into the 17 AHA segments, coloured and hover-synced with a 2-D bullseye.
 4. **Explanations and uncertainty per vessel.** Owen-value SHAP on the exact displayed output, measurements beside their contributions, conformal "uncertain" shading on vessels, bootstrap intervals and an out-of-distribution warning.
 
@@ -29,7 +29,7 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 
 **Served procedure.** The served model is a validated *selection procedure*, not a hand-picked learner. On the training split it builds inner 5-fold out-of-fold predictions for 10 finalist pipelines (8-class learners such as CatBoost, an RBF SVM, in-fold-selected elastic-net and Bayesian logistic regression, EBM; averaged; vector or Dirichlet calibration), scores each with cross-fitted calibration, and serves the best. On the full training split it selects **CatBoost + CatBoost (depth 3) + SVM, averaged, vector-calibrated**. Operating thresholds (max-F1 and a screening mode with sensitivity ≥ 0.90) come from out-of-fold predictions.
 
-**Model search (details in `docs/EXPERIMENTS.md`).** 748 procedures were screened with repeated CV on the training split only (learners, calibrations, learned ensemble weights, a vessel-count blend, a clinically informed prior, in-fold feature selection, per-target stacking, SVM). Ten finalists, chosen by a rule written before the screening results were read, went through 10×5 nested CV with selection inside every outer fold. TabPFN was considered and not used (license-gated weights; CPU inference cost incompatible with live explanations).
+**Model search (details in `docs/EXPERIMENTS.md`).** 748 procedures were screened with repeated CV on the training split only (learners, calibrations, learned ensemble weights, a vessel-count blend, a clinically informed prior, in-fold feature selection, per-target stacking, SVM). Ten finalists, chosen by a rule written down before the second screening round's results were read (committed together with them), went through 10×5 nested CV with selection inside every outer fold. TabPFN was considered and not used (license-gated weights; CPU inference cost incompatible with live explanations).
 
 ## 3. Validation and results
 
@@ -37,14 +37,16 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 
 **Table 1. Served procedure, nested CV (mean [95% corrected CI]).** Threshold metrics at the max-F1 threshold chosen inside each training fold.
 
-| Target | ROC-AUC | PR-AUC | Brier | Accuracy | Precision | Recall | F1 |
-|---|---|---|---|---|---|---|---|
-| CAD | 0.934 [0.896, 0.973] | 0.972 | 0.089 | 0.880 | 0.909 | 0.926 | 0.916 |
-| LAD | 0.866 [0.820, 0.911] | 0.894 | 0.144 | 0.805 | 0.789 | 0.913 | 0.845 |
-| LCX | 0.708 [0.647, 0.769] | 0.578 | 0.204 | 0.630 | 0.515 | 0.848 | 0.638 |
-| RCA | 0.737 [0.679, 0.796] | 0.583 | 0.194 | 0.654 | 0.527 | 0.848 | 0.647 |
-| ≥ 2 vessels | 0.766 [0.711, 0.820] | | | | | | |
-| 3 vessels | 0.755 [0.689, 0.821] | | | | | | |
+| Target | ROC-AUC | PR-AUC | Brier | Accuracy (majority) | Precision | Recall | Specificity | F1 |
+|---|---|---|---|---|---|---|---|---|
+| CAD | 0.934 [0.896, 0.973] | 0.972 | 0.089 | 0.880 (0.711) | 0.909 | 0.926 | 0.768 | 0.916 |
+| LAD | 0.866 [0.820, 0.911] | 0.894 | 0.144 | 0.805 (0.583) | 0.789 | 0.913 | 0.655 | 0.845 |
+| LCX | 0.708 [0.647, 0.769] | 0.578 | 0.204 | 0.630 (0.612) | 0.515 | 0.848 | 0.491 | 0.638 |
+| RCA | 0.737 [0.679, 0.796] | 0.583 | 0.194 | 0.654 (0.624) | 0.527 | 0.848 | 0.537 | 0.647 |
+| ≥ 2 vessels | 0.766 [0.711, 0.820] | | | | | | | |
+| 3 vessels | 0.755 [0.689, 0.821] | | | | | | | |
+
+"Majority" = accuracy of always predicting the more common class. The max-F1 thresholds favour sensitivity, so LCX/RCA accuracy is only slightly above that baseline.
 
 **Table 2. Coherence and discrimination of alternative designs** (nested CV; rows 1–4 on the same 5×5 benchmark folds; served row on the 10×5 folds, compared with the ensemble on identical folds).
 
@@ -61,21 +63,24 @@ Four elastic-net logistic regressions (C = 0.3) on the benchmark folds still con
 
 ![Share of patients with P(CAD) below some vessel's probability](../reports/figures/coherence.png)
 
-**What the model search bought.** Against the first served model on identical folds, only the risk estimate improved significantly (pattern log-loss −0.067, p = 0.002, 46/50 folds). Brier and CAD/LAD AUC gains (+0.007, +0.015) are small and not statistically significant; LCX and RCA did not improve. We tried 748 procedures and the LCX/RCA ceiling held: with clinical data alone, the circumflex and right coronary arteries stay at AUC ≈ 0.71–0.74.
+**What the model search bought.** Against the first served model on identical folds, only the risk estimate improved significantly (pattern log-loss −0.067, p = 0.002, 46/50 folds). The Brier gain (−0.004) and the CAD/LAD AUC gains (+0.007, +0.015) are small and not statistically significant; LCX and RCA did not improve. We tried 748 procedures and the LCX/RCA ceiling held: with clinical data alone, the circumflex and right coronary arteries stay at AUC ≈ 0.71–0.74.
 
-**Locked test set (n = 61; 44 CAD).** ROC-AUC with 95% bootstrap CIs: CAD 0.898 [0.80, 0.97], LAD 0.829 [0.71, 0.93], LCX 0.761 [0.64, 0.87], RCA 0.661 [0.51, 0.80]. The test set was looked at twice: before the search (first model: 0.920 / 0.842 / 0.692 / 0.685) and after it (above). All differences lie inside the CIs; nothing was selected or tuned on these patients, and nested CV is the primary estimate.
+**Where the model fails: which artery.** Vessel probabilities mostly carry overall CAD risk. Among patients who have CAD, they separate the diseased artery only modestly for LAD (within-CAD AUC 0.686) and barely better than chance for LCX (0.515) and RCA (0.566) (nested-CV outer predictions). In single-vessel LCX or RCA patients the true artery was never the highest-probability vessel (0/100 and 0/140 fold-instances; LAD-only: 458/460). Dedicated models trained only on CAD patients reached at most 0.62 for LCX in exploratory CV. The UI states this next to every vessel explanation.
 
-**Leakage ablation (analysis only, never served).** Random forest, 10-fold × 3: running SMOTE and top-20 feature selection on the full dataset before CV gives CAD AUC 0.968, LCX 0.842 and RCA 0.851; doing both inside each fold gives 0.930, 0.714 and 0.715. Selection before CV alone gives 0.931 / 0.741 / 0.726. This is why we report ~0.93, not 0.97–0.99.
+**Locked test set (n = 61; 44 CAD).** ROC-AUC with 95% bootstrap CIs: CAD 0.898 [0.80, 0.97], LAD 0.829 [0.71, 0.93], LCX 0.761 [0.64, 0.87], RCA 0.661 [0.51, 0.80]; specificity 0.53 / 0.60 / 0.50 / 0.53. The independent ensemble on the same patients: 0.917 / 0.820 / 0.716 / 0.713 (DeLong p ≥ 0.18 for every target) with 0% contradictions on this small set. The test set was looked at twice: before the search (first model: 0.920 / 0.842 / 0.692 / 0.685) and after it (above). All differences lie inside the CIs; nothing was selected or tuned on these patients, and nested CV is the primary estimate.
 
-**Comparison with published work on this dataset** (different protocols; not a like-for-like ranking). Accuracy LAD / LCX / RCA: Alizadehsani et al. 2012 (decision tree, 10-fold) 74.2 / 63.8 / 68.3%; 2013 (bagging) 79.5 / 65.1 / 68.0%; 2020 (SVM with feature selection, 10-fold) 86.6 / 83.5 / 82.9%. Ours (nested CV, threshold chosen for F1, not accuracy): 80.5 / 63.0 / 65.4%. A 2025 study reports 97.7% CAD accuracy with feature selection before cross-validation; our ablation shows how much that step can inflate.
+**Leakage ablation (analysis only, never served).** Random forest, 10-fold × 3: running SMOTE and top-20 feature selection on the full dataset before CV gives CAD AUC 0.968, LCX 0.842 and RCA 0.851; doing both inside each fold gives 0.930, 0.714 and 0.715. Selection before CV alone gives 0.931 / 0.741 / 0.726. SMOTE before CV causes most of the inflation; this is why we report ~0.93, not 0.97–0.99.
+
+**Comparison with published work on this dataset** (different protocols; not a like-for-like ranking). Accuracy LAD / LCX / RCA: Alizadehsani et al. 2012 (decision tree, 10-fold) 74.2 / 63.8 / 68.3%; 2013 (bagging) 79.5 / 65.1 / 68.0%; 2020 (SVM with feature selection, 10-fold) 86.6 / 83.5 / 82.9%. Ours (nested CV, threshold chosen for F1, not accuracy): 80.5 / 63.0 / 65.4%. A 2025 study reports 97.7% CAD accuracy (feature selection before cross-validation, SMOTE inside it); in our ablation, selection before CV alone changes CAD AUC only from 0.925 to 0.931, so we do not attribute that result to leakage.
 
 **Subgroups (nested CV).** Performance is lowest in patients aged ≥ 65 (n = 76: CAD 0.840, LCX 0.539, RCA 0.588) compared with < 50 (n = 47: CAD 0.911) and 50–64 (n = 119: CAD 0.949). Women (n = 104) CAD 0.960; men (n = 138) 0.905.
 
 ## 4. Calibration, uncertainty, decision value
 
 - **Calibration** (test): slope / ECE CAD 0.95 / 0.088, LAD 1.03 / 0.092, LCX 1.34 / 0.140, RCA 0.67 / 0.082.
-- **Conformal prediction** (class-conditional, 90% target): test coverage CAD 0.87, LAD 0.84, LCX 0.92, RCA 0.87. A vessel is shown as *uncertain* (moving stripes) when its prediction set contains both outcomes: 7% of test patients for CAD, 25% LAD, 54% LCX, 52% RCA. Being honest about LCX/RCA uncertainty is part of the design.
-- **Intervals**: 50 bootstrap refits; mean 90% interval width CAD 0.17 to LCX 0.23.
+- **Conformal prediction** (class-conditional, 90% target): test coverage CAD 0.87, LAD 0.84, LCX 0.92, RCA 0.87. The UI shows *likely*/*unlikely* only when the 90% set is a single outcome that agrees with the threshold decision; otherwise *uncertain* (moving stripes): 18% of test patients for CAD, 26% LAD, 54% LCX, 52% RCA.
+- **Thresholds**: max-F1 ("Balanced") and a "Screening" threshold (sensitivity ≥ 0.90, never above the max-F1 threshold), both from out-of-fold predictions.
+- **Intervals**: 50 bootstrap refits of the served learners with the served hyperparameters; 5th–95th percentile spread centred on the served estimate (the raw percentile interval already contained it for 95–100% of test patients); mean width CAD 0.18 to LCX 0.27.
 - **Applicability domain**: Mahalanobis distance (Ledoit–Wolf) with a 99th-percentile threshold; inputs beyond it trigger an "outside training distribution" warning.
 - **Decision curves** (test, CAD): net benefit 0.541 vs 0.443 for treat-all at a 0.5 threshold.
 
@@ -89,7 +94,7 @@ Explanations are computed on the exact function that is displayed: input encodin
 
 `tools/build_anatomy.py` downloads BodyParts3D 4.0 (part-of tree), resolves FMA concepts to element meshes (25 IDs, none missing), merges, decimates and exports one meshopt-compressed glTF (0.45 MB, 91,777 triangles) with named nodes: LAD, LCX, RCA, left main (grey: not modelled), myocardium, aorta, ribs, sternum, airways. Vessel colours follow P(stenosis) on a colour-blind-safe viridis scale with 3-D labels showing probability and interval.
 
-**Territories.** The LV surface is split into the 17 AHA segments (rings along the principal long axis; sectors oriented by the right ventricle; apex cap) and each segment is coloured by its vessel under the standard assignment (Cerqueira et al., 2002), the same table that drives the 2-D bullseye; a test asserts the two agree, and hovering a segment highlights it in both. An optional nearest-artery estimate is shown for comparison (14/17 segments agree with the AHA assignment). Both are labelled as expected supply territory, illustrative, varying with coronary dominance.
+**Territories.** The LV surface is split into the 17 AHA segments (rings along the principal long axis; sectors oriented by the right ventricle; apex cap) and each segment is coloured by its vessel under the standard assignment (Cerqueira et al., 2002), the same table that drives the 2-D bullseye; a test asserts the two agree, and hovering a segment highlights it in both. An optional nearest-artery estimate is shown for comparison; it was adjusted toward the AHA convention during development, so its agreement (14/17 segments) is alignment, not independent validation. Both are labelled as expected supply territory, illustrative, varying with coronary dominance.
 
 ## 7. System and performance
 

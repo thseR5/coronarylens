@@ -5,8 +5,18 @@ import type { Contribution, TargetId } from '../types/api'
 import { featureMeta, TARGET_LABEL } from './labels'
 
 const TOP_N = 8
-const fmtValue = (v: Contribution['value']) =>
-  v == null ? '' : typeof v === 'number' ? (Number.isInteger(v) ? String(v) : v.toFixed(1)) : v
+const fmtValue = (v: Contribution['value'], type?: string) =>
+  v == null
+    ? ''
+    : type === 'binary'
+      ? Number(v) === 1
+        ? 'Yes'
+        : 'No'
+      : typeof v === 'number'
+        ? Number.isInteger(v)
+          ? String(v)
+          : v.toFixed(1)
+        : v
 
 export default function WhyPanel() {
   const config = useStore((s) => s.config)
@@ -31,7 +41,8 @@ export default function WhyPanel() {
       const sorted = [...ex.contributions].sort((a, b) => Math.abs(b.shap) - Math.abs(a.shap))
       rows = sorted.slice(0, TOP_N).map((c) => {
         const m = featureMeta(config, c.feature)
-        return { id: c.feature, label: m.label, value: `${fmtValue(c.value)}${m.unit && c.value != null ? ` ${m.unit}` : ''}`, shap: c.shap }
+        const unit = m.unit && c.value != null && m.type !== 'binary' ? ` ${m.unit}` : ''
+        return { id: c.feature, label: m.label, value: `${fmtValue(c.value, m.type)}${unit}`, shap: c.shap }
       })
       const rest = sorted.slice(TOP_N).reduce((a, c) => a + c.shap, 0)
       if (sorted.length > TOP_N) rows.push({ id: 'rest', label: `${sorted.length - TOP_N} other features`, value: '', shap: rest })
@@ -122,6 +133,13 @@ export default function WhyPanel() {
               <li key={i}>{s}</li>
             ))}
           </ul>
+          {target !== 'CAD' && target !== 'P_GE2' && (
+            <p className="rounded bg-ink/40 px-2 py-1 text-[10px] text-muted">
+              Vessel estimates mostly reflect overall CAD risk. Among patients who have CAD, the model separates LAD from the other
+              arteries only modestly and LCX/RCA barely better than chance (within-CAD AUC LAD 0.69, LCX 0.52, RCA 0.57), so similar
+              drivers appear for every vessel.
+            </p>
+          )}
           <p className="text-[10px] text-muted">
             Contributions are SHAP values ({explanation?.method}) in percentage points on the same output that is displayed.
             They describe model behaviour, not causation. Red raises the estimate, blue lowers it.

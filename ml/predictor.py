@@ -19,7 +19,7 @@ from ml.calibrate import Calibrator
 from ml.explain import METHOD, aggregate_features, build_target_explanations, column_groups, owen_values
 from ml.ingest import InputError, decode_row, encode_input, encode_value, feature_map
 from ml.joint import EXPLAIN_OUTPUTS, PATTERNS, VESSELS, explain_matrix, marginals
-from ml.uncertainty import BootstrapEnsemble
+from ml.uncertainty import BootstrapEnsemble, centered_intervals
 
 TARGET_KEYS = {"CAD": "cad", "LAD": "LAD", "LCX": "LCX", "RCA": "RCA"}
 
@@ -80,16 +80,19 @@ class ServedModel:
         x, imputed, oor = self.encode(features)
         P = self.patterns(x)
         m = marginals(P)
-        iv = self.bootstrap.intervals(x, self.calibrator)
+        Pb = self.bootstrap.predict_patterns(x)  # (B, 1, 8) raw bootstrap members
+        B = Pb.shape[0]
+        Pc = self.calibrator.transform(Pb.reshape(B, -1)).reshape(B, 1, -1)
+        iv, _ = centered_intervals(Pc, {t: m[t] for t in ["CAD", *VESSELS]})
         dom = float(self.domain.score(x)[0])
 
         def risk(t):
             p = float(m[t][0])
-            lo, hi = float(iv[t][0, 0]), float(iv[t][0, 1])
-            lo, hi = min(lo, p), max(hi, p)  # interval always contains the served point estimate
+            lo, hi = float(iv[t][0, 0]), float(iv[t][0, 1])  # centred bootstrap interval (contains p by design)
             thr = float(self.thresholds[t][mode])
-            return {"p": p, "interval": (lo, hi), "status": conformal.status(p, self.conformal[t]),
-                    "threshold": thr, "positive": bool(p >= thr)}
+            positive = bool(p >= thr)
+            return {"p": p, "interval": (lo, hi), "status": conformal.reconciled_status(p, self.conformal[t], positive),
+                    "threshold": thr, "positive": positive}
 
         nv = {str(n): float(m[f"N{n}"][0]) for n in range(len(VESSELS) + 1)}
         return {

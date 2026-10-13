@@ -3,7 +3,7 @@
 Short answers; every number is in `ml/artifacts/metrics.json` or the linked file.
 
 **Why is your accuracy lower than papers that report 97–99% on this dataset?**
-Because our numbers come from patients the model never saw during any modelling step. Our leakage ablation runs the same random forest two ways. With oversampling (SMOTE) and feature selection on the full dataset before cross-validation, CAD AUC is 0.968, LCX 0.842 and RCA 0.851. With both steps inside each training fold, the numbers are 0.930, 0.714 and 0.715. Feature selection before splitting alone gives 0.931 / 0.741 / 0.726. The served model scores CAD 0.934 in nested CV.
+Because our numbers come from patients the model never saw during any modelling step. Our leakage ablation runs the same random forest two ways. With oversampling (SMOTE) and feature selection on the full dataset before cross-validation, CAD AUC is 0.968, LCX 0.842 and RCA 0.851. With both steps inside each training fold, the numbers are 0.930, 0.714 and 0.715. Most of the inflation comes from SMOTE before CV: feature selection before splitting alone gives only 0.931 / 0.741 / 0.726. So we do not claim that every high published number is leakage. We report what our own protocol gives: CAD 0.934 in nested CV.
 
 **How do you prove there is no leakage?**
 LAD, LCX, RCA and Cath are rejected as inputs in training, evaluation and inference (unit tests; the API returns HTTP 422). Every preprocessing, selection, calibration and threshold step runs inside the CV folds. A scan found no feature with within-fold AUC above 0.95 for any target. The 61 test patients were split off before any modelling.
@@ -12,10 +12,13 @@ LAD, LCX, RCA and Cath are rejected as inputs in training, evaluation and infere
 We screened 748 procedures on the training split (learners, calibrations, ensembles, priors, stacking). Ten finalists, chosen by a rule written before we read the results, then went through 10×5 nested cross-validation. Model selection happened inside every outer fold, so the reported performance accounts for that search. The whole log, including failures, is in `docs/EXPERIMENTS.md`.
 
 **Why a joint model instead of four classifiers?**
-Overall CAD means at least one artery is narrowed, so P(CAD) can never be lower than any vessel's probability. Separate models break this rule for 32.1% of patients (four logistic regressions), 24.8% (four regularised ones), 23.4% (classifier chains) and 5.4% (a strong LR + RF + ExtraTrees ensemble, on the same folds as ours). Our model predicts the 8 vessel patterns jointly, so it breaks it for 0%, by construction and measured. On identical folds it matches the ensemble's AUC and has better log-loss (p = 0.0003) and Brier score (p = 0.049).
+Overall CAD means at least one artery is narrowed, so P(CAD) can never be lower than any vessel's probability. Separate models break this rule for 32.1% of patients (four logistic regressions), 24.8% (four regularised ones), 23.4% (classifier chains) and 5.4% (a strong LR + RF + ExtraTrees ensemble, on the same folds as ours). Our model breaks it for 0%, by construction and measured. To be fair, the ensemble's contradictions are small (mean gap 0.03), and a one-line patch, P(CAD) = max(P(CAD), max vessel), hides them without changing its CAD log-loss (0.341 → 0.341). The joint model's real advantages are that it gives one distribution, so ≥2-vessel and 3-vessel risks are consistent with everything else, and that its risk estimates are better calibrated: on identical folds it matches the ensemble's AUC with better pattern log-loss (p = 0.0003) and Brier score (p = 0.049). Against the patched ensemble, its CAD Brier score is still better (0.089 vs 0.102, p = 0.034).
 
 **Why is the log-loss gain significant but the AUC gain isn't?**
 AUC only measures ranking. Log-loss and Brier also measure whether the probabilities are right, and the joint model with calibration improves exactly that. Small AUC gains (+0.007 CAD, +0.015 LAD over our first model) have p = 0.21 and 0.14. Repeated-CV folds share training data, so we use the Nadeau–Bengio corrected t-test, which makes the standard error about 3.7 times larger than the naive one. Log-loss improves by 0.067 (t = −3.29, p = 0.002, better in 46 of 50 folds). That matters here because the 3-D colours are probabilities.
+
+**Can the model tell which artery is diseased?**
+Only weakly, and we say so in the app. Vessel probabilities mostly carry overall CAD risk. Among patients who have CAD, the within-CAD AUC is LAD 0.686, LCX 0.515 and RCA 0.566. In single-vessel LCX or RCA patients, the true artery was never the highest-probability vessel (0/100 and 0/140 fold-instances), while LAD-only patients were found 458 of 460 times. Dedicated models trained only on CAD patients reached at most 0.62 for LCX in exploratory CV. The data tells you whether coronary disease is present far better than where it is.
 
 **Why are LCX and RCA so hard?**
 The inputs are mostly global findings: symptoms, risk factors, labs, ECG and echo. They say a lot about whether a patient has CAD, and less about which artery is affected. ECG and wall-motion clues are regional but imprecise, and coronary dominance varies between people. LCX and RCA disease are also less common than LAD disease here (119 and 114 vs 177 patients), and more often occur together with other vessels. After 748 procedures their AUC stayed at 0.71–0.74, and about half of test patients get an "uncertain" LCX/RCA status. We show that rather than hide it.
@@ -36,13 +39,16 @@ In the what-if check, P(LAD) drops by about 0.07 as EF crosses roughly 55%, the 
 Our expected direction in `features.yaml` is for overall CAD. A wall-motion abnormality raises P(CAD) everywhere in our sweep. At vessel level, the model can attribute it to one artery and lower the others slightly (by up to 0.048 in our presets). That is plausible, because wall-motion abnormalities are regional. Six such small vessel-level reversals are listed in the performance tab.
 
 **Are the 3-D territories real for this patient?**
-No. They show expected supply: the standard AHA 17-segment assignment (Cerqueira 2002), labelled "illustrative; coronary dominance varies between people". The 3-D segments and the bullseye use the same table (tested). An optional nearest-artery estimate agrees with the AHA assignment on 14 of 17 segments.
+No. They show expected supply: the standard AHA 17-segment assignment (Cerqueira 2002), labelled "illustrative; coronary dominance varies between people". The 3-D segments and the bullseye use the same table (tested). An optional nearest-artery estimate agrees with the AHA assignment on 14 of 17 segments. It was adjusted toward the AHA convention during development, so that is alignment, not independent validation.
 
 **Why is the left main grey?**
 The dataset has no left-main label, so we show it as "not modelled" instead of inventing a value.
 
 **What does "uncertain" mean statistically?**
-A class-conditional conformal prediction set at 90% target coverage contains both "stenosis" and "no stenosis". Test coverage was 0.84–0.92.
+We show "likely" or "unlikely" only when the class-conditional (Mondrian) conformal prediction set at 90% target coverage contains a single outcome *and* that outcome agrees with the threshold decision. Otherwise the vessel is "uncertain": the set contains both outcomes, or it disagrees with the threshold. Test coverage was 0.84–0.92. On the test set, 18% (CAD), 26% (LAD), 54% (LCX) and 52% (RCA) of patients were shown as uncertain.
+
+**How are the intervals computed?**
+50 bootstrap refits of the served learners with the served hyperparameters. The 5th–95th percentile spread is centred on the served estimate. The raw percentile interval already contained the served estimate for 95–100% of test patients. Mean width is 0.18 for CAD and 0.27 for LCX.
 
 **Why no SMOTE?**
 It distorts calibrated probabilities, and our colours are probabilities. We keep the natural class balance, calibrate, and choose thresholds on out-of-fold predictions.

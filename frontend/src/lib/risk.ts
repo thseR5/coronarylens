@@ -12,9 +12,11 @@ export const STATUS_LABEL: Record<Status, string> = {
 }
 
 export const STATUS_HELP: Record<Status, string> = {
-  likely: '90% conformal prediction set contains only "stenosis".',
-  uncertain: '90% conformal prediction set contains both outcomes: the data cannot separate them for this patient.',
-  unlikely: '90% conformal prediction set contains only "no stenosis".',
+  likely: 'The 90% conformal prediction set contains only "stenosis", and it agrees with the threshold decision.',
+  uncertain:
+    'The 90% conformal set contains both outcomes (patients without stenosis in this artery also often score this high), ' +
+    'or it disagrees with the threshold decision. Calibrated per artery, so a higher % can still be uncertain.',
+  unlikely: 'The 90% conformal prediction set contains only "no stenosis", and it agrees with the threshold decision.',
 }
 
 export const STATUS_CLASS: Record<Status, string> = {

@@ -195,12 +195,12 @@ export default function CoronaryScene() {
   const activeRenderer = useSceneLocal((s) => s.activeRenderer)
   const fallbackReason = useSceneLocal((s) => s.fallbackReason)
   const [hit, setHit] = useState<Hit | null>(null)
-  const [probe] = useState(() => {
-    const p = probeWebGL()
-    useSceneLocal.getState().set({ lowPower: p.software })
-    if (p.software) useStore.getState().setView({ showRibs: false })
-    return p
-  })
+  const [probe] = useState(probeWebGL) // pure: no store writes during render
+  useEffect(() => {
+    // apply low-power defaults after mount (writing to stores while rendering triggers React warnings)
+    useSceneLocal.getState().set({ lowPower: probe.software })
+    if (probe.software) useStore.getState().setView({ showRibs: false })
+  }, [probe])
   const lowPower = probe.software
   const down = useRef<{ x: number; y: number } | null>(null)
 

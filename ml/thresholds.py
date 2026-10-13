@@ -31,5 +31,10 @@ def min_sensitivity_threshold(y: np.ndarray, p: np.ndarray, sens: float = 0.90) 
 
 def fit_thresholds(Y: dict[str, np.ndarray], Pm: dict[str, np.ndarray], targets: list[str],
                    sens: float = 0.90) -> dict[str, dict[str, float]]:
-    return {t: {"f1": max_f1_threshold(Y[t], Pm[t]), "screening": min_sensitivity_threshold(Y[t], Pm[t], sens)}
-            for t in targets}
+    """Screening = the largest threshold with sensitivity >= sens, but never above the max-F1 threshold, so the
+    screening mode is never less sensitive than the balanced mode."""
+    out = {}
+    for t in targets:
+        f1 = max_f1_threshold(Y[t], Pm[t])
+        out[t] = {"f1": f1, "screening": min(min_sensitivity_threshold(Y[t], Pm[t], sens), f1)}
+    return out

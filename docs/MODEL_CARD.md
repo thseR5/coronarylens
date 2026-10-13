@@ -19,7 +19,7 @@
 
 - **Inputs:** 54 features (demographics, risk factors, symptoms and examination, ECG, labs, echo) defined in `config/features.yaml`; missing inputs are imputed with training medians/modes and listed in the response.
 - **Never inputs:** LAD, LCX, RCA, Cath (enforced in training, evaluation and inference).
-- **Outputs:** probabilities with 90% bootstrap intervals, conformal status (likely / uncertain / unlikely at 90% target coverage), operating thresholds (max-F1 or screening sensitivity ≥ 0.90), applicability-domain flag, Owen-value SHAP explanations.
+- **Outputs:** probabilities with 90% intervals (50 bootstrap refits with the served hyperparameters; 5th–95th percentile spread centred on the served estimate), status (likely / unlikely only when the 90% conformal set is a single outcome agreeing with the threshold decision, otherwise uncertain), operating thresholds (max-F1, or screening with sensitivity ≥ 0.90 and never above max-F1), applicability-domain flag, Owen-value SHAP explanations.
 
 ## Training data
 
@@ -52,6 +52,7 @@ Owen values (SHAP with clinical groups → features) on the exact displayed outp
 
 - Single-centre, small cohort; no external validation; test set small (wide CIs).
 - LCX and RCA discrimination is modest (AUC ≈ 0.71–0.74); about half of test patients get an "uncertain" LCX/RCA status.
+- The model tells whether CAD is present far better than which artery: within-CAD AUC LAD 0.686, LCX 0.515, RCA 0.566; in single-vessel LCX/RCA patients the true vessel was never ranked highest. Specificity (nested CV): CAD 0.768, LAD 0.655, LCX 0.491, RCA 0.537.
 - Weakest in patients aged ≥ 65.
 - Vessel-level labels only: no lesion location, severity grading or left-main label.
 - Coronary territories are typical (AHA assignment), not patient-specific.

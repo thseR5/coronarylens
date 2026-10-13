@@ -5678,6 +5678,104 @@
    "max": 0.0,
    "n_folds": 50
   },
+  "within_cad_localisation": {
+   "within_cad_auc": {
+    "LAD": 0.686371,
+    "LCX": 0.515046,
+    "RCA": 0.56559
+   },
+   "single_vessel_true_vessel_ranked_highest": {
+    "100": {
+     "hits": 458,
+     "n": 460
+    },
+    "010": {
+     "hits": 0,
+     "n": 100
+    },
+    "001": {
+     "hits": 0,
+     "n": 140
+    }
+   },
+   "note": "outer-test predictions of the 10x5 nested CV; patients with CAD only"
+  },
+  "coherence_posthoc": {
+   "violations": {
+    "n_patient_folds_violating": 131,
+    "gap_mean": 0.029893,
+    "gap_median": 0.024336,
+    "gap_max": 0.176901
+   },
+   "cad_metrics_mean": {
+    "orig": {
+     "ll": 0.341009,
+     "brier": 0.101768,
+     "auc": 0.925982
+    },
+    "patched": {
+     "ll": 0.340854,
+     "brier": 0.101761,
+     "auc": 0.926302
+    },
+    "served": {
+     "ll": 0.299846,
+     "brier": 0.089072,
+     "auc": 0.934326
+    }
+   },
+   "served_minus_patched": {
+    "ll": {
+     "mean": -0.041008,
+     "sd": 0.047516,
+     "se_naive": 0.00672,
+     "se_corrected": 0.02469,
+     "t": -1.660923,
+     "df": 49,
+     "p": 0.103115,
+     "ci95": [
+      -0.090624,
+      0.008608
+     ],
+     "J": 50,
+     "n_train": 193.6,
+     "n_test": 48.4
+    },
+    "brier": {
+     "mean": -0.012689,
+     "sd": 0.011218,
+     "se_naive": 0.001586,
+     "se_corrected": 0.005829,
+     "t": -2.17691,
+     "df": 49,
+     "p": 0.034334,
+     "ci95": [
+      -0.024402,
+      -0.000975
+     ],
+     "J": 50,
+     "n_train": 193.6,
+     "n_test": 48.4
+    },
+    "auc": {
+     "mean": 0.008024,
+     "sd": 0.013053,
+     "se_naive": 0.001846,
+     "se_corrected": 0.006782,
+     "t": 1.183133,
+     "df": 49,
+     "p": 0.242465,
+     "ci95": [
+      -0.005605,
+      0.021654
+     ],
+     "J": 50,
+     "n_train": 193.6,
+     "n_test": 48.4
+    }
+   },
+   "note": "patch fixes CAD-vs-vessel contradictions only; P(>=2)/P(3VD) remain undefined for separate models"
+  },
   "rule": "finalists by the pre-registered rule; inner selection by cross-fitted inner-OOF pattern log-loss",
   "served_on_full_training_split": {
    "chosen": "catboost+catboost_d3+svm|avg|vector",
@@ -7619,11 +7717,11 @@
  "thresholds": {
   "CAD": {
    "f1": 0.44305,
-   "screening": 0.66759
+   "screening": 0.44305
   },
   "LAD": {
    "f1": 0.538759,
-   "screening": 0.60226
+   "screening": 0.538759
   },
   "LCX": {
    "f1": 0.383843,
@@ -8301,6 +8399,28 @@
      "n": 25
     }
    }
+  }
+ },
+ "conformal_displayed_status_test": {
+  "CAD": {
+   "likely": 0.622951,
+   "uncertain": 0.180328,
+   "unlikely": 0.196721
+  },
+  "LAD": {
+   "likely": 0.409836,
+   "uncertain": 0.262295,
+   "unlikely": 0.327869
+  },
+  "LCX": {
+   "likely": 0.196721,
+   "uncertain": 0.540984,
+   "unlikely": 0.262295
+  },
+  "RCA": {
+   "likely": 0.163934,
+   "uncertain": 0.52459,
+   "unlikely": 0.311475
   }
  },
  "conformal": {
@@ -9266,29 +9386,20 @@
  "bootstrap_intervals": {
   "B": 50,
   "level": 0.9,
-  "refits": {
-   "catboost": {
-    "iterations": 200
-   },
-   "rf": {
-    "n_estimators": 100
-   },
-   "et": {
-    "n_estimators": 100
-   }
-  },
+  "refits": {},
   "test_mean_width": {
-   "CAD": 0.171145,
-   "LAD": 0.187258,
-   "LCX": 0.233982,
-   "RCA": 0.22448
+   "CAD": 0.180089,
+   "LAD": 0.200465,
+   "LCX": 0.267777,
+   "RCA": 0.259801
   },
   "test_frac_point_inside_raw_interval": {
-   "CAD": 0.704918,
-   "LAD": 0.901639,
-   "LCX": 0.934426,
-   "RCA": 0.95082
-  }
+   "CAD": 1.0,
+   "LAD": 0.95082,
+   "LCX": 0.983607,
+   "RCA": 1.0
+  },
+  "method": "centred bootstrap percentile interval around the served estimate (raw percentile containment reported separately)"
  },
  "applicability_domain": {
   "method": "Mahalanobis (Ledoit-Wolf), 99th pct of OOF training scores",

@@ -14,13 +14,15 @@ COPY --from=ghcr.io/astral-sh/uv:0.9 /uv /usr/local/bin/uv
 WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy MPLCONFIGDIR=/tmp/matplotlib PYTHONUNBUFFERED=1
 COPY pyproject.toml uv.lock ./
-# runtime groups only (sprint learners are needed to load the served model; dev/anatomy tools are not)
-RUN uv sync --frozen --no-install-project --no-default-groups --group sprint
+# runtime only: core + the "serve" group (CatBoost); training-only tools (interpret/EBM, dev, anatomy) are left out
+RUN uv sync --frozen --no-install-project --no-default-groups --group serve
 COPY config ./config
 COPY ml ./ml
 COPY backend ./backend
 COPY data ./data
 COPY --from=web /app/frontend/dist ./frontend/dist
+# fail the build if the served model cannot be loaded with the runtime dependencies
+RUN /app/.venv/bin/python -c "from ml.predictor import ServedModel; ServedModel()"
 # non-root user (required by Hugging Face Spaces; harmless elsewhere)
 RUN useradd -m -u 1000 user
 USER user

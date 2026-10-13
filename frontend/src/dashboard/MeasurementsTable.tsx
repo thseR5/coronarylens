@@ -48,7 +48,7 @@ export default function MeasurementsTable() {
               <th className="py-1 text-left font-medium">Measurement</th>
               <th className="text-right font-medium">Value</th>
               <th className="pl-2 text-left font-medium">Ref</th>
-              <th className="w-28 text-left font-medium">Contribution</th>
+              <th className="w-36 text-left font-medium">Contribution (pts)</th>
             </tr>
           </thead>
           <tbody>
@@ -61,8 +61,12 @@ export default function MeasurementsTable() {
                   {flag && <span className="ml-1" aria-label={flag === 'high' ? 'above reference' : 'below reference'}>{flag === 'high' ? '▲' : '▼'}</span>}
                 </td>
                 <td className="pl-2 text-muted">{f.ref ? `${f.ref[0]}–${f.ref[1]}` : ''}</td>
-                <td>
-                  <div className="relative h-3" title={`${shap >= 0 ? '+' : ''}${(shap * 100).toFixed(2)} pts`}>
+                <td className="flex items-center gap-1">
+                  <span className={`w-9 shrink-0 text-right font-mono text-[10px] ${shap >= 0 ? 'text-rose-300' : 'text-sky-300'}`}>
+                    {shap >= 0 ? '+' : '−'}
+                    {Math.abs(shap * 100).toFixed(1)}
+                  </span>
+                  <div className="relative h-3 flex-1" title={`${shap >= 0 ? '+' : ''}${(shap * 100).toFixed(2)} pts`}>
                     <div className="absolute inset-y-0 left-1/2 w-px bg-line" />
                     <div
                       className={`absolute inset-y-0.5 rounded-sm ${shap >= 0 ? 'bg-rose-400/80' : 'bg-sky-400/80'}`}

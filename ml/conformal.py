@@ -39,6 +39,24 @@ def status(p: float, q: dict[str, float]) -> str:
     return "uncertain"
 
 
+def reconciled_status(p: float, q: dict[str, float], positive: bool) -> str:
+    """Status shown in the UI. "likely"/"unlikely" only when the 90% conformal set is a single outcome AND it
+    agrees with the operating-threshold decision; otherwise "uncertain". (Mondrian sets are class-conditional and
+    are not aligned with the max-F1 threshold, so the two can disagree; the UI must never show a contradiction.)"""
+    s = status(p, q)
+    if s == "likely" and positive:
+        return "likely"
+    if s == "unlikely" and not positive:
+        return "unlikely"
+    return "uncertain"
+
+
+def displayed_status_rates(p, q, thr: float) -> dict:
+    p = np.asarray(p, dtype=float)
+    st = [reconciled_status(float(x), q, bool(x >= thr)) for x in p]
+    return {k: float(np.mean([s == k for s in st])) for k in ("likely", "uncertain", "unlikely")}
+
+
 def evaluate(y, p, q) -> dict:
     y = np.asarray(y, dtype=int)
     in0, in1 = prediction_set(p, q)

@@ -1,9 +1,12 @@
 import type { AppConfig } from '../types/config'
 
 /** Display label/unit for any feature, engineered feature or group id the API may return. */
-export function featureMeta(config: AppConfig | null, id: string): { label: string; unit: string; group?: string } {
+export function featureMeta(
+  config: AppConfig | null,
+  id: string,
+): { label: string; unit: string; group?: string; type?: string } {
   const f = config?.features.features.find((x) => x.id === id)
-  if (f) return { label: f.label, unit: f.unit, group: f.group }
+  if (f) return { label: f.label, unit: f.unit, group: f.group, type: f.type }
   const e = config?.features.engineered.find((x) => x.id === id)
   if (e) return { label: e.label, unit: e.unit, group: e.group }
   const g = config?.features.groups.find((x) => x.id === id)

@@ -122,6 +122,33 @@ def served_coherence(rec: dict) -> dict:
     return {"mean": float(np.mean(vals)), "max": float(np.max(vals)), "n_folds": len(vals)}
 
 
+def within_cad_localisation(rec: dict) -> dict:
+    """How well vessel probabilities pick the diseased artery AMONG patients with CAD (outer-test predictions)."""
+    from ml.sprint.core import labels, training_split
+
+    _, T, _ = training_split()
+    Y = labels(T)
+    pat = T["pattern"].to_numpy()
+    aucs: dict[str, list[float]] = {v: [] for v in ("LAD", "LCX", "RCA")}
+    top = {"100": [0, 0], "010": [0, 0], "001": [0, 0]}
+    for f in rec["folds"]:
+        idx = np.asarray(f["selected_pred"]["test_index"])
+        m = marginals(np.asarray(f["selected_pred"]["P"]))
+        cad = Y["CAD"][idx] == 1
+        for v, lst in aucs.items():
+            y = Y[v][idx][cad]
+            if 0 < y.sum() < y.size:
+                lst.append(E.auc(y, m[v][cad]))
+        V = np.column_stack([m["LAD"], m["LCX"], m["RCA"]])
+        for k, col in (("100", 0), ("010", 1), ("001", 2)):
+            s = pat[idx] == k
+            top[k][0] += int((V[s].argmax(1) == col).sum())
+            top[k][1] += int(s.sum())
+    return {"within_cad_auc": {v: float(np.mean(a)) for v, a in aucs.items()},
+            "single_vessel_true_vessel_ranked_highest": {k: {"hits": a, "n": n} for k, (a, n) in top.items()},
+            "note": "outer-test predictions of the 10x5 nested CV; patients with CAD only"}
+
+
 def sprint_section(rec: dict) -> dict:
     fin = json.loads((NESTED / "finalists.json").read_text("utf-8"))
     return {"n_screened": fin["n_screened"], "n_finalists": len(fin["finalists"]),
@@ -132,4 +159,7 @@ def sprint_section(rec: dict) -> dict:
             "previous_served": variant_summary(rec, "baseline"),
             "vs_independent_same_folds": vs_independent(rec),
             "served_coherence_measured": served_coherence(rec),
+            "within_cad_localisation": within_cad_localisation(rec),
+            "coherence_posthoc": (json.loads((NESTED / "coherence_posthoc.json").read_text("utf-8"))
+                                  if (NESTED / "coherence_posthoc.json").exists() else None),
             "rule": "finalists by the pre-registered rule; inner selection by cross-fitted inner-OOF pattern log-loss"}

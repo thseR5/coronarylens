@@ -19,7 +19,7 @@ const CONTEXT_STYLE: Record<string, { color: string; opacity: number }> = {
   Sternum: { color: '#e2d8c6', opacity: 0.25 },
 }
 const TRANSITION_MS = 400
-const TERRITORY_MIX = 0.55
+const TERRITORY_MIX = 0.35 // subtle, so the coloured vessels stand out against the LV surface
 // Nodes that beat with the myocardium (scaled about the heart centre = origin). Aorta pulses subtly.
 const BEAT_AMPLITUDE: Record<string, number> = { vessel: 0.035, territory: 0.035, segment: 0.035, Myocardium: 0.035, LeftMain: 0.035, Aorta: 0.01 }
 

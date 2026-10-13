@@ -7,7 +7,7 @@ dependencies = [
   "pandas",
   "numpy",
   "openpyxl",
-  "scikit-learn",
+  "scikit-learn>=1.9,<1.11",  # SVC(probability=True), used by the served SVM, is removed in 1.11
   "shap",
   "joblib",
   "pyyaml",
@@ -15,7 +15,6 @@ dependencies = [
   "fastapi",
   "uvicorn[standard]",
   "lightgbm",
-  "dice-ml",
   "matplotlib",
   "scipy",
   "pandera",
@@ -37,6 +36,9 @@ sprint = [
     "catboost>=1.2.10",
     "interpret>=0.7.8",
 ]
+serve = [
+    "catboost>=1.2.10",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["ml/tests", "backend/tests"]
@@ -46,4 +48,4 @@ pythonpath = ["."]
 line-length = 110
 
 [tool.uv]
-default-groups = ["dev", "anatomy", "sprint"]
+default-groups = ["dev", "anatomy", "sprint", "serve"]

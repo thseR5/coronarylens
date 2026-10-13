@@ -5,8 +5,8 @@ seed: 42
 
 served: procedure        # Part 2 sprint: the validated selection procedure (docs/EXPERIMENTS.md); was joint_ensemble
 
-validation:
-  test_fraction: 0.20          # locked, stratified on vessel pattern; used once
+validation:                    # benchmark CV in ml/train.py (5x5); the served procedure's headline is the 10x5 sprint run
+  test_fraction: 0.20          # locked, stratified on vessel pattern
   outer_folds: 5
   outer_repeats: 5
   inner_folds: 3
@@ -47,10 +47,7 @@ benchmarks:
 # (ml/sprint/finalists.py, reports/sprint/finalists.json); the last entry is the previous served recipe.
 served_procedure:
   inner_folds: 5
-  bootstrap_overrides:          # lighter refits for the 50-member bootstrap interval ensemble
-    catboost: {iterations: 200}
-    rf: {n_estimators: 100}
-    et: {n_estimators: 100}
+  bootstrap_overrides: {}       # bootstrap members use the served hyperparameters (judge review 2026-10-13)
   candidates:
     - {"learners": ["catboost_d3", "sel_joint", "svm"], "combine": "avg", "calib": "dirichlet"}
     - {"learners": ["ebm", "bayes_lr", "sel_joint"], "combine": "avg", "calib": "dirichlet"}

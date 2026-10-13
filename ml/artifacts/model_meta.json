@@ -3,7 +3,7 @@
  "variant": "sprint_procedure",
  "feature_engineering": false,
  "calibration": "vector",
- "model_version": "procedure-sprint_procedure-73934324-ae7f75d9",
+ "model_version": "procedure-sprint_procedure-73934324-192598c9",
  "seed": 42,
  "data_sha256": "739343245c2ba578b541370217531750d8e936022f928b83e0d91756caa3ff0b",
  "quick": false,

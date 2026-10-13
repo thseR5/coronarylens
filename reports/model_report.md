@@ -33,14 +33,14 @@ Engineered features (paired, same folds): Δ log-loss -0.0005, Δ AUC +0.0024 �
 
 Served on the full training split: **catboost+catboost_d3+svm|avg|vector**.
 
-| metric | served procedure (mean ± SD) | previous served model | paired diff (mean ± SD) | folds improved |
-|---|---|---|---|---|
-| CAD ROC-AUC | 0.934 ± 0.037 | 0.927 ± 0.041 | +0.0073 ± 0.0109 | 39/50 |
-| LAD ROC-AUC | 0.866 ± 0.043 | 0.851 ± 0.048 | +0.0149 ± 0.0193 | 35/50 |
-| LCX ROC-AUC | 0.708 ± 0.059 | 0.714 ± 0.052 | -0.0058 ± 0.0460 | 23/50 |
-| RCA ROC-AUC | 0.737 ± 0.056 | 0.744 ± 0.055 | -0.0068 ± 0.0416 | 23/50 |
-| pattern log-loss | 1.5084 ± 0.0918 | 1.5754 ± 0.0787 | -0.0670 ± 0.0392 | 46/50 |
-| mean Brier | 0.1579 ± 0.0138 | 0.1617 ± 0.0122 | -0.0039 ± 0.0059 | 40/50 |
+| metric | served procedure (mean ± SD) | previous served model | paired diff (mean ± SD) | p (Nadeau–Bengio) | folds improved |
+|---|---|---|---|---|---|
+| CAD ROC-AUC | 0.934 ± 0.037 | 0.927 ± 0.041 | +0.0073 ± 0.0109 | 0.207 (small, not statistically significant) | 39/50 |
+| LAD ROC-AUC | 0.866 ± 0.043 | 0.851 ± 0.048 | +0.0149 ± 0.0193 | 0.142 (small, not statistically significant) | 35/50 |
+| LCX ROC-AUC | 0.708 ± 0.059 | 0.714 ± 0.052 | -0.0058 ± 0.0460 | 0.809 (no improvement (not significant)) | 23/50 |
+| RCA ROC-AUC | 0.737 ± 0.056 | 0.744 ± 0.055 | -0.0068 ± 0.0416 | 0.755 (no improvement (not significant)) | 23/50 |
+| pattern log-loss | 1.5084 ± 0.0918 | 1.5754 ± 0.0787 | -0.0670 ± 0.0392 | 0.002 (significant improvement) | 46/50 |
+| mean Brier | 0.1579 ± 0.0138 | 0.1617 ± 0.0122 | -0.0039 ± 0.0059 | 0.217 (small, not statistically significant) | 40/50 |
 
 ## Locked test split, 95% bootstrap CIs (second look: after the Part 2 sprint)
 

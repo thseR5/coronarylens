@@ -86,7 +86,7 @@ Top 12 overall by pattern log-loss:
 A1 reading: (i) Dirichlet calibration gives the lowest log-loss for most learners (≈1.53 vs baseline 1.572, ~3 SE) but can lower AUC; (b) CatBoost is the strongest single learner on AUC (LAD 0.875, LCX 0.747 with vector scaling); (j) learned weights and (h) the vessel-count blend give no gain over the baseline (within / worse than 1 SE). With 278 procedures screened, winner's-curse risk is high: only nested CV decides.
 Configurations so far: 12 + 278 = 290 (A1).
 
-### Finalist-selection rule (written 2026-10-13 before A2 results were read)
+### Finalist-selection rule (written into this log 2026-10-13 while A2 was running, before its results were read; it was committed together with the A2 results, so the ordering is not verifiable from git history)
 
 From all procedures screened in A1 ∪ A2 (training split only):
 1. the 8 procedures with the lowest screening pattern log-loss;

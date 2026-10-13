@@ -10,8 +10,8 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 
 ## What is different
 
-- **It cannot contradict itself.** One calibrated model predicts all 8 LAD/LCX/RCA patterns; CAD and vessel risks are sums of those, so P(CAD) is never below a vessel's risk. Separate per-target models do this for 32.1% of patients (naive logistic regression) and 5.4% (a strong ensemble); ours 0%, with equal AUC and significantly better log-loss and Brier score.
-- **Validation that counts its own search.** Nested cross-validation with model selection inside every fold; 748 procedures screened; a 61-patient test set held out from the start; a leakage ablation that shows how 0.925 becomes 0.968.
+- **One distribution, so the numbers always fit together.** One calibrated model predicts all 8 LAD/LCX/RCA patterns; CAD, vessel, ≥2- and 3-vessel risks are sums of those. Separate per-target models put P(CAD) below a vessel's risk for 32.1% (naive logistic regression) to 5.4% (strong ensemble) of patients; ours 0%. On identical folds AUC is equal and log-loss and Brier score are significantly better.
+- **Validation that counts its own search.** Nested cross-validation with model selection inside every fold; 748 procedures screened; a 61-patient test set held out from the start; a leakage ablation that shows how CAD AUC 0.930 becomes 0.968.
 - **Real anatomy.** BodyParts3D meshes; LAD/LCX/RCA mapped by FMA ID; the left ventricle split into the 17 AHA segments, synced with a 2-D bullseye.
 - **Honest per-vessel explanations.** Owen-value SHAP on the exact displayed output, measurements beside their contributions, conformal "uncertain" shading, intervals and an out-of-distribution warning.
 
@@ -23,8 +23,9 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 | PR-AUC | 0.972 | 0.894 | 0.578 | 0.583 |
 | Brier | 0.089 | 0.144 | 0.204 | 0.194 |
 | F1 (max-F1 threshold) | 0.916 | 0.845 | 0.638 | 0.647 |
+| Specificity | 0.768 | 0.655 | 0.491 | 0.537 |
 
-Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (wide CIs; see the report). LCX and RCA are hard to predict from clinical data: after 748 procedures their AUC stayed at about 0.71–0.74. Full results, statistics and limitations: **[docs/REPORT.pdf](docs/REPORT.pdf)** (4 pages).
+Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (wide CIs; see the report). LCX and RCA are hard to predict from clinical data: after 748 procedures their AUC stayed at about 0.71–0.74. Vessel probabilities mostly reflect overall CAD risk: among patients with CAD, the model picks out LAD disease only modestly (within-CAD AUC 0.69) and LCX/RCA barely better than chance (0.52 / 0.57). Full results, statistics and limitations: **[docs/REPORT.pdf](docs/REPORT.pdf)** (4 pages).
 
 ## Quickstart
 

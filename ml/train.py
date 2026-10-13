@@ -45,7 +45,7 @@ from ml.neighbors import NeighborIndex
 from ml.procedure import ProcedureBootstrap, ProcedureModel, candidates_from_config
 from ml.sprint import headline as SH
 from ml.thresholds import fit_thresholds
-from ml.uncertainty import BootstrapEnsemble, fit_bootstrap
+from ml.uncertainty import BootstrapEnsemble, centered_intervals, fit_bootstrap
 
 JOINT_VARIANTS = ["joint_none", "joint_temperature", "joint_vector",
                   "joint_fe_none", "joint_fe_temperature", "joint_fe_vector"]  # simplest first
@@ -246,6 +246,8 @@ def main(quick: bool = False, out_dir: Path = config.ARTIFACTS, reports: Path = 
     alpha = 1 - float(tcfg["conformal"]["target_coverage"])
     q = {t: conformal.fit_quantiles(Ytr[t], c["oof_m"][t], alpha) for t in TARGETS}
     _dump(q, out_dir / "conformal.json")
+    metrics["conformal_displayed_status_test"] = {
+        t: conformal.displayed_status_rates(Mte[t], q[t], thr[t]["f1"]) for t in TARGETS}
     metrics["conformal"] = {"target_coverage": 1 - alpha, "method": "Mondrian (class-conditional), K-fold OOF scores",
                             "quantiles": q, "test": {t: conformal.evaluate(Yte[t], Mte[t], q[t]) for t in TARGETS}}
 
@@ -316,13 +318,17 @@ def main(quick: bool = False, out_dir: Path = config.ARTIFACTS, reports: Path = 
         specs = mcfg["pattern_models"]["joint_ensemble"]["members"]
         boot = fit_bootstrap(specs, Xtr, Ttr["pattern_code"].to_numpy(), boot_B, S["boot_trees"], seed, fe, cols)
         be = BootstrapEnsemble(boot)
-    iv = be.intervals(Xte, calibrator)
-    cover = {t: float(np.mean((Mte[t] >= iv[t][:, 0]) & (Mte[t] <= iv[t][:, 1]))) for t in TARGETS}
+    Pb = be.predict_patterns(Xte)
+    Pcb = calibrator.transform(Pb.reshape(-1, Pb.shape[-1])).reshape(Pb.shape)
+    iv, iv_raw = centered_intervals(Pcb, {t: Mte[t] for t in TARGETS})
+    cover = {t: float(np.mean((Mte[t] >= iv_raw[t][:, 0]) & (Mte[t] <= iv_raw[t][:, 1]))) for t in TARGETS}
     width = {t: float(np.mean(iv[t][:, 1] - iv[t][:, 0])) for t in TARGETS}
     metrics["bootstrap_intervals"] = {"B": boot_B, "level": 0.90,
                                       "refits": (mcfg["served_procedure"].get("bootstrap_overrides") if procedure
                                                  else {"trees_per_forest": S["boot_trees"]}),
-                                      "test_mean_width": width, "test_frac_point_inside_raw_interval": cover}
+                                      "test_mean_width": width, "test_frac_point_inside_raw_interval": cover,
+                                      "method": "centred bootstrap percentile interval around the served estimate "
+                                                "(raw percentile containment reported separately)"}
     timings["bootstrap_s"] = time.time() - t0
     domain = DomainModel(0.99, seed).fit(Xtr)
     dte = domain.score(Xte)

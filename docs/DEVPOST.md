@@ -24,7 +24,7 @@ Risk models for coronary artery disease often output one number for "CAD" and se
 
 ## How we built it
 
-- **Model:** one model predicts all 8 possible LAD/LCX/RCA patterns, and every displayed number is a sum of those 8 probabilities. P(CAD) can never fall below a vessel's probability. Separate models break this for 32.1% (naive logistic regression) to 5.4% (strong ensemble) of patients; ours for 0%.
+- **Model:** one model predicts all 8 possible LAD/LCX/RCA patterns, and every displayed number, including ≥2- and 3-vessel risk, is a sum of those 8 probabilities, so the numbers always fit together. Separate models put P(CAD) below a vessel's probability for 32.1% (naive logistic regression) to 5.4% (strong ensemble) of patients; ours for 0%.
 - **Validation:** nested cross-validation with model selection inside every fold; 748 procedures screened on the training split; 10 finalists chosen by a rule written in advance; a 61-patient test set held out from the start; Nadeau–Bengio corrected statistics.
 - **Served model:** CatBoost + CatBoost (depth 3) + SVM, averaged and calibrated, chosen by the validated selection procedure.
 - **Stack:** Python, scikit-learn, CatBoost, FastAPI; React, TypeScript, React Three Fiber, Tailwind; Playwright and pytest; Docker. Explanations run in a separate worker process. An exact vectorised SVM probability routine keeps them fast.
@@ -35,8 +35,8 @@ ROC-AUC: CAD 0.934 [0.896, 0.973] · LAD 0.866 [0.820, 0.911] · LCX 0.708 [0.64
 
 ## Challenges
 
-- **LCX and RCA are hard to predict from clinical data.** We screened 748 approaches and their AUC stayed at 0.71–0.74. We say so in the app and show "uncertain" honestly.
-- **Many published results on this dataset are inflated by leakage.** Our ablation reproduces the effect: CAD AUC rises from 0.925 to 0.968 when preprocessing sees all the data.
+- **LCX and RCA are hard to predict from clinical data.** We screened 748 approaches and their AUC stayed at 0.71–0.74. Among patients with CAD, the model can barely tell which of these arteries is affected (within-CAD AUC 0.52 / 0.57). We say so in the app and show "uncertain" honestly.
+- **Leakage is easy to fall into on this dataset.** In our ablation, oversampling and feature selection on the full data raise CAD AUC from 0.930 to 0.968.
 - **Keeping explanations under a quarter of a second** while they are computed on the exact displayed output.
 
 ## Accomplishments we're proud of

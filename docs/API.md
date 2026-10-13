@@ -19,4 +19,4 @@ Types: `backend/app/schemas.py` (source) ⇄ `frontend/src/types/api.ts` (mirror
 
 Invariants (tested): pattern probabilities sum to 1; `cad.p ≥ max(vessels[*].p)`; `cad.p = 1 − patterns["000"]`;
 no forbidden column (`LAD, LCX, RCA, Cath`) is accepted as a feature (422).
-Latency budget on a laptop CPU: analyze p95 < 150 ms, explain p95 < 400 ms.
+Latency (production build, laptop CPU, slider change → painted, incl. 100 ms debounce): probabilities and colours p95 175 ms, SHAP panel p95 241 ms (targets 300 / 700 ms; `docs/latency.json`). Server-side test budget (`backend/tests`): analyze p95 < 150 ms, explain p95 < 400 ms. Status: `likely`/`unlikely` only when the 90% conformal set is one outcome and agrees with the threshold decision, else `uncertain`.
