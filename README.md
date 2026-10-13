@@ -10,7 +10,7 @@ IIT Mandi Multimodal AI Hackathon 2026 · Track A: Cardiovascular Risk Visualiza
 
 ## What is different
 
-- **One distribution, so the numbers always fit together.** One calibrated model predicts all 8 LAD/LCX/RCA patterns; CAD, vessel, ≥2- and 3-vessel risks are sums of those. Against a strong ensemble of separate models on identical folds, AUC is equal and risk estimates are significantly better calibrated (log-loss p = 0.0003, Brier p = 0.049); separate models also put P(CAD) below a vessel's risk for 5–32% of patients (small gaps, mean 0.03).
+- **One distribution, so the numbers always fit together.** One calibrated model predicts all 8 LAD/LCX/RCA patterns; CAD, vessel, ≥2- and 3-vessel risks are sums of those. Against a strong ensemble of separate models on identical folds, AUC is equal and risk estimates are significantly better calibrated (log-loss p = 0.0003, Brier p = 0.049); separate models also put P(CAD) below a vessel's risk for 5–32% of patients (for the strong ensemble the gaps were small: mean 0.03, at most 0.18).
 - **Validation that counts its own search.** Nested cross-validation with model selection inside every fold; 748 procedures screened; a 61-patient test set held out from the start; a leakage ablation that shows how CAD AUC 0.930 becomes 0.968.
 - **Real anatomy.** BodyParts3D meshes; LAD/LCX/RCA mapped by FMA ID; the left ventricle split into the 17 AHA segments, synced with a 2-D bullseye.
 - **Honest per-vessel explanations.** Owen-value SHAP on the exact displayed output, measurements beside their contributions, conformal "uncertain" shading, intervals and an out-of-distribution warning.

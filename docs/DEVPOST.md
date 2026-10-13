@@ -12,7 +12,7 @@
 
 ## Inspiration
 
-Risk models for coronary artery disease often output one number for "CAD" and separate numbers for each artery. We noticed that these numbers can disagree: in our tests, separate models put the overall CAD risk below a single artery's risk for 5–32% of patients (by up to 18 percentage points), which is impossible. We wanted a model whose numbers always fit together, on a heart that shows where they point.
+Risk models for coronary artery disease often output one number for "CAD" and separate numbers for each artery. We noticed that these numbers can disagree: in our tests, separate models put the overall CAD risk below a single artery's risk for 5–32% of patients, which is impossible (for the strong ensemble, by up to 18 percentage points). We wanted a model whose numbers always fit together, on a heart that shows where they point.
 
 ## What it does
 

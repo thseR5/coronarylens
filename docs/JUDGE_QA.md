@@ -54,7 +54,7 @@ We show "likely" or "unlikely" only when the class-conditional (Mondrian) confor
 It distorts calibrated probabilities, and our colours are probabilities. We keep the natural class balance, calibrate, and choose thresholds on out-of-fold predictions.
 
 **Do your explanations explain the model you show?**
-Yes. SHAP (Owen values over clinical groups) runs on the exact displayed function, including calibration and the step from pattern to vessel probabilities. Base value + contributions equals the displayed probability exactly. Removing the top-ranked features changes the prediction four times more than removing random ones (0.217 vs 0.051). Across 8 random seeds, no contribution moves by more than 0.025 (SD) and the top-5 features overlap by at least 85% (`reports/explain_stability.json`).
+Yes. SHAP (Owen values over clinical groups) runs on the exact displayed function, including calibration and the step from pattern to vessel probabilities. Base value + contributions equals the displayed probability exactly. Removing the top-ranked features changes the prediction four times more than removing random ones (0.217 vs 0.051). Across 8 random seeds, no contribution varies by more than about 0.025 (largest SD 0.0251) and the top-5 features overlap by at least 85% (`reports/explain_stability.json`).
 
 **How fast is it without a GPU?**
 On the production build on a laptop, colours update at p95 226 ms after a slider change and the explanation at p95 360 ms. The 3-D scene ran at 46–60 FPS with the GPU disabled (software rendering).

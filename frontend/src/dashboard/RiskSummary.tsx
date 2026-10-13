@@ -42,6 +42,9 @@ function Gauge({ p, lo, hi, threshold }: { p: number; lo: number; hi: number; th
   )
 }
 
+
+/** Three significant digits, e.g. 18.365473 → 18.4 (ranges come from raw training data). */
+const round3 = (x: number) => Number(x.toPrecision(3))
 export default function RiskSummary() {
   const a = useStore((s) => s.analysis)
   const mode = useStore((s) => s.mode)
@@ -132,7 +135,7 @@ export default function RiskSummary() {
       )}
       {a.out_of_range.length > 0 && (
         <div className="text-[11px] text-warn">
-          Outside the training data range: {a.out_of_range.map((o) => `${o.feature} = ${o.value} (training ${o.range[0]}–${o.range[1]})`).join(', ')}
+          Outside the training data range: {a.out_of_range.map((o) => `${o.feature} = ${round3(o.value)} (training ${round3(o.range[0])}–${round3(o.range[1])})`).join(', ')}
         </div>
       )}
     </div>

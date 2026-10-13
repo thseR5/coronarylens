@@ -77,7 +77,7 @@ interface Metrics {
 const TARGETS = ['CAD', 'LAD', 'LCX', 'RCA'] as const
 const VARIANT_LABEL: Record<string, string> = {
   naive_lr: 'Naive logistic regression ×4',
-  joint_vector: 'Joint (served)',
+  joint_vector: 'Joint, first served model',
   joint_none: 'Joint, uncalibrated',
   independent: 'Independent',
   chains: 'Classifier chains',
@@ -369,9 +369,11 @@ export default function ModelPerformance() {
         title="Benchmarks · same 5×5 nested CV for every approach (ROC-AUC mean ± SD)"
         note={
           <>
-            Same outer folds for every model. Selection rule: lowest pattern log-loss, then AUC, simplest within 1 SE. On the test set the
-            joint and independent models do not differ significantly in AUC (DeLong p ={' '}
-            {TARGETS.map((t) => f2(m.test.comparison_served_vs_independent[t]?.delong.p_value)).join(' / ')}); the joint model's gain is
+            Same outer folds for every model. This is the first comparison round; the served procedure was chosen later by the model
+            search below (10×5 nested CV, headline above) and is compared with the independent ensemble on its own folds in
+            &quot;Served procedure vs independent ensemble&quot;. On the test set the served and independent models do not differ
+            significantly in AUC (DeLong p ={' '}
+            {TARGETS.map((t) => f2(m.test.comparison_served_vs_independent[t]?.delong.p_value)).join(' / ')}); the served model's gain is
             coherence and calibration.
           </>
         }
