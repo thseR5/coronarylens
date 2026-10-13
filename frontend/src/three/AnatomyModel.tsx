@@ -6,6 +6,7 @@ import { useStore } from '../store'
 import type { TargetId } from '../types/api'
 import type { StructureSpec } from '../types/config'
 import { ARTERY_COLORS, NEUTRAL_VESSEL, NOT_MODELLED, riskColor } from './colorScale'
+import { confidenceFade } from '../lib/risk'
 import { makeContextMaterial, makeVesselMaterial, makeXrayMaterial, stripeUniforms, type LitMaterial } from './materials'
 import { prefersReducedMotion, useSceneLocal } from './sceneState'
 import { ahaSegmentSpecs, type SegmentSpec } from './aha'
@@ -189,7 +190,11 @@ export function AnatomyModel({ root, onHit }: { root: THREE.Object3D; onHit: (h:
       const { spec } = r
       let to: THREE.Color | null = null
       const p = spec.target ? analysis?.vessels[spec.target]?.p : undefined
-      if (spec.role === 'vessel') to = p == null ? new THREE.Color(NEUTRAL_VESSEL) : new THREE.Color().setRGB(...riskColor(p), THREE.SRGBColorSpace)
+      if (spec.role === 'vessel') {
+        to = p == null ? new THREE.Color(NEUTRAL_VESSEL) : new THREE.Color().setRGB(...riskColor(p), THREE.SRGBColorSpace)
+        // fade toward grey as more of the model's input signal comes from cohort averages (missing inputs)
+        if (p != null) to.lerp(new THREE.Color(NEUTRAL_VESSEL), 0.8 * confidenceFade(analysis?.input_confidence.missing_signal_share))
+      }
       if (isTerritory(spec.role)) {
         // territories show WHICH artery usually supplies the region (categorical), not risk: the model has no
         // regional information, so a risk tint here would imply localisation it cannot provide

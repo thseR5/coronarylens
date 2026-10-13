@@ -556,7 +556,7 @@ export default function ModelPerformance() {
 
       <Section
         title={`Conformal prediction · ${pc(m.conformal.target_coverage, 0)} target coverage (test)`}
-        note="The app shows 'uncertain' when the 90% set contains both outcomes or disagrees with the threshold decision (and always for out-of-distribution patients or 10+ imputed inputs)."
+        note="The app shows 'uncertain' when the 90% set contains both outcomes or disagrees with the threshold decision (and always for out-of-distribution patients or when missing inputs carry 25% or more of the model's usual signal)."
       >
         <table className="w-full">
           <thead className="text-[10px] uppercase text-muted">

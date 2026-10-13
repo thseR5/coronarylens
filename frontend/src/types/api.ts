@@ -7,10 +7,19 @@ export type TargetId = 'CAD' | 'LAD' | 'LCX' | 'RCA' | 'P_GE2'
 export type FeatureValue = number | string | null
 export type Features = Record<string, FeatureValue>
 
+export type StatusReason =
+  | 'single_outcome'
+  | 'both_outcomes'
+  | 'empty_set'
+  | 'threshold_disagrees'
+  | 'out_of_distribution'
+  | 'missing_inputs'
+
 export interface TargetRisk {
   p: number
   interval: [number, number]
   status: Status
+  reason: StatusReason
   threshold: number
   positive: boolean
 }
@@ -33,6 +42,13 @@ export interface OutOfRange {
   range: [number, number]
 }
 
+export interface InputConfidence {
+  /** Share of the model's usual signal (global mean |SHAP| for CAD) that comes from imputed inputs. */
+  missing_signal_share: number
+  level: 'full' | 'reduced' | 'low'
+  forces_uncertain: boolean
+}
+
 export interface AnalyzeResponse {
   patterns: Record<string, number>
   cad: TargetRisk
@@ -40,6 +56,7 @@ export interface AnalyzeResponse {
   multivessel: MultiVessel
   applicability: Applicability
   imputed: string[]
+  input_confidence: InputConfidence
   out_of_range: OutOfRange[]
   mode: ThresholdMode
   model_version: string

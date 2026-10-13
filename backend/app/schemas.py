@@ -14,6 +14,9 @@ API_VERSION = "1"
 
 Status = Literal["likely", "uncertain", "unlikely"]
 ThresholdMode = Literal["f1", "screening"]
+StatusReason = Literal[
+    "single_outcome", "both_outcomes", "empty_set", "threshold_disagrees", "out_of_distribution", "missing_inputs"
+]
 TargetId = Literal["CAD", "LAD", "LCX", "RCA", "P_GE2"]
 
 # Feature values: numeric for numeric/binary/ordinal features, string for categorical (e.g. bbb = "LBBB").
@@ -53,6 +56,10 @@ class TargetRisk(_Model):
     p: float = Field(ge=0, le=1)
     interval: tuple[float, float] = Field(description="Bootstrap 90% interval for p")
     status: Status = Field(description="Conformal prediction set: {1}=likely, {0,1}=uncertain, {0}=unlikely")
+    reason: StatusReason = Field(
+        description="Why this status: single_outcome (90% set is one outcome, agrees with threshold), both_outcomes, "
+        "empty_set, threshold_disagrees, out_of_distribution, missing_inputs (>= 25% of signal imputed)"
+    )
     threshold: float = Field(ge=0, le=1, description="Operating threshold for the requested mode")
     positive: bool = Field(description="p >= threshold")
 
@@ -75,6 +82,14 @@ class OutOfRange(_Model):
     range: tuple[float, float]
 
 
+class InputConfidence(_Model):
+    missing_signal_share: float = Field(
+        ge=0, le=1, description="Share of the model's usual signal (global mean |SHAP| for CAD) from imputed inputs"
+    )
+    level: Literal["full", "reduced", "low"] = Field(description="full < 0.10 <= reduced < 0.50 <= low")
+    forces_uncertain: bool = Field(description="share >= 0.25: every status is shown as uncertain")
+
+
 class AnalyzeResponse(_Model):
     patterns: dict[str, float] = Field(description='Pattern string (bit order from targets.yaml, e.g. "101") -> p')
     cad: TargetRisk
@@ -82,6 +97,7 @@ class AnalyzeResponse(_Model):
     multivessel: MultiVessel
     applicability: Applicability
     imputed: list[str] = Field(description="Feature ids that were missing and imputed with training median/mode")
+    input_confidence: InputConfidence
     out_of_range: list[OutOfRange] = Field(description="Values outside the training data range (accepted, flagged)")
     mode: ThresholdMode
     model_version: str

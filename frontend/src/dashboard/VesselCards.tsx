@@ -1,5 +1,5 @@
 import { useStore } from '../store'
-import { pct, signedPct } from '../lib/risk'
+import { confidenceFade, fadeFilter, pct, signedPct, STATUS_LEGEND } from '../lib/risk'
 import { riskColor } from '../lib/color'
 import type { TargetId } from '../types/api'
 import { useWhatIf } from './whatIfStore'
@@ -17,6 +17,7 @@ export default function VesselCards() {
   const vessels = config?.targets.vessels ?? []
   const cad = a?.cad.p ?? null
   const auc = useHeadlineAuc()
+  const fade = confidenceFade(a?.input_confidence.missing_signal_share)
 
   return (
     <div className="flex flex-col gap-1">
@@ -29,7 +30,7 @@ export default function VesselCards() {
         . Use them as supporting context.
       </span>
     </div>
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-2" style={{ filter: fadeFilter(fade) }} data-testid="vessel-cards" data-fade={fade.toFixed(2)}>
       {vessels.map((v) => {
         const r = a?.vessels[v.id]
         const active = selected === v.id
@@ -62,7 +63,7 @@ export default function VesselCards() {
                 <span className={`text-[11px] font-medium ${r.positive ? 'text-rose-300' : 'text-emerald-300'}`}>
                   {r.positive ? 'Above threshold' : 'Below threshold'}
                 </span>
-                <StatusChip status={r.status} />
+                <StatusChip status={r.status} reason={r.reason} />
                 {cad != null && cad > 0 && (
                   <span className="text-[10px] text-muted" title="Share of the CAD probability attributed to this artery">
                     if CAD: {pct(Math.min(1, r.p / cad))}
@@ -79,6 +80,9 @@ export default function VesselCards() {
         )
       })}
     </div>
+    <p className="text-[10px] leading-snug text-muted" data-testid="status-legend">
+      {STATUS_LEGEND}
+    </p>
     <p className="text-[10px] leading-snug text-muted">
       Artery estimates mostly follow overall CAD risk. The model cannot reliably tell which artery is affected (among patients
       with CAD: LAD modestly, LCX/RCA barely better than chance). Use them as risk levels, not lesion locations.

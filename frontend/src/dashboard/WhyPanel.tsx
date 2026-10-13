@@ -32,6 +32,7 @@ export default function WhyPanel() {
   const targets: TargetId[] = ['CAD', 'LAD', 'LCX', 'RCA', 'P_GE2']
 
   let rows: { id: string; label: string; value: string; shap: number }[] = []
+  let diffuse = false // the summed "other features" bar is larger than any single feature
   if (ex) {
     if (byGroup) {
       rows = Object.entries(ex.group_totals)
@@ -46,6 +47,7 @@ export default function WhyPanel() {
       })
       const rest = sorted.slice(TOP_N).reduce((a, c) => a + c.shap, 0)
       if (sorted.length > TOP_N) rows.push({ id: 'rest', label: `${sorted.length - TOP_N} other features`, value: '', shap: rest })
+      diffuse = sorted.length > TOP_N && Math.abs(rest) > Math.abs(sorted[0].shap)
     }
   }
 
@@ -128,6 +130,11 @@ export default function WhyPanel() {
               )
             })}
           </div>
+          {diffuse && (
+            <p className="rounded bg-warn/10 px-2 py-1 text-[11px] text-warn ring-1 ring-warn/30" data-testid="diffuse-note">
+              Signal for this artery is spread thinly across many features. No single factor dominates.
+            </p>
+          )}
           <ul className="list-disc space-y-1 pl-4 text-xs text-text/90">
             {(patientView ? ex.narrative_patient : ex.narrative).map((s, i) => (
               <li key={i}>{s}</li>

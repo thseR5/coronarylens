@@ -61,8 +61,36 @@ def test_imputation(client, presets):
     f["hdl"] = None
     r = client.post("/api/analyze", json={"features": f}).json()
     assert set(r["imputed"]) == {"ldl", "hdl"}
+    assert r["input_confidence"]["level"] == "full"  # two minor labs carry little signal
     r0 = client.post("/api/analyze", json={"features": {}}).json()
     assert len(r0["imputed"]) == len(config.features_cfg()["features"])
+    assert r0["input_confidence"] == {"missing_signal_share": 1.0, "level": "low", "forces_uncertain": True}
+    assert {v["status"] for v in [r0["cad"], *r0["vessels"].values()]} == {"uncertain"}
+
+
+def test_input_confidence_degrades_gradually(client, presets):
+    """Removing inputs one by one, most important last, never makes the estimate look more confident."""
+    import json
+
+    from ml.input_confidence import UNCERTAIN_FROM
+
+    imp = json.loads((config.ARTIFACTS / "global_explanations.json").read_text())["targets"]["CAD"]["mean_abs_shap"]
+    f = dict(presets[0]["features"])
+    shares, forced_seen = [], False
+    for fid in sorted(imp, key=imp.get):
+        f.pop(fid, None)
+        r = client.post("/api/analyze", json={"features": f}).json()
+        c = r["input_confidence"]
+        shares.append(c["missing_signal_share"])
+        assert c["forces_uncertain"] == (c["missing_signal_share"] >= UNCERTAIN_FROM)
+        if c["forces_uncertain"]:
+            forced_seen = True
+            assert {v["status"] for v in [r["cad"], *r["vessels"].values()]} == {"uncertain"}
+        else:
+            assert not forced_seen  # once forced, stays forced as more inputs go missing
+    assert shares == sorted(shares) and shares[-1] == 1.0
+    # removing the 10 least important inputs alone keeps full confidence (old count-based rule forced 'uncertain')
+    assert shares[9] < 0.10
 
 
 @pytest.mark.parametrize("features", [

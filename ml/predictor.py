@@ -18,11 +18,9 @@ from ml import config, conformal
 from ml.calibrate import Calibrator
 from ml.explain import METHOD, aggregate_features, build_target_explanations, column_groups, owen_values
 from ml.ingest import InputError, decode_row, encode_input, encode_value, feature_map
+from ml.input_confidence import input_confidence
 from ml.joint import EXPLAIN_OUTPUTS, PATTERNS, VESSELS, explain_matrix, marginals
 from ml.uncertainty import BootstrapEnsemble, centered_intervals
-
-# with this many imputed (missing) inputs the estimate rests largely on typical cohort values: show "uncertain"
-MAX_IMPUTED_FOR_CONFIDENT = 10
 
 TARGET_KEYS = {"CAD": "cad", "LAD": "LAD", "LCX": "LCX", "RCA": "RCA"}
 
@@ -56,6 +54,9 @@ class ServedModel:
         self.meta = json.loads((a / "model_meta.json").read_text())
         self.explain_cfg = self.meta["explain"]
         self.model_version = self.meta["model_version"]
+        # global importance of each input for P(CAD): weights missing inputs (ml/input_confidence.py)
+        g = json.loads((a / "global_explanations.json").read_text())
+        self.input_importance: dict[str, float] = g["targets"]["CAD"]["mean_abs_shap"]
         self.groups = column_groups(self.columns, self.fcfg)
         self.fmap = feature_map(self.fcfg)
 
@@ -90,8 +91,9 @@ class ServedModel:
         dom = float(self.domain.score(x)[0])
 
         in_domain = bool(dom <= self.domain.threshold_)
-        # never show a confident status for patients unlike the training data or with many guessed inputs
-        force_uncertain = (not in_domain) or len(imputed) >= MAX_IMPUTED_FOR_CONFIDENT
+        conf = input_confidence(imputed, self.input_importance)
+        # never show a confident status for patients unlike the training data or when much of the signal is guessed
+        force_uncertain = (not in_domain) or conf["forces_uncertain"]
 
         def risk(t):
             p = float(m[t][0])
@@ -99,7 +101,10 @@ class ServedModel:
             thr = float(self.thresholds[t][mode])
             positive = bool(p >= thr)
             status = "uncertain" if force_uncertain else conformal.reconciled_status(p, self.conformal[t], positive)
-            return {"p": p, "interval": (lo, hi), "status": status, "threshold": thr, "positive": positive}
+            reason = ("out_of_distribution" if not in_domain else "missing_inputs" if conf["forces_uncertain"]
+                      else conformal.status_reason(p, self.conformal[t], positive))
+            return {"p": p, "interval": (lo, hi), "status": status, "reason": reason, "threshold": thr,
+                    "positive": positive}
 
         nv = {str(n): float(m[f"N{n}"][0]) for n in range(len(VESSELS) + 1)}
         return {
@@ -110,6 +115,7 @@ class ServedModel:
             "applicability": {"in_domain": in_domain, "score": dom,
                               "threshold": float(self.domain.threshold_)},
             "imputed": imputed,
+            "input_confidence": conf,
             "out_of_range": oor,
             "mode": mode,
             "model_version": self.model_version,

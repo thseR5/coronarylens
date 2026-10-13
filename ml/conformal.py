@@ -51,6 +51,19 @@ def reconciled_status(p: float, q: dict[str, float], positive: bool) -> str:
     return "uncertain"
 
 
+def status_reason(p: float, q: dict[str, float], positive: bool) -> str:
+    """Why `reconciled_status` returns what it does (shown inline in the UI).
+    single_outcome: the 90% set is one outcome and agrees with the threshold (likely / unlikely);
+    both_outcomes: the set contains both; empty_set: neither outcome fits; threshold_disagrees: the single
+    outcome contradicts the threshold decision."""
+    in0, in1 = prediction_set(np.array([p]), q)
+    if in0[0] and in1[0]:
+        return "both_outcomes"
+    if not in0[0] and not in1[0]:
+        return "empty_set"
+    return "single_outcome" if bool(in1[0]) == positive else "threshold_disagrees"
+
+
 def displayed_status_rates(p, q, thr: float) -> dict:
     p = np.asarray(p, dtype=float)
     st = [reconciled_status(float(x), q, bool(x >= thr)) for x in p]

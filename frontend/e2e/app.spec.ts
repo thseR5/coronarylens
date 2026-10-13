@@ -123,3 +123,74 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   expect(errors).toEqual([])
   expect(reactErrors).toEqual([])
 })
+
+test('vessel labels never sit under the legend (1280×800, 1440×900, 1920×1080; all camera presets)', async ({ page }) => {
+  for (const [width, height] of [
+    [1280, 800],
+    [1440, 900],
+    [1920, 1080],
+  ]) {
+    await page.setViewportSize({ width, height })
+    await page.goto('/')
+    await expect(page.getByLabel('Load preset patient')).toHaveValue('lad-only', { timeout: 15_000 })
+    for (const preset of ['three-vessel', 'rca-only']) {
+      await page.getByLabel('Load preset patient').selectOption(preset)
+      await expect(page.getByTestId('label-RCA')).toContainText('%', { timeout: 15_000 })
+      for (const cam of ['AP', 'LAO 30°', 'RAO 30°', 'LAO 30° cranial 20°', 'RAO 30° caudal 20°']) {
+        await page.getByRole('button', { name: cam, exact: true }).click()
+        await page.waitForTimeout(900) // camera transition
+        const overlapping = await page.evaluate(() => {
+          const box = (el: Element) => el.getBoundingClientRect()
+          const legend = box(document.querySelector('[data-testid=legend]')!)
+          return [...document.querySelectorAll('[data-testid^=label-]')]
+            .filter((el) => {
+              const b = box(el)
+              return b.x < legend.right && b.right > legend.x && b.y < legend.bottom && b.bottom > legend.y
+            })
+            .map((el) => (el as HTMLElement).dataset.testid)
+        })
+        expect(overlapping, `${width}×${height} ${preset} ${cam}`).toEqual([])
+      }
+    }
+  }
+})
+
+test('honesty cues: inline status reasons, diffuse-signal note, low-confidence blank patient', async ({ page, request }) => {
+  await page.goto('/')
+  await expect(page.getByLabel('Load preset patient')).toHaveValue('lad-only', { timeout: 15_000 })
+  // full input: shown normally, every chip carries its reason inline, one legend line explains per-artery calibration
+  await expect(page.getByTestId('cad-gauge')).toHaveAttribute('data-confidence', 'full')
+  await expect(page.getByTestId('vessel-cards')).toHaveAttribute('data-fade', '0.00')
+  await expect(page.getByTestId('status-reason')).toHaveCount(4) // CAD + 3 vessels
+  await expect(page.getByTestId('vessel-cards')).toContainText('both outcomes plausible at 90% confidence')
+  await expect(page.getByTestId('status-legend')).toContainText('so a higher probability can still be "uncertain"')
+
+  // diffuse note appears exactly when the summed "other features" bar beats every single feature (checked via API)
+  const presets = await (await request.get('http://127.0.0.1:8000/api/presets')).json()
+  const lad = presets.find((p: { id: string }) => p.id === 'lad-only')
+  const ex = await (await request.post('http://127.0.0.1:8000/api/explain', { data: { features: lad.features } })).json()
+  let anyDiffuse = false
+  for (const v of ['LCX', 'RCA', 'LAD']) {
+    const c = [...ex.targets[v].contributions].sort((a: { shap: number }, b: { shap: number }) => Math.abs(b.shap) - Math.abs(a.shap))
+    const rest = c.slice(8).reduce((s: number, x: { shap: number }) => s + x.shap, 0)
+    const diffuse = Math.abs(rest) > Math.abs(c[0].shap)
+    anyDiffuse ||= diffuse
+    await page.getByRole('tab', { name: v, exact: true }).click()
+    await expect(page.getByRole('listitem').filter({ hasText: 'other features' })).toBeVisible()
+    await expect(page.getByTestId('diffuse-note')).toHaveCount(diffuse ? 1 : 0)
+    if (diffuse)
+      await expect(page.getByTestId('diffuse-note')).toHaveText(
+        'Signal for this artery is spread thinly across many features. No single factor dominates.',
+      )
+  }
+  expect(anyDiffuse).toBe(true) // LCX in this preset (measured)
+
+  // blank patient: greyed + hatched gauge, faded vessels, explicit text, every status uncertain with its reason
+  await page.getByRole('button', { name: 'Reset' }).click()
+  await expect(page.getByTestId('cad-gauge')).toHaveAttribute('data-confidence', 'low', { timeout: 10_000 })
+  await expect(page.getByTestId('low-confidence-label')).toHaveText('Estimate based mostly on cohort averages')
+  await expect(page.getByTestId('vessel-cards')).toHaveAttribute('data-fade', '1.00')
+  await expect(page.getByTestId('imputed-warning')).toContainText('100% of the model')
+  await expect(page.getByTestId('vessel-cards')).toContainText('too much of the input is missing')
+  await page.screenshot({ path: '../docs/img/app-low-confidence.png' })
+})
