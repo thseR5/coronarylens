@@ -147,7 +147,7 @@ The app opens on the **LAD only** preset.
 
 **Say:** "Limits: 303 patients from one centre, no external validation, and artery-level estimates are supporting context only. CoronaryLens: one coherent model, honest validation, real anatomy, and explanations you can check. Decision support and education only."
 
-**Caption:** "CoronaryLens · github link · report PDF"
+**Caption:** "CoronaryLens · github.com/thseR5/coronarylens"
 
 ---
 

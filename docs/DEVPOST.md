@@ -6,7 +6,7 @@
 
 **Track:** A · Cardiovascular Risk Visualization & Prediction
 
-**Links:** GitHub `<repo URL>` · Demo video `<YouTube URL, unlisted>` · Live demo `<Hugging Face Space URL>` (if deployed)
+**Links:** GitHub https://github.com/thseR5/coronarylens · Demo video `<YouTube URL, unlisted>` · Live demo `<Hugging Face Space URL>` (if deployed)
 
 ---
 

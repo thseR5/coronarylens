@@ -33,7 +33,7 @@ Locked test set (n = 61), ROC-AUC: CAD 0.898, LAD 0.829, LCX 0.761, RCA 0.661 (w
 Prerequisites: Python 3.12 with [uv](https://docs.astral.sh/uv/), Node 22+ (tested on 26), make. Trained models and the 3-D anatomy are committed, so no training or download is needed.
 
 ```bash
-git clone <repo-url> coronarylens && cd coronarylens
+git clone https://github.com/thseR5/coronarylens.git && cd coronarylens
 make setup          # Python + frontend dependencies
 make dev            # API on http://localhost:8000, app on http://localhost:5173
 ```
