@@ -13,6 +13,7 @@ import {
   XAxis,
   YAxis,
   ZAxis,
+  LabelList,
 } from 'recharts'
 import { api } from '../api/client'
 
@@ -127,6 +128,11 @@ export default function ModelPerformance() {
   const coherence = Object.keys(VARIANT_LABEL)
     .filter((v) => m.coherence[v])
     .map((v) => ({ name: VARIANT_LABEL[v], rate: m.coherence[v].mean * 100 }))
+  if (m.sprint?.vs_independent_same_folds)
+    coherence.push({
+      name: 'Independent, same folds as served',
+      rate: m.sprint.vs_independent_same_folds.coherence_independent.mean * 100,
+    })
   if (m.sprint?.served_coherence_measured)
     coherence.push({ name: 'Served procedure', rate: m.sprint.served_coherence_measured.mean * 100 })
   const dca = m.dca.test[dcaTarget]
@@ -480,13 +486,15 @@ export default function ModelPerformance() {
           </>
         }
       >
-        <div className="h-36">
+        <div className="h-60" data-testid="coherence-chart">
           <ResponsiveContainer>
-            <BarChart data={coherence} layout="vertical" margin={{ left: 8, right: 16 }}>
+            <BarChart data={coherence} layout="vertical" margin={{ left: 8, right: 40 }}>
               <XAxis type="number" unit="%" {...AX} />
-              <YAxis type="category" dataKey="name" width={110} {...AX} />
+              <YAxis type="category" dataKey="name" width={150} interval={0} {...AX} />
               <Tooltip {...TIP} formatter={(v) => `${Number(v).toFixed(1)}%`} />
-              <Bar dataKey="rate" fill="#f472b6" isAnimationActive={false} />
+              <Bar dataKey="rate" fill="#f472b6" isAnimationActive={false} minPointSize={2}>
+                <LabelList dataKey="rate" position="right" fill="#cbd5e1" fontSize={10} formatter={(v) => `${Number(v).toFixed(1)}%`} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -117,6 +117,10 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   await expect(page.getByText(/^Headline · nested CV/)).toBeVisible()
   await expect(page.getByText(/Secondary · locked test set \(n = 61\)/)).toBeVisible()
   await expect(page.getByText('Leakage ablation', { exact: false })).toBeVisible()
+  // coherence chart used as the video's opening shot: values printed on the bars
+  await expect(page.getByTestId('coherence-chart')).toContainText('32.1%')
+  await expect(page.getByTestId('coherence-chart')).toContainText('5.4%')
+  await expect(page.getByTestId('coherence-chart')).toContainText('Served procedure')
   // the localisation finding with corrected CIs, read from metrics.json
   await expect(page.getByTestId('within-cad-table')).toContainText('0.69 [0.59–0.78]')
   await expect(page.getByTestId('within-cad-table')).toContainText('0.52 [0.42–0.61]')
@@ -198,3 +202,93 @@ test('honesty cues: inline status reasons, diffuse-signal note, low-confidence b
   await expect(page.getByTestId('vessel-cards')).toContainText('too much of the input is missing')
   await page.screenshot({ path: '../docs/img/app-low-confidence.png' })
 })
+
+// Walks the exact click path of docs/DEMO_SCRIPT.md and checks every number the narration reads out.
+for (const [width, height] of [
+  [1920, 1080],
+  [1440, 900],
+]) {
+  test(`demo script click path works at ${width}×${height}`, async ({ page, context }) => {
+    await page.setViewportSize({ width, height })
+    await page.goto('/')
+    const preset = page.getByLabel('Load preset patient')
+    await expect(preset).toHaveValue('lad-only', { timeout: 15_000 })
+    const tab = (name: string) => page.getByRole('tab', { name, exact: true })
+
+    // 0:00 hook
+    await tab('Model performance').click()
+    const coh = page.getByTestId('coherence-chart')
+    await coh.scrollIntoViewIfNeeded()
+    for (const t of ['32.1%', '5.4%', 'Served procedure']) await expect(coh).toContainText(t)
+
+    // 0:20 + 0:40 anatomy
+    await tab('Patient analysis').click()
+    await expect(page.getByRole('alert').first()).toContainText('Decision support and educational use only')
+    for (const cam of ['AP', 'LAO 30°', 'RAO 30° caudal 20°']) await page.getByRole('button', { name: cam, exact: true }).click()
+    await page.getByRole('button', { name: 'Ribs', exact: true }).click()
+    await page.getByRole('tab', { name: /^Full \(54\)/ }).click()
+    await expect(page.locator('#feat-pr')).toHaveValue('100')
+    await page.getByRole('tab', { name: /^Quick \(13\)/ }).click()
+    await page.getByRole('button', { name: 'Ribs', exact: true }).click()
+
+    // 1:40 three-vessel
+    await preset.selectOption('three-vessel')
+    await expect(page.getByTestId('cad-gauge')).toContainText('97%', { timeout: 10_000 })
+    const cards = page.getByTestId('vessel-cards')
+    for (const t of ['78%', '57%', '53%']) await expect(cards).toContainText(t)
+    await page.locator('[data-testid="bullseye"] [data-segment="7"]').hover()
+    await page.getByRole('button', { name: /^LAD/ }).first().click()
+    await expect(tab('LAD')).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByText(/^Measurements · contribution to/)).toBeVisible()
+
+    // 2:50 what-if, counterfactual, similar patients
+    await preset.selectOption('uncertain')
+    await expect(page.getByTestId('cad-gauge')).toContainText('78%', { timeout: 10_000 })
+    await tab('CAD').click()
+    await page.getByRole('button', { name: 'Pin current as baseline' }).click()
+    await expect(page.locator('#feat-age')).toHaveValue('70')
+    await page.locator('#feat-age').fill('45')
+    await expect(page.getByText(/vs pinned baseline/)).toBeVisible({ timeout: 10_000 })
+    await page.getByRole('button', { name: 'Restore baseline' }).click()
+    await expect(page.locator('#feat-age')).toHaveValue('70')
+    await page.getByRole('button', { name: 'Suggest' }).click()
+    const cf = page.getByText(/Triglycerides/).first()
+    await expect(cf).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByText(/78%.*74%|78% → 74%/).first()).toBeVisible()
+    await expect(page.getByText('Most similar training patients · actual angiography')).toBeVisible()
+
+    // 3:50 uncertainty, OOD, blank patient
+    await expect(cards).toContainText('both outcomes plausible at 90% confidence')
+    await preset.selectOption('synthetic-ood')
+    await expect(page.getByText('Outside training distribution: interpret with extra caution.')).toBeVisible({ timeout: 10_000 })
+    await expect(cards).toContainText('patient unlike the training data')
+    await page.getByRole('button', { name: 'Reset' }).click()
+    await expect(page.getByTestId('low-confidence-label')).toHaveText('Estimate based mostly on cohort averages', { timeout: 10_000 })
+
+    // 4:40 validation + 5:30 finding
+    await tab('Model performance').click()
+    for (const t of [/^Headline · nested CV/, /^Model search · 748 procedures/, /^Served procedure vs independent ensemble/, /^Leakage ablation/, /^Finding · which artery\?/])
+      await expect(page.getByText(t)).toBeVisible()
+    await expect(page.getByTestId('within-cad-table')).toContainText('0.52 [0.42–0.61]')
+
+    // 5:50 montage
+    await tab('Patient analysis').click()
+    await preset.selectOption('three-vessel')
+    await expect(page.getByTestId('cad-gauge')).toContainText('97%', { timeout: 10_000 })
+    const dot = page.locator('[data-testid^="cohort-"]').first()
+    await dot.scrollIntoViewIfNeeded()
+    await dot.click()
+    await expect(preset).toHaveValue('')
+    await page.getByTestId('toggle-clip').click()
+    await page.getByTestId('toggle-clip').click()
+    await page.getByRole('button', { name: 'Patient view' }).click()
+    await page.evaluate(() => (window.print = () => {}))
+    const [report] = await Promise.all([context.waitForEvent('page'), page.getByRole('button', { name: 'Report / PDF' }).click()])
+    await expect(report.locator('body')).toContainText('Decision support and educational use only', { timeout: 15_000 })
+    await report.close()
+
+    // 6:40 limitations
+    await tab('About & limits').click()
+    await expect(page.getByText('Limitations', { exact: true })).toBeVisible()
+  })
+}
