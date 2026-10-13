@@ -39,7 +39,7 @@ make dev            # API on http://localhost:8000, app on http://localhost:5173
 
 Or with Docker: `docker compose up --build`, then open http://localhost:8000. A free Hugging Face Space can host the same image: see [deploy/hf-space/DEPLOY.md](deploy/hf-space/DEPLOY.md).
 
-Other commands: `make test` (67 Python + 21 frontend tests), `make test-e2e` (Playwright; run `cd frontend && npx playwright install chromium` once), `make train` (retrain the served model, benchmarks and all artifacts: 316 s on an M2 laptop; the model search itself, `ml/sprint/`, is a separate run of about 25–40 min: screening 4 + 7 min, nested CV 13–30 min), `make anatomy` (rebuild the 3-D model from BodyParts3D), `uv run python tools/build_report.py` (report PDF).
+Other commands: `make test` (70 Python + 21 frontend tests), `make test-e2e` (Playwright; run `cd frontend && npx playwright install chromium` once), `make train` (retrain the served model, benchmarks and all artifacts: 316 s on an M2 laptop; the model search itself, `ml/sprint/`, is a separate run of about 25–40 min: screening 4 + 7 min, nested CV 13–30 min), `make anatomy` (rebuild the 3-D model from BodyParts3D), `uv run python tools/build_report.py` (report PDF).
 
 ## Using the app
 

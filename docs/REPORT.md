@@ -108,7 +108,7 @@ Single-centre cohort (n = 303, Iran) with no external validation; small test set
 
 ```
 make setup && make dev      # API :8000 + web :5173   (or: docker compose up → http://localhost:8000)
-make test                   # 67 Python + 21 frontend tests;  make train / make anatomy rebuild everything
+make test                   # 70 Python + 21 frontend tests;  make train / make anatomy rebuild everything
 ```
 
 **Appendix: further features (one line each).** Cohort map of training patients (PCA) with click-to-load · nearest training patients with their true angiography · counterfactual suggestions on modifiable factors · frontal clipping plane · X-ray view · angiographic camera presets (AP, LAO/RAO, cranial/caudal) · heartbeat at the patient's pulse · printable report / PDF · decision curves, reliability plots, subgroup table and model search in the performance tab · classifier-chain and LightGBM benchmarks · Docker image and CI. Development history: `docs/DECISIONS.md`, `docs/EXPERIMENTS.md`.
