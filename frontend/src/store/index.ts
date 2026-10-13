@@ -20,6 +20,7 @@ export interface ViewState {
 export interface AppState {
   config: AppConfig | null
   features: Features
+  presetId: string | null // which preset the inputs came from (null = manual / reset / cohort map)
   mode: ThresholdMode
   analysis: AnalyzeResponse | null
   explanation: ExplainResponse | null
@@ -32,6 +33,7 @@ export interface AppState {
 
   setConfig: (c: AppConfig) => void
   setFeatures: (f: Features) => void
+  setPresetId: (id: string | null) => void
   setFeature: (id: string, v: Features[string]) => void
   setMode: (m: ThresholdMode) => void
   setAnalysis: (a: AnalyzeResponse | null) => void
@@ -47,6 +49,7 @@ export interface AppState {
 export const useStore = create<AppState>((set) => ({
   config: null,
   features: {},
+  presetId: null,
   mode: 'f1',
   analysis: null,
   explanation: null,
@@ -68,6 +71,7 @@ export const useStore = create<AppState>((set) => ({
 
   setConfig: (config) => set({ config }),
   setFeatures: (features) => set({ features }),
+  setPresetId: (presetId) => set({ presetId }),
   setFeature: (id, v) => set((s) => ({ features: { ...s.features, [id]: v } })),
   setMode: (mode) => set({ mode }),
   setAnalysis: (analysis) => set({ analysis }),

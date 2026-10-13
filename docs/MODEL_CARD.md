@@ -19,7 +19,7 @@
 
 - **Inputs:** 54 features (demographics, risk factors, symptoms and examination, ECG, labs, echo) defined in `config/features.yaml`; missing inputs are imputed with training medians/modes and listed in the response.
 - **Never inputs:** LAD, LCX, RCA, Cath (enforced in training, evaluation and inference).
-- **Outputs:** probabilities with 90% intervals (50 bootstrap refits with the served hyperparameters; 5th–95th percentile spread centred on the served estimate), status (likely / unlikely only when the 90% conformal set is a single outcome agreeing with the threshold decision, otherwise uncertain), operating thresholds (max-F1, or screening with sensitivity ≥ 0.90 and never above max-F1), applicability-domain flag, Owen-value SHAP explanations.
+- **Outputs:** probabilities with 90% intervals (50 bootstrap refits with the served hyperparameters; 5th–95th percentile spread centred on the served estimate), status (likely / unlikely only when the 90% conformal set is a single outcome agreeing with the threshold decision, otherwise uncertain; always uncertain for out-of-distribution patients or 10+ imputed inputs), operating thresholds (max-F1, or screening with sensitivity ≥ 0.90 and never above max-F1), applicability-domain flag, Owen-value SHAP explanations.
 
 ## Training data
 

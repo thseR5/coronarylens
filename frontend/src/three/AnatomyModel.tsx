@@ -19,7 +19,7 @@ const CONTEXT_STYLE: Record<string, { color: string; opacity: number }> = {
   Sternum: { color: '#e2d8c6', opacity: 0.25 },
 }
 const TRANSITION_MS = 400
-const TERRITORY_MIX = 0.45 // categorical artery tint on the LV surface
+const TERRITORY_MIX = 0.6 // categorical artery tint on the LV surface (clearly visible, distinct from vessel risk)
 // Nodes that beat with the myocardium (scaled about the heart centre = origin). Aorta pulses subtly.
 const BEAT_AMPLITUDE: Record<string, number> = { vessel: 0.035, territory: 0.035, segment: 0.035, Myocardium: 0.035, LeftMain: 0.035, Aorta: 0.01 }
 

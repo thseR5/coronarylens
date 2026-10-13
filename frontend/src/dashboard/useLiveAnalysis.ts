@@ -25,7 +25,7 @@ useStore.subscribe((s, prev) => {
 export function useLiveAnalysis() {
   const features = useStore((s) => s.features)
   const mode = useStore((s) => s.mode)
-  const ready = useStore((s) => s.config !== null && Object.keys(s.features).length > 0)
+  const ready = useStore((s) => s.config !== null)
   const [latencyMs, setLatencyMs] = useState<number | null>(null)
   const ctrl = useRef<AbortController | null>(null)
 

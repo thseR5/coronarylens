@@ -6,9 +6,9 @@ export const pct = (p: number | null | undefined, digits = 0) =>
 export const signedPct = (d: number, digits = 1) => `${d >= 0 ? '+' : '−'}${Math.abs(d * 100).toFixed(digits)} pts`
 
 export const STATUS_LABEL: Record<Status, string> = {
-  likely: 'Confident',
+  likely: 'Likely',
   uncertain: 'Uncertain',
-  unlikely: 'Confident',
+  unlikely: 'Unlikely',
 }
 
 export const STATUS_HELP: Record<Status, string> = {

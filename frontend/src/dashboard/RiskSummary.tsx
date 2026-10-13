@@ -119,6 +119,12 @@ export default function RiskSummary() {
         </div>
       </div>
 
+      {a.imputed.length >= 10 && (
+        <div role="status" className="rounded-md bg-warn/10 px-2 py-1.5 text-xs text-warn ring-1 ring-warn/40" data-testid="imputed-warning">
+          {a.imputed.length} of 54 inputs not entered: they use typical cohort values, so all estimates are shown as uncertain.
+          Load a preset or enter the patient's findings.
+        </div>
+      )}
       {!a.applicability.in_domain && (
         <div role="status" className="rounded-md bg-warn/10 px-2 py-1.5 text-xs text-warn ring-1 ring-warn/40">
           Outside training distribution: interpret with extra caution.
@@ -126,7 +132,7 @@ export default function RiskSummary() {
       )}
       {a.out_of_range.length > 0 && (
         <div className="text-[11px] text-warn">
-          Outside the training data range: {a.out_of_range.map((o) => o.feature).join(', ')}
+          Outside the training data range: {a.out_of_range.map((o) => `${o.feature} = ${o.value} (training ${o.range[0]}–${o.range[1]})`).join(', ')}
         </div>
       )}
     </div>

@@ -60,6 +60,7 @@ export function cssGradient(direction = 'to right', steps = 10): string {
   return `linear-gradient(${direction}, ${parts.join(', ')})`
 }
 
-/** Categorical colours for "which artery usually supplies this region" (territories and bullseye). Pastel ColorBrewer
- *  Set2 hues, chosen to be distinct from the viridis risk scale so a territory colour is never read as risk. */
-export const ARTERY_COLORS: Record<string, string> = { LAD: '#8da0cb', LCX: '#fc8d62', RCA: '#66c2a5' }
+/** Categorical colours for "which artery usually supplies this region" (territories and bullseye): magenta, orange and
+ *  brown (ColorBrewer Dark2 hues), none of which occur in the viridis risk scale (purple-blue-green-yellow), so a
+ *  territory colour is never read as risk. */
+export const ARTERY_COLORS: Record<string, string> = { LAD: '#e7298a', LCX: '#d95f02', RCA: '#a6761d' }

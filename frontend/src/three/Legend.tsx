@@ -1,10 +1,11 @@
 import { useStore } from '../store'
-import { cssGradient, NEUTRAL_VESSEL, NOT_MODELLED } from './colorScale'
+import { ARTERY_COLORS, cssGradient, NEUTRAL_VESSEL, NOT_MODELLED } from './colorScale'
 
 const STRIPES = `repeating-linear-gradient(45deg, #7ad151 0 4px, #0b1118 4px 7px)`
 
 /** Colour-scale legend with each vessel's operating threshold marked. */
 export default function Legend({ className = '' }: { className?: string }) {
+  const showTerritories = useStore((s) => s.view.showTerritories)
   const analysis = useStore((s) => s.analysis)
   const mode = useStore((s) => s.mode)
   const vessels = analysis ? Object.entries(analysis.vessels) : []
@@ -55,6 +56,19 @@ export default function Legend({ className = '' }: { className?: string }) {
           <i className="inline-block h-2.5 w-5 rounded-sm" style={{ background: NEUTRAL_VESSEL }} /> no analysis
         </span>
       </div>
+      {showTerritories && (
+        <div className="mt-1.5 border-t border-line pt-1" data-testid="legend-territories">
+          <div>Heart wall: artery that usually supplies it (not risk)</div>
+          <div className="mt-0.5 flex gap-2">
+            {Object.entries(ARTERY_COLORS).map(([v, c]) => (
+              <span key={v} className="flex items-center gap-1">
+                <i className="inline-block h-2.5 w-3 rounded-sm" style={{ background: c }} />
+                {v}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

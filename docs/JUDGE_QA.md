@@ -33,7 +33,7 @@ It is small, which is why we use nested CV with corrected CIs, report Brier and 
 We considered it. Its current weights require accepting a separate licence and an API token. Its CPU inference is also too slow for our live explanations: each explanation evaluates the model on about 5,000 coalition rows, within a 700 ms budget. Our served model explains in 57 ms median (p95 91 ms) per request in-process.
 
 **What happens at an ejection fraction of 55%?**
-In the what-if check, P(LAD) drops by about 0.07 as EF crosses roughly 55%, the upper end of the normal reference range. The tree-based learners split there. The step is below our 0.15 jump threshold, and P(CAD) still moves in the expected direction (higher EF → lower risk). It is a real artefact of tree models on 242 patients, visible in the performance tab.
+In the what-if check, P(LAD) drops in one step as EF crosses about 52–55%, the edge of the normal reference range. The step is 0.03–0.11 depending on the patient (0.072 for the three-vessel preset, `reports/whatif/whatif.json`). The tree-based learners split there. The step is below our 0.15 jump threshold, and P(CAD) still moves in the expected direction (higher EF → lower risk). It is a real artefact of tree models on 242 patients, visible in the performance tab.
 
 **Why does the regional wall-motion score lower LCX/RCA probability for some patients?**
 Our expected direction in `features.yaml` is for overall CAD. A wall-motion abnormality raises P(CAD) everywhere in our sweep. At vessel level, the model can attribute it to one artery and lower the others slightly (by up to 0.048 in our presets). That is plausible, because wall-motion abnormalities are regional. Six such small vessel-level reversals are listed in the performance tab.
@@ -45,7 +45,7 @@ No. They show expected supply: the standard AHA 17-segment assignment (Cerqueira
 The dataset has no left-main label, so we show it as "not modelled" instead of inventing a value.
 
 **What does "uncertain" mean statistically?**
-We show "likely" or "unlikely" only when the class-conditional (Mondrian) conformal prediction set at 90% target coverage contains a single outcome *and* that outcome agrees with the threshold decision. Otherwise the vessel is "uncertain": the set contains both outcomes, or it disagrees with the threshold. Test coverage was 0.84–0.92. On the test set, 18% (CAD), 26% (LAD), 54% (LCX) and 52% (RCA) of patients were shown as uncertain.
+We show "likely" or "unlikely" only when the class-conditional (Mondrian) conformal prediction set at 90% target coverage contains a single outcome *and* that outcome agrees with the threshold decision. Otherwise the vessel is "uncertain": the set contains both outcomes, or it disagrees with the threshold. Every output is also forced to "uncertain" when the patient is outside the training distribution or 10 or more inputs were not entered (imputed). Test coverage was 0.84–0.92. On the test set, 18% (CAD), 26% (LAD), 54% (LCX) and 52% (RCA) of patients were shown as uncertain.
 
 **How are the intervals computed?**
 50 bootstrap refits of the served learners with the served hyperparameters. The 5th–95th percentile spread is centred on the served estimate. The raw percentile interval already contained the served estimate for 95–100% of test patients. Mean width is 0.18 for CAD and 0.27 for LCX.
@@ -54,10 +54,10 @@ We show "likely" or "unlikely" only when the class-conditional (Mondrian) confor
 It distorts calibrated probabilities, and our colours are probabilities. We keep the natural class balance, calibrate, and choose thresholds on out-of-fold predictions.
 
 **Do your explanations explain the model you show?**
-Yes. SHAP (Owen values over clinical groups) runs on the exact displayed function, including calibration and the step from pattern to vessel probabilities. Base value + contributions equals the displayed probability exactly. Removing the top-ranked features changes the prediction four times more than removing random ones (0.217 vs 0.051).
+Yes. SHAP (Owen values over clinical groups) runs on the exact displayed function, including calibration and the step from pattern to vessel probabilities. Base value + contributions equals the displayed probability exactly. Removing the top-ranked features changes the prediction four times more than removing random ones (0.217 vs 0.051). Across 8 random seeds, no contribution moves by more than 0.025 (SD) and the top-5 features overlap by at least 85% (`reports/explain_stability.json`).
 
 **How fast is it without a GPU?**
-On the production build on a laptop, colours update at p95 226 ms after a slider change and the explanation at 241 ms. The 3-D scene ran at 46–60 FPS with the GPU disabled (software rendering).
+On the production build on a laptop, colours update at p95 226 ms after a slider change and the explanation at p95 360 ms. The 3-D scene ran at 46–60 FPS with the GPU disabled (software rendering).
 
 **How would you add a new vessel or feature?**
 Add it to the YAML config (`features.yaml` or `anatomy.yaml`) and retrain or rebuild. The input form, API schema, explanations and 3-D mapping follow automatically, and tests check the mapping. A new vessel target grows the joint pattern space to 2^k.

@@ -11,7 +11,11 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
   })
   await page.goto('/')
   // lands on a real preset patient, not on mode-imputed defaults
-  await expect(page.getByLabel('Load preset patient')).toHaveValue('low-risk', { timeout: 15_000 })
+  await expect(page.getByLabel('Load preset patient')).toHaveValue('lad-only', { timeout: 15_000 })
+  // Reset sends no inputs: the server imputes them and every status becomes 'uncertain' with a visible warning
+  await page.getByRole('button', { name: 'Reset' }).click()
+  await expect(page.getByTestId('imputed-warning')).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByTestId('localisation-badge')).toBeVisible()
 
   // Disclaimer is visible and non-dismissible.
   await expect(page.getByRole('alert').first()).toContainText('Not a substitute for formal diagnostic imaging')

@@ -18,6 +18,9 @@ export default function VesselCards() {
 
   return (
     <div className="flex flex-col gap-1">
+    <div className="flex items-center gap-1.5 text-[10px] text-warn" data-testid="localisation-badge">
+      <span aria-hidden>⚠</span> Artery ranking is not reliable: the model estimates risk per artery, not where the lesion is.
+    </div>
     <div className="grid grid-cols-3 gap-2">
       {vessels.map((v) => {
         const r = a?.vessels[v.id]

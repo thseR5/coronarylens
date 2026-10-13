@@ -131,7 +131,8 @@ export default function PatientInput() {
   const imputed = useStore((s) => s.analysis?.imputed ?? NO_IMPUTED)
   const [full, setFull] = useState(false)
   const [presets, setPresets] = useState<Preset[]>([])
-  const [presetId, setPresetId] = useState('')
+  const presetId = useStore((s) => s.presetId) ?? ''
+  const setPresetId = useStore((s) => s.setPresetId)
   const [open, setOpen] = useState<Record<string, boolean>>({})
 
   const specs = useMemo(() => config?.features.features ?? [], [config])
@@ -143,7 +144,8 @@ export default function PatientInput() {
       .then((ps) => {
         setPresets(ps)
         // land on a real patient (Low risk), not on mode-imputed defaults (which describe a typical angina patient)
-        const first = ps.find((p) => p.id === 'low-risk') ?? ps[0]
+        // LAD-only: a real test patient with no out-of-range inputs
+        const first = ps.find((p) => p.id === 'lad-only') ?? ps[0]
         const st = useStore.getState()
         if (first && specs.length) {
           setPresetId(first.id)
@@ -153,9 +155,6 @@ export default function PatientInput() {
       .catch(() => setPresets([]))
   }, [specs])
 
-  useEffect(() => {
-    if (specs.length && Object.keys(features).length === 0) setFeatures(defaultFeatures(specs))
-  }, [specs, features, setFeatures])
 
   const shown = full ? specs : specs.filter((f) => f.quick)
   const preset = presets.find((p) => p.id === presetId)
@@ -183,10 +182,18 @@ export default function PatientInput() {
             </option>
           ))}
         </select>
-        <button type="button" className="btn" onClick={() => { setPresetId(''); setFeatures(defaultFeatures(specs)) }}>
+        <button
+          type="button"
+          className="btn"
+          title="Clear all inputs: missing values are imputed with typical cohort values and the estimate is shown as uncertain"
+          onClick={() => {
+            setPresetId(null)
+            setFeatures({}) // nothing entered: the server imputes and reports every field
+          }}
+        >
           Reset
         </button>
-        <button type="button" className="btn" onClick={() => { setPresetId(''); setFeatures(randomPatient(specs)) }}>
+        <button type="button" className="btn" onClick={() => { setPresetId(null); setFeatures(randomPatient(specs)) }}>
           Randomize
         </button>
       </div>

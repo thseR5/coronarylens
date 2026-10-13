@@ -44,6 +44,7 @@ export default function CohortMap() {
   const load = async (index: number) => {
     const p = await api.trainingPatient(index)
     setFeatures({ ...useStore.getState().features, ...p.features })
+    useStore.getState().setPresetId(null) // inputs now come from a training patient, not the preset
     setLoaded({ index, pattern: p.pattern })
   }
 
