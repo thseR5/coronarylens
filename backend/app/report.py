@@ -29,6 +29,14 @@ LOCALISATION_NOTE = ("Reliable overall CAD risk, with vessel-level estimates as 
                      "artery-specific information.")
 
 
+def _value(f: dict, v) -> str:
+    """Same display text as the app: value labels (e.g. Female / Male) or Yes / No for binary inputs."""
+    if f.get("type") == "binary" and v is not None:
+        on = str(int(float(v) >= 0.5))
+        return str((f.get("value_labels") or {}).get(on, "Yes" if on == "1" else "No"))
+    return str(v)
+
+
 def _pct(p: float) -> str:
     return f"{p * 100:.0f}%"
 
@@ -43,7 +51,7 @@ def render(features: dict, analysis: dict, explanation: dict, fmap: dict, autopr
     mv = analysis["multivessel"]
     app = analysis["applicability"]
     feat_rows = "".join(
-        f"<tr><td>{escape(fmap[k]['label'])}</td><td>{escape(str(v))} {escape(fmap[k].get('unit') or '')}</td>"
+        f"<tr><td>{escape(fmap[k]['label'])}</td><td>{escape(_value(fmap[k], v))} {escape(fmap[k].get('unit') or '')}</td>"
         f"<td>{'imputed' if k in analysis['imputed'] else ''}</td></tr>"
         for k, v in features.items() if k in fmap)
     narr = "".join(f"<h3>{escape(t)}</h3><ul>" + "".join(f"<li>{escape(s)}</li>" for s in e["narrative"]) + "</ul>"

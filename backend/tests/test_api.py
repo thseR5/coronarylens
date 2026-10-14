@@ -203,3 +203,14 @@ def test_report_by_url(client, presets):
     assert "Decision support and educational use only" in printed
     assert client.get("/api/report?features=not-json").status_code == 422
     assert client.get(f"/api/report?features={quote(_json.dumps({'LAD': 1}))}").status_code == 422
+
+
+def test_report_shows_value_labels(client, presets):
+    """Binary inputs read as in the app: Male / Female for sex, Yes / No otherwise (never raw 1 / 0)."""
+    import re
+
+    for sex, word in ((1, "Male"), (0, "Female")):
+        f = {**presets[0]["features"], "sex_male": sex, "dm": 1, "htn": 0}
+        html = client.post("/api/report", json={"features": f}).text
+        assert re.search(rf"<td>Sex</td><td>{word} ", html)
+        assert re.search(r"<td>Diabetes mellitus</td><td>Yes ", html) and re.search(r"<td>Hypertension</td><td>No ", html)
