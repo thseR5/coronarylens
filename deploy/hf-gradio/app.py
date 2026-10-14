@@ -5,13 +5,20 @@ A small Gradio page linking to the app is mounted at /gradio. The model runs on 
 @spaces.GPU function, so a no-op one is registered and never called.
 """
 
-import spaces  # noqa: F401  (must be imported before other CUDA-aware packages on ZeroGPU)
+# ruff: noqa: I001  (order matters: spaces must be imported before gradio on ZeroGPU)
+import os
+
+# Hugging Face enables Gradio server-side rendering, whose Node server would take port 7860 before our app.
+os.environ["GRADIO_SSR_MODE"] = "false"
+
+import spaces  # (must be imported before other CUDA-aware packages on ZeroGPU)
 
 import gradio as gr
 import uvicorn
 from fastapi import FastAPI
 
 from backend.app.main import app as coronarylens
+
 
 @spaces.GPU
 def _gpu_noop() -> str:
@@ -27,7 +34,7 @@ with gr.Blocks(title="CoronaryLens") as status:
 
 # mounted apps do not run their own lifespan, so the outer app runs CoronaryLens startup (model load, worker)
 root = FastAPI(title="CoronaryLens Space", lifespan=coronarylens.router.lifespan_context)
-root = gr.mount_gradio_app(root, status, path="/gradio")
+root = gr.mount_gradio_app(root, status, path="/gradio", ssr_mode=False)
 root.mount("/", coronarylens)  # API under /api, frontend at /
 
 if __name__ == "__main__":
