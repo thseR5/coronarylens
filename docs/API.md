@@ -16,6 +16,7 @@ Types: `backend/app/schemas.py` (source) ⇄ `frontend/src/types/api.ts` (mirror
 | POST | `/api/cohort-map` | `ExplainRequest` | `CohortMapResponse` (2-D PCA of the training split + projected patient) |
 | GET | `/api/training-patient/{index}` | – | `TrainingPatient` (training split only; 404 for test rows) |
 | POST | `/api/report` | `ExplainRequest` | printable HTML with disclaimer (UI: Report / PDF → browser Print) |
+| GET | `/api/report?features=<JSON>&print=1` | query | same report by URL; `print=1` opens the Print dialog (UI: Report / PDF opens this in a new tab, which also works inside a Hugging Face Space frame) |
 
 Invariants (tested): pattern probabilities sum to 1; `cad.p ≥ max(vessels[*].p)`; `cad.p = 1 − patterns["000"]`;
 no forbidden column (`LAD, LCX, RCA, Cath`) is accepted as a feature (422).

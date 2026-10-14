@@ -187,3 +187,19 @@ def test_latency(client, presets):
     print(f"\nlatency p50: analyze {an * 1000:.1f} ms, explain {ex * 1000:.1f} ms, http analyze {http * 1000:.1f} ms")
     assert an < 0.300  # generous so CI on shared runners is not flaky; UX targets are measured in e2e/latency.spec.ts
     assert ex < 0.800
+
+
+def test_report_by_url(client, presets):
+    """GET /api/report renders the same report as POST, so it can open in a new tab from a sandboxed frame."""
+    import json as _json
+    from urllib.parse import quote
+
+    f = presets[0]["features"]
+    post = client.post("/api/report", json={"features": f}).text
+    get = client.get(f"/api/report?features={quote(_json.dumps(f))}")
+    assert get.status_code == 200 and get.text == post
+    printed = client.get(f"/api/report?print=1&features={quote(_json.dumps(f))}").text
+    assert "window.print()" in printed and "window.print()" not in post
+    assert "Decision support and educational use only" in printed
+    assert client.get("/api/report?features=not-json").status_code == 422
+    assert client.get(f"/api/report?features={quote(_json.dumps({'LAD': 1}))}").status_code == 422

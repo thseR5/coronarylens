@@ -62,6 +62,9 @@ export const api = {
   similar: (features: Features, k = 5) => post<SimilarResponse>('similar', { features, k }),
   cohortMap: (features: Features) => post<CohortMapResponse>('cohort-map', { features }),
   trainingPatient: (index: number) => get<TrainingPatient>(`training-patient/${index}`),
+  /** URL of the printable report (GET); `print` makes the page open the browser's Print dialog (save as PDF). */
+  reportUrl: (features: Features, print = false) =>
+    `/api/report?${print ? 'print=1&' : ''}features=${encodeURIComponent(JSON.stringify(features))}`,
   /** Printable HTML report (analysis + explanation + disclaimer); the browser's Print dialog saves it as PDF. */
   reportHtml: async (features: Features) => {
     const res = await fetch('/api/report', {

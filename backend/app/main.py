@@ -9,10 +9,11 @@ import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi import FastAPI, Header, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import ValidationError
 
 from backend.app import report
 from backend.app.presets import load_presets
@@ -151,6 +152,21 @@ def make_report(req: ExplainRequest):
     a = _guard(s.analyze, req.features, "f1")
     e = _guard(s.explain, req.features)
     return HTMLResponse(report.render(s.model.raw_values(req.features), a, e, s.model.fmap))
+
+
+@app.get("/api/report", response_class=HTMLResponse)
+def make_report_get(features: str = "{}", print_dialog: bool = Query(False, alias="print")):
+    """Same report as POST, addressable by URL (features = JSON object), so the browser can open it in a new tab.
+    Needed when the app runs inside a sandboxed frame (e.g. a Hugging Face Space), where writing into a blank popup
+    is not possible."""
+    try:
+        req = ExplainRequest(features=json.loads(features))
+    except (json.JSONDecodeError, ValidationError) as exc:
+        raise HTTPException(status_code=422, detail=f"invalid features: {exc}") from exc
+    s = svc()
+    a = _guard(s.analyze, req.features, "f1")
+    e = _guard(s.explain, req.features)
+    return HTMLResponse(report.render(s.model.raw_values(req.features), a, e, s.model.fmap, autoprint=print_dialog))
 
 
 __all__ = ["RequestValidationError", "app"]

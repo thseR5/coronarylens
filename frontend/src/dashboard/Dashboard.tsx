@@ -49,13 +49,10 @@ export default function Dashboard({ latencyMs }: { latencyMs: number | null }) {
             className="btn !py-0.5"
             disabled={!analysis || analysis.model_version === 'mock'}
             title="Printable report with the disclaimer; use the browser's Print dialog to save it as PDF"
-            onClick={async () => {
-              const w = window.open('', '_blank')
-              if (!w) return
-              w.document.write(await api.reportHtml(useStore.getState().features))
-              w.document.close()
-              w.focus()
-              w.print()
+            onClick={() => {
+              // open the report by URL (not by writing into a blank popup): works inside sandboxed frames such as
+              // a Hugging Face Space; the report page opens the print dialog itself
+              window.open(api.reportUrl(useStore.getState().features, true), '_blank')
             }}
           >
             Report / PDF

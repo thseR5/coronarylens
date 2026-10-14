@@ -33,7 +33,7 @@ def _pct(p: float) -> str:
     return f"{p * 100:.0f}%"
 
 
-def render(features: dict, analysis: dict, explanation: dict, fmap: dict) -> str:
+def render(features: dict, analysis: dict, explanation: dict, fmap: dict, autoprint: bool = False) -> str:
     rows = []
     for name, r in [("CAD (any vessel)", analysis["cad"])] + [(v, r) for v, r in analysis["vessels"].items()]:
         lo, hi = r["interval"]
@@ -88,5 +88,6 @@ td, th {{ border-bottom: 1px solid #ddd; padding: 4px 6px; text-align: left; }}
 <h2>Inputs</h2><table><tr><th>Feature</th><th>Value</th><th></th></tr>{feat_rows}</table>
 {('<h3>Values outside the training range</h3><ul>' + oor + '</ul>') if oor else ''}
 <p class="disclaimer">{escape(DISCLAIMER)}</p>
+{"<script>window.addEventListener('load', () => window.print())</script>" if autoprint else ""}
 </body></html>
 """
