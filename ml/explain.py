@@ -128,8 +128,8 @@ TARGET_LABELS = {
 def _fmt_value(fid: str, value, fmap: dict) -> str:
     f = fmap.get(fid, {})
     if f.get("type") == "binary":
-        if fid == "sex_male":
-            return "male" if float(value) >= 0.5 else "female"
+        if f.get("value_labels"):  # e.g. sex: 0 = Female, 1 = Male
+            return str(f["value_labels"][str(int(float(value) >= 0.5))]).lower()
         return "yes" if float(value) >= 0.5 else "no"
     if f.get("type") == "categorical":
         return str(value)

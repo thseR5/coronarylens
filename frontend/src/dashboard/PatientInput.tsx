@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../api/client'
 import { useStore } from '../store'
+import { binaryText } from './labels'
 import type { FeatureValue, Features, Preset } from '../types/api'
 import type { FeatureSpec } from '../types/config'
 
@@ -58,11 +59,15 @@ function FieldInput({ f, value, onChange }: { f: FeatureSpec; value: FeatureValu
         title={f.description}
         onClick={() => onChange(on ? 0 : 1)}
         className={`flex items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs ring-1 transition ${
-          on ? 'bg-accent/15 text-text ring-accent/50' : 'bg-panel-2 text-muted ring-line hover:text-text'
+          f.value_labels // two named values (e.g. Female / Male): neither is an "on" state
+            ? 'bg-panel-2 text-text ring-line hover:ring-accent/50'
+            : on
+              ? 'bg-accent/15 text-text ring-accent/50'
+              : 'bg-panel-2 text-muted ring-line hover:text-text'
         }`}
       >
         <span>{f.label}</span>
-        <span className="font-mono">{on ? 'Yes' : 'No'}</span>
+        <span className="font-mono">{binaryText(f, value)}</span>
       </button>
     )
   }

@@ -4,9 +4,9 @@ import type { AppConfig } from '../types/config'
 export function featureMeta(
   config: AppConfig | null,
   id: string,
-): { label: string; unit: string; group?: string; type?: string } {
+): { label: string; unit: string; group?: string; type?: string; value_labels?: Record<string, string> } {
   const f = config?.features.features.find((x) => x.id === id)
-  if (f) return { label: f.label, unit: f.unit, group: f.group, type: f.type }
+  if (f) return { label: f.label, unit: f.unit, group: f.group, type: f.type, value_labels: f.value_labels }
   const e = config?.features.engineered.find((x) => x.id === id)
   if (e) return { label: e.label, unit: e.unit, group: e.group }
   const g = config?.features.groups.find((x) => x.id === id)
@@ -21,4 +21,10 @@ export const TARGET_LABEL: Record<string, string> = {
   LCX: 'LCX stenosis',
   RCA: 'RCA stenosis',
   P_GE2: 'Multi-vessel (≥2)',
+}
+
+/** Display text for a binary value: the feature's own value labels (e.g. Female / Male) or No / Yes. */
+export function binaryText(f: { value_labels?: Record<string, string> } | undefined, v: unknown): string {
+  const on = Number(v) === 1
+  return f?.value_labels?.[on ? '1' : '0'] ?? (on ? 'Yes' : 'No')
 }

@@ -20,6 +20,16 @@ test('full stack: preset → API → dashboard + 3D agree; slider updates live',
     'Vessel-level estimates are less certain than overall CAD (nested-CV AUC: CAD 0.93 · LAD 0.87 · LCX 0.71 · RCA 0.74)',
   )
 
+  // Sex is shown as Male / Female (model input stays sex_male 1/0)
+  await page.getByLabel('Load preset patient').selectOption('lad-only')
+  const sex = page.locator('#feat-sex_male')
+  await expect(sex).toContainText(/Male|Female/)
+  const before = (await sex.innerText()).includes('Female') ? 'Female' : 'Male'
+  await sex.click()
+  await expect(sex).toContainText(before === 'Male' ? 'Female' : 'Male')
+  await sex.click()
+  await expect(sex).toContainText(before)
+
   // Disclaimer is visible and non-dismissible.
   await expect(page.getByRole('alert').first()).toContainText('Not a substitute for formal diagnostic imaging')
   await expect(page.locator('canvas')).toBeVisible({ timeout: 30_000 })

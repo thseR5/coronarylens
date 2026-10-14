@@ -32,7 +32,7 @@ dropped:
 features:
   # ---------------- Demographics & anthropometrics ----------------
   - {id: age, column: Age, label: Age, unit: years, type: numeric, group: demographics, range: [18, 100], ref: null, default: 58, modifiable: false, monotone: 1, quick: true, description: "Age at presentation"}
-  - {id: sex_male, column: Sex, label: Sex (male), unit: "", type: binary, encoding: sex, group: demographics, range: [0, 1], ref: null, default: 1, modifiable: false, monotone: 1, quick: true, description: "1 = male, 0 = female (source spells female as 'Fmale')"}
+  - {id: sex_male, column: Sex, label: Sex, unit: "", type: binary, encoding: sex, value_labels: {"0": Female, "1": Male}, group: demographics, range: [0, 1], ref: null, default: 1, modifiable: false, monotone: 1, quick: true, description: "1 = male, 0 = female (source spells female as 'Fmale')"}
   - {id: weight, column: Weight, label: Weight, unit: kg, type: numeric, group: demographics, range: [30, 200], ref: null, default: 74, modifiable: true, monotone: 0, quick: false, description: "Body weight"}
   - {id: height, column: Length, label: Height, unit: cm, type: numeric, group: demographics, range: [120, 210], ref: null, default: 165, modifiable: false, monotone: 0, quick: false, description: "Height (source column 'Length')"}
   - {id: bmi, column: BMI, label: BMI, unit: kg/m², type: numeric, group: demographics, range: [12, 60], ref: [18.5, 24.9], default: 26.8, modifiable: true, monotone: 0, quick: false, description: "Body-mass index"}

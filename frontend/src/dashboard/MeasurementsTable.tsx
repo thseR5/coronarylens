@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../store'
 import type { TargetId } from '../types/api'
-import { TARGET_LABEL } from './labels'
+import { binaryText, TARGET_LABEL } from './labels'
 
 type SortKey = 'impact' | 'name' | 'group'
 
@@ -56,7 +56,7 @@ export default function MeasurementsTable() {
               <tr key={f.id} className="border-t border-line/60">
                 <td className="py-1 pr-1">{f.label}</td>
                 <td className={`text-right font-mono ${flag ? 'text-warn' : ''}`}>
-                  {f.type === 'binary' ? (Number(v) === 1 ? 'Yes' : 'No') : String(v ?? '–')}
+                  {f.type === 'binary' ? binaryText(f, v) : String(v ?? '–')}
                   {f.type === 'numeric' && <span className="ml-0.5 text-muted">{f.unit}</span>}
                   {flag && <span className="ml-1" aria-label={flag === 'high' ? 'above reference' : 'below reference'}>{flag === 'high' ? '▲' : '▼'}</span>}
                 </td>

@@ -13,6 +13,8 @@ export interface FeatureSpec {
   type: 'numeric' | 'binary' | 'ordinal' | 'categorical'
   encoding?: string
   levels?: (string | number)[]
+  /** Display names for a binary feature's values, e.g. sex: { 0: 'Female', 1: 'Male' } (default No / Yes). */
+  value_labels?: Record<string, string>
   group: string
   range: [number, number] | null
   ref: [number, number] | null

@@ -2,16 +2,14 @@ import { useState } from 'react'
 import { useStore } from '../store'
 import { pct } from '../lib/risk'
 import type { Contribution, TargetId } from '../types/api'
-import { featureMeta, TARGET_LABEL } from './labels'
+import { binaryText, featureMeta, TARGET_LABEL } from './labels'
 
 const TOP_N = 8
-const fmtValue = (v: Contribution['value'], type?: string) =>
+const fmtValue = (v: Contribution['value'], type?: string, f?: { value_labels?: Record<string, string> }) =>
   v == null
     ? ''
     : type === 'binary'
-      ? Number(v) === 1
-        ? 'Yes'
-        : 'No'
+      ? binaryText(f, v)
       : typeof v === 'number'
         ? Number.isInteger(v)
           ? String(v)
@@ -43,7 +41,7 @@ export default function WhyPanel() {
       rows = sorted.slice(0, TOP_N).map((c) => {
         const m = featureMeta(config, c.feature)
         const unit = m.unit && c.value != null && m.type !== 'binary' ? ` ${m.unit}` : ''
-        return { id: c.feature, label: m.label, value: `${fmtValue(c.value, m.type)}${unit}`, shap: c.shap }
+        return { id: c.feature, label: m.label, value: `${fmtValue(c.value, m.type, m)}${unit}`, shap: c.shap }
       })
       const rest = sorted.slice(TOP_N).reduce((a, c) => a + c.shap, 0)
       if (sorted.length > TOP_N) rows.push({ id: 'rest', label: `${sorted.length - TOP_N} other features`, value: '', shap: rest })
