@@ -38,4 +38,10 @@ root = gr.mount_gradio_app(root, status, path="/gradio", ssr_mode=False)
 root.mount("/", coronarylens)  # API under /api, frontend at /
 
 if __name__ == "__main__":
+    # ZeroGPU reports @spaces.GPU functions from inside gr.Blocks.launch(); we serve with uvicorn instead, so run the
+    # same startup report here (only defined when the Space runs on ZeroGPU).
+    from spaces import zero
+
+    if hasattr(zero, "startup"):
+        zero.startup()
     uvicorn.run(root, host="0.0.0.0", port=7860)
