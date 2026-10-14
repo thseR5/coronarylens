@@ -4,7 +4,7 @@ Record at **1920×1080** (preferred) or 1440×900, Chrome, browser zoom 100%. Ev
 
 Read the **recording checklist** at the end before you start.
 
-**Start state:** app open at http://localhost:8000 (or the live demo URL), **Model performance** tab selected, scrolled so the **Coherence** chart fills the dashboard panel.
+**Start state:** app open at http://localhost:8000 (or the live demo https://thsesr5-coronarylens.hf.space/), **Model performance** tab selected, scrolled so the **Coherence** chart fills the dashboard panel.
 
 ---
 
@@ -127,7 +127,7 @@ The app opens on the **LAD only** preset.
 2. Scroll to **Cohort map**; click a dot to load that training patient.
 3. Click **Clip**: the front of the heart is cut away to show the left-ventricle segments. Click **Clip** again.
 4. In **Why this estimate?** click **Patient view**.
-5. Click **Report / PDF**; show the printable report for 2 s; close it.
+5. Click **Report / PDF**. A new tab opens with the report and the Print dialog: show it for 2 s (the disclaimer at the top, inputs such as *Sex: Male*), press **Esc** to close the dialog, then close the tab.
 
 **Say:** "There is more: a map of all training patients, a clipping plane, a plain-language patient view, and a printable report with the disclaimer."
 
@@ -147,7 +147,7 @@ The app opens on the **LAD only** preset.
 
 **Say:** "Limits: 303 patients from one centre, no external validation, and artery-level estimates are supporting context only. CoronaryLens: one coherent model, honest validation, real anatomy, and explanations you can check. Decision support and education only."
 
-**Caption:** "CoronaryLens · github.com/thseR5/coronarylens"
+**Caption:** "CoronaryLens · github.com/thseR5/coronarylens · live demo: thsesr5-coronarylens.hf.space"
 
 ---
 
@@ -159,7 +159,8 @@ The app opens on the **LAD only** preset.
 - Only two tabs: the app and the GitHub README (for 6:20).
 
 **App state before you press record**
-- Run `make serve` (production build on http://localhost:8000) or open the live demo URL. Load the page, click any preset once and wait 10 s so the explanation worker is warm; then reload.
+- Run `make serve` (production build on http://localhost:8000) or open the live demo https://thsesr5-coronarylens.hf.space/ (slower; the first visit after a pause can take 30–60 s to wake up). Load the page, click any preset once and wait 10 s so the explanation worker is warm; then reload.
+- Allow pop-ups for the app's address (Chrome: icon at the right of the address bar), so **Report / PDF** can open its tab.
 - Default toggles: **Heartbeat** on, **Labels** on, **Ribs** on, **Territories** on (AHA 17-segment), **Clip** off, **X-ray** off.
 - Select **Model performance** and scroll so the **Coherence** chart fills the panel (start of 0:00).
 
