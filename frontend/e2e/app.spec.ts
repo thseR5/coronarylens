@@ -213,7 +213,7 @@ test('honesty cues: inline status reasons, diffuse-signal note, low-confidence b
   await page.screenshot({ path: '../docs/img/app-low-confidence.png' })
 })
 
-// Walks the exact click path of docs/DEMO_SCRIPT.md and checks every number the narration reads out.
+// Walks the exact click path of the demo-video script and checks every number the narration reads out.
 for (const [width, height] of [
   [1920, 1080],
   [1440, 900],

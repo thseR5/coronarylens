@@ -10,7 +10,7 @@ One line per decision: what, why. Newest at the bottom.
 - 2026-10-12 · Frontend reads config from `/api/config`, falling back to the same YAML files bundled with `?raw`: one source, no duplication.
 - 2026-10-12 · API contract v1 frozen in `backend/app/schemas.py` ⇄ `frontend/src/types/api.ts` before parallel work.
 
-## Merged from the ML/backend workstream (2026-10-12; full detail in docs/notes/ml.md)
+## Merged from the ML/backend workstream (2026-10-12)
 - Model matrix = feature ids from features.yaml; `bbb` one-hot (`bbb_LBBB`, `bbb_RBBB`, N = baseline), ordinals as codes 0..k (vhd N/mild/Moderate/Severe → 0-3; function_class / region_rwma raw value → index). One code path (`ml/ingest.py:encode_value`) serves training and API input, so encodings cannot drift.
 - Leakage guard checks model columns, feature ids AND source columns (normalized: case/space/punctuation-insensitive) against LAD/LCX/RCA/Cath/cad at ingest, training and inference; API returns 422 for forbidden keys.
 - Engineered features (eGFR CKD-EPI 2021 race-free, TG/HDL, LDL/HDL, NLR, risk-factor count, ECG-abnormality count) implemented as a stateless transformer inside the pipeline; kept only if the nested-CV selection rule picks a `joint_fe_*` variant (see Evidence).
@@ -47,7 +47,7 @@ One line per decision: what, why. Newest at the bottom.
 - Train time: 395 s and 327 s (two runs; nested CV 243 s). Artifacts: 13 MB (`bootstrap_ensemble.joblib` 11 MB, `joint_model.joblib` 2.3 MB).
 - Latency (pytest `backend/tests/test_api.py::test_latency`, uncached, after warm-up, M2, background load average 11-35 from iCloud sync + other agent): analyze p95 22.7-22.8 ms, explain p95 253-328 ms, HTTP analyze p95 38-70 ms.
 
-## Merged from the 3D workstream (2026-10-12; full detail in docs/notes/3d.md)
+## Merged from the 3D workstream (2026-10-12)
 - **+X = patient LEFT, +Y = SUPERIOR, +Z = ANTERIOR** (three.js right-handed, Y up). A camera on +Z looking at the
 - BodyParts3D source frame (mm): +X patient left, −Y anterior (xiphoid at y ≈ −200), +Z superior. Mapping
 - One common transform for all nodes: centre = bbox centre of the heart nodes (myocardium + territories + coronaries +

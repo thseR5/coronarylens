@@ -38,7 +38,7 @@ make setup          # Python + frontend dependencies
 make dev            # API on http://localhost:8000, app on http://localhost:5173
 ```
 
-Or with Docker: `docker compose up --build`, then open http://localhost:8000. A free Hugging Face Space can host the same image: see [deploy/hf-space/DEPLOY.md](deploy/hf-space/DEPLOY.md).
+Or with Docker: `docker compose up --build`, then open http://localhost:8000. Live demo (free Hugging Face Space; the first visit after a pause takes 30–60 s): https://thsesr5-coronarylens.hf.space/ (setup: [deploy/hf-gradio/DEPLOY.md](deploy/hf-gradio/DEPLOY.md)).
 
 Other commands: `make test` (70 Python + 21 frontend tests), `make test-e2e` (Playwright; run `cd frontend && npx playwright install chromium` once), `make train` (retrain the served model, benchmarks and all artifacts: 470 s on an M2 laptop; the model search itself, `ml/sprint/`, is a separate run of about 25–40 min: screening 4 + 7 min, nested CV 13–30 min), `make anatomy` (rebuild the 3-D model from BodyParts3D), `uv run python tools/build_report.py` (report PDF).
 
@@ -65,7 +65,7 @@ flowchart LR
 - **Extensible:** features, targets, anatomy and models are defined in four YAML files; adding a feature or structure needs no code change (tested).
 - **Fast:** production build, laptop CPU: slider → probabilities and colours p95 226 ms; → SHAP panel p95 360 ms.
 
-More: [architecture](docs/ARCHITECTURE.md) · [model card](docs/MODEL_CARD.md) · [datasheet](docs/DATASHEET.md) · [TRIPOD+AI checklist](docs/TRIPOD_AI_CHECKLIST.md) · [API](docs/API.md) · [judge Q&A](docs/JUDGE_QA.md) · development history: [decisions](docs/DECISIONS.md), [experiments](docs/EXPERIMENTS.md).
+More: [architecture](docs/ARCHITECTURE.md) · [model card](docs/MODEL_CARD.md) · [datasheet](docs/DATASHEET.md) · [TRIPOD+AI checklist](docs/TRIPOD_AI_CHECKLIST.md) · [API](docs/API.md) · development history: [decisions](docs/DECISIONS.md), [experiments](docs/EXPERIMENTS.md).
 
 ## Extending
 

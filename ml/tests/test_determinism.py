@@ -1,5 +1,5 @@
 """Running the training pipeline twice gives byte-identical metrics.json (quick settings for test speed;
-the full run was also checked twice, see docs/notes/ml.md)."""
+the full run was also checked twice, see docs/DECISIONS.md)."""
 
 import pytest
 

@@ -1,6 +1,6 @@
 """Engineered features as a stateless sklearn transformer (used inside the pipeline, i.e. inside CV folds).
 
-Kept in the served pipeline only if nested CV supports it (see ml/train.py and docs/notes/ml.md).
+Kept in the served pipeline only if nested CV supports it (see ml/train.py and docs/DECISIONS.md).
 """
 
 from __future__ import annotations

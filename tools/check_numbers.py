@@ -41,9 +41,10 @@ SOURCES = [
 FILES = [
     "README.md",
     "docs/REPORT.md",
-    "docs/DEVPOST.md",
-    "docs/JUDGE_QA.md",
-    "docs/DEMO_SCRIPT.md",
+    # submission material kept outside the repo (checked when present on this machine)
+    "../coronarylens-private/docs/DEVPOST.md",
+    "../coronarylens-private/docs/JUDGE_QA.md",
+    "../coronarylens-private/docs/DEMO_SCRIPT.md",
     "docs/MODEL_CARD.md",
     "frontend/src/dashboard/*.tsx",
     "frontend/src/lib/*.ts",

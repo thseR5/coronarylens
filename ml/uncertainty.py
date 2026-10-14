@@ -1,5 +1,5 @@
 """Bootstrap ensemble for 90% intervals: B refits of the served joint variant on bootstrap resamples of the
-training split (smaller forests to keep artifacts and latency small; see docs/notes/ml.md).
+training split (smaller forests to keep artifacts and latency small; see docs/DECISIONS.md).
 
 At inference every bootstrap member predicts the 8-pattern distribution, the served calibrator is applied,
 outputs are marginalized, and the 5th/95th percentiles across members form the interval. All trees of all
